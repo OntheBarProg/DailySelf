@@ -41,6 +41,7 @@
 <main>
   <h1 id="today"></h1>
   <div class="sub" id="streak"></div>
+  <div class="sub" id="sync"><span id="syncMsg">Connecting…</span> <button class="s hide" id="signIn">Sign in with Google to sync</button></div>
 
   <!-- 1. Yesterday must be reported first -->
   <section class="card hide" id="reportCard">
@@ -141,7 +142,26 @@
   </section>
 </main>
 
-<script>
+<script type="module">
+// ---------- Firebase setup (Part B step 2) ----------
+import { initializeApp } from "https://www.gstatic.com/firebasejs/13.4.0/firebase-app.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/13.4.0/firebase-auth.js";
+import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/13.4.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDcOPgcaMG-B40_IVQ_t9f-Nn78dJO_gUY",
+  authDomain: "daily-ea53d.firebaseapp.com",
+  projectId: "daily-ea53d",
+  storageBucket: "daily-ea53d.firebasestorage.app",
+  messagingSenderId: "238681367430",
+  appId: "1:238681367430:web:204ab30ff02b7bbef50207"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);     // who is signed in
+const db = getFirestore(app);  // the online database
+// ----------------------------------------------------
+
 const KEY = 'daily-v1';
 const iso = d => { const z = new Date(d.getTime() - d.getTimezoneOffset()*60000); return z.toISOString().slice(0,10); };
 const TODAY = iso(new Date());
@@ -164,10 +184,64 @@ const SEED = {
 };
 
 let S = JSON.parse(localStorage.getItem(KEY) || 'null') || SEED;
-const save = () => localStorage.setItem(KEY, JSON.stringify(S));
+const save = () => { localStorage.setItem(KEY, JSON.stringify(S)); pushSoon(); };
 const day = d => (S.days[d] ||= {log:'', vent:[], blockers:[], done:[], notDone:[]});
 const $ = id => document.getElementById(id);
 const esc = s => s.replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+// ---------- cloud sync (Part B steps 3-6) ----------
+// The cloud copy lives at users/<your Google user id> as ONE string (step 6:
+// Firestore can't store arrays inside arrays, so we never store S directly).
+const DIRTY = 'daily-dirty';    // set = this device has changes the cloud hasn't received yet
+const PULLED = 'daily-pulled';  // set = we just replaced local data with the cloud copy and reloaded
+let pushTimer = null;
+const setSync = msg => { $('syncMsg').textContent = msg; };
+const userDoc = () => doc(db, 'users', auth.currentUser.uid);
+
+async function pushNow(){
+  if(!auth.currentUser) return;
+  try{
+    await setDoc(userDoc(), { data: JSON.stringify(S), updatedAt: Date.now() });
+    localStorage.removeItem(DIRTY);
+    setSync('Synced ✓');
+  }catch(e){ setSync('Not synced (offline?) — will retry next time you open this.'); }
+}
+// Called by save(). Waits 1.5s so typing in the draft box doesn't send a write per keystroke.
+function pushSoon(){
+  if(!auth.currentUser) return;
+  localStorage.setItem(DIRTY, '1');
+  setSync('Saving…');
+  clearTimeout(pushTimer);
+  pushTimer = setTimeout(pushNow, 1500);
+}
+
+// Step 3: sign-in button
+$('signIn').onclick = () => signInWithPopup(auth, new GoogleAuthProvider())
+  .catch(e => setSync('Sign-in failed: ' + e.code));
+
+// Step 4: when you're signed in, decide which copy wins
+onAuthStateChanged(auth, async user => {
+  $('signIn').classList.toggle('hide', !!user);
+  if(!user){ setSync('Not signed in — data stays on this device only.'); return; }
+  setSync('Checking cloud…');
+  try{
+    const snap = await getDoc(userDoc());
+    const justPulled = sessionStorage.getItem(PULLED);
+    sessionStorage.removeItem(PULLED);
+    // First sync ever, unsent local changes, or we just pulled (local = cloud + today's open): upload this device's copy
+    if(!snap.exists() || localStorage.getItem(DIRTY) || justPulled){ await pushNow(); return; }
+    const cloud = snap.data().data;
+    if(cloud !== localStorage.getItem(KEY)){
+      // Cloud is newer (edited on your other device): take it and restart the page with it
+      localStorage.setItem(KEY, cloud);
+      sessionStorage.setItem(PULLED, '1');
+      location.reload();
+      return;
+    }
+    setSync('Synced ✓');
+  }catch(e){ setSync("Offline — using this device's copy."); }
+});
+// ----------------------------------------------------
 
 // ---------- report on last opened day ----------
 const needReport = S.lastOpened && S.lastOpened < TODAY && !day(S.lastOpened).reported && S.tasks.some(t=>t.status==='open');
