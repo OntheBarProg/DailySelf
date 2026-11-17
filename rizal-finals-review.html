@@ -1,0 +1,2403 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rizal Finals Review</title>
+<style>
+  :root { --bg:#f4f5f8; --card:#fff; --ink:#1d2230; --muted:#5f667a; --accent:#3a5bb8; --line:#d6d9e3; --good:#2c7a4b; --bad:#b83a3a; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#13161d; --card:#1d212b; --ink:#e8eaf0; --muted:#9aa1b4; --accent:#8aa6ff; --line:#2f3442; --good:#6fcf97; --bad:#ff8a8a; } }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font-family:system-ui, "Segoe UI", sans-serif; }
+  main { max-width:680px; margin:0 auto; padding:16px; }
+  h1 { font-size:1.2rem; margin:8px 0 4px; }
+  .rule { color:var(--muted); font-size:.9rem; margin:0 0 14px; }
+  .tabs, .decks { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px; }
+  button { font:inherit; border:1px solid var(--line); background:var(--card); color:var(--ink); border-radius:8px; padding:8px 12px; cursor:pointer; }
+  button.on { background:var(--accent); color:var(--bg); border-color:var(--accent); }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:14px; min-height:240px; padding:24px; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; cursor:pointer; user-select:none; }
+  .tag { font-size:.75rem; color:var(--muted); text-transform:uppercase; letter-spacing:.05em; margin-bottom:12px; }
+  .front { font-size:1.3rem; white-space:pre-line; }
+  .back { font-size:1.05rem; white-space:pre-line; line-height:1.5; }
+  .hint { font-size:.85rem; color:var(--muted); margin-top:18px; }
+  .row { display:flex; gap:8px; justify-content:space-between; align-items:center; margin-top:12px; flex-wrap:wrap; }
+  .count { color:var(--muted); font-size:.9rem; }
+  .panel { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:20px; }
+  .q { font-size:1.1rem; margin-bottom:14px; line-height:1.45; }
+  .opts { display:flex; flex-direction:column; gap:8px; }
+  .opts button { text-align:left; }
+  .opts button.right { border-color:var(--good); color:var(--good); font-weight:600; }
+  .opts button.wrong { border-color:var(--bad); color:var(--bad); }
+  .why { margin-top:12px; color:var(--muted); font-size:.95rem; }
+  textarea { width:100%; min-height:180px; font:inherit; padding:10px; border-radius:8px; border:1px solid var(--line); background:var(--bg); color:var(--ink); }
+  ul.check { margin:10px 0 0; padding-left:20px; line-height:1.5; }
+  .hidden { display:none; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Life and Works of Rizal: Finals Review, Modules 1 to 5</h1>
+  <p class="rule">Answer out loud or in your head BEFORE you flip. If you get a card wrong, say the answer out loud once, then move on.</p>
+  <div class="tabs" id="tabs"></div>
+
+  <section id="fc">
+    <div class="decks" id="decks"></div>
+    <div class="card" id="card"></div>
+    <div class="row">
+      <button id="prev">&larr; Prev</button>
+      <span class="count" id="count"></span>
+      <button id="next">Next &rarr;</button>
+    </div>
+    <div class="row"><button id="shuffle">Shuffle</button></div>
+  </section>
+
+  <section id="qz" class="hidden">
+    <div class="panel" id="qpanel"></div>
+  </section>
+
+  <section id="es" class="hidden">
+    <p class="rule">If the exam has an essay part, practice here. Write your answer first, then press Check and see which points you hit. Aim for correct module terms, a clear explanation, and a concrete example.</p>
+    <div class="panel">
+      <div class="tag" id="etag"></div>
+      <div class="q" id="eq"></div>
+      <textarea id="ea" placeholder="Write your answer here..."></textarea>
+      <div class="row">
+        <button id="eprev">&larr; Prev</button>
+        <button id="echeck">Check</button>
+        <button id="enext">Next &rarr;</button>
+      </div>
+      <div id="ekey" class="hidden"><div class="why">A strong answer mentions:</div><ul class="check" id="elist"></ul></div>
+    </div>
+  </section>
+</main>
+<script>
+// [front, back]
+const DECKS = {
+ "M1: Course Overview & Grading": [
+  [
+   "How is Jose Rizal described in the course description?",
+   "Highly-esteemed as the country's national hero, even if there is NO law officially recognizing him as such."
+  ],
+  [
+   "Is there a law officially declaring Rizal the national hero (per the course description)?",
+   "No. He is esteemed as national hero even if no law officially recognizes him as such."
+  ],
+  [
+   "What does the Rizal course present (course description)?",
+   "The meaningful relevance of the hero to the contemporary issues of the country and to students' ordinary life, as well as his contributions to the making of the Filipino nation."
+  ],
+  [
+   "What does the course involve, in terms of analysis?",
+   "Reflective analysis of Rizal's life story, history, revolutionary activities and literary prowess as evident in his writings."
+  ],
+  [
+   "Course Learning Outcomes (all 6)",
+   "1. Discuss Rizal's life within the context of 19th-century Philippines\n2. Analyze Rizal's works, particularly Noli Me Tangere and El Filibusterismo\n3. Organize Rizal's ideas into various themes\n4. Demonstrate a critical reading of primary sources\n5. Interpret the values derived from studying Rizal's life and works\n6. Display an appreciation for education and love of country"
+  ],
+  [
+   "Which two novels does the course particularly analyze?",
+   "Noli Me Tangere and El Filibusterismo"
+  ],
+  [
+   "Module 1 subtopics",
+   "Introduction\n1. Introduction to Rizal\n2. RA 1425: The Rizal Law\n3. Historical and Legal Basis of the Rizal Law"
+  ],
+  [
+   "Module 2 subtopics",
+   "The Philippines and the 19th Century Context\n1. The Economic-Political Context of the 19th Century\n2. The Socio-Cultural Context of the 19th Century"
+  ],
+  [
+   "Module 3 subtopics",
+   "Rizal's Childhood and Education\n1. Family and Childhood\n2. Education in the Philippines\n3. Education Abroad"
+  ],
+  [
+   "Module 4",
+   "Rizal's Trips Abroad"
+  ],
+  [
+   "Module 5 subtopics",
+   "Rizal's Works\n1. Annotation of Antonio Morga's Sucesos de las Islas Filipinas\n2. Noli Me Tangere\n3. El Filibusterismo\n4. Letter to the Women of Malolos, On the Indolence of the Filipinos, and The Philippines: A Century Hence"
+  ],
+  [
+   "Module 6 subtopics",
+   "Rizal's Heroism & Nationalism\n1. Exile, Trial, and Death\n2. National Symbol"
+  ],
+  [
+   "Module 7 subtopics",
+   "Rizal's Controversies\n1. Veneration without Understanding by Renato Constantino\n2. December 15 Manifesto\n3. The Women in Rizal's Life"
+  ],
+  [
+   "Module 8",
+   "Rizal in Modern Time: Rizal's Image to the Present Generation"
+  ],
+  [
+   "Who wrote \"Veneration without Understanding\"?",
+   "Renato Constantino"
+  ],
+  [
+   "Whose Sucesos de las Islas Filipinas did Rizal annotate?",
+   "Antonio Morga"
+  ],
+  [
+   "Midterm grade computation",
+   "Class Standing (CS) 60% + Midterm Exam (ME) 40%"
+  ],
+  [
+   "Final grade computation",
+   "Class Standing (CS) 60% + Midterm Exam (ME) 15% + Final Exam (FE) 25%"
+  ],
+  [
+   "Components of Class Standing",
+   "1. Average of at least three long quizzes\n2. Teacher's Evaluation\n3. Class participation (Seatwork, Assignments, Recitations)\n4. Short Quizzes, Class Exercises"
+  ],
+  [
+   "Passing raw score",
+   "70"
+  ]
+ ],
+ "M1: RA 1425 (The Rizal Law)": [
+  [
+   "RA 1425 is commonly known as...",
+   "The Rizal Law (Rizal Act)"
+  ],
+  [
+   "Full title of RA 1425",
+   "An Act to Include in the Curricula of All Public and Private Schools, Colleges and Universities Courses on the Life, Works and Writings of Jose Rizal, particularly his novels Noli Me Tangere and El Filibusterismo, Authorizing the Printing and Distribution Thereof, and for Other Purposes."
+  ],
+  [
+   "Date RA 1425 was approved/signed",
+   "June 12, 1956"
+  ],
+  [
+   "President who signed the Rizal Law",
+   "Pres. (Ramon) Magsaysay, on June 12, 1956"
+  ],
+  [
+   "Author / sponsor of the Rizal Bill",
+   "Senator Claro M. Recto"
+  ],
+  [
+   "Co-author of the Rizal Bill",
+   "Jose P. Laurel"
+  ],
+  [
+   "Where was RA 1425 published?",
+   "Official Gazette, Vol. 52, No. 6, p. 2971, June 1956"
+  ],
+  [
+   "Constitutional provision cited with RA 1425 on the slide",
+   "Article XIV, Section 3 par. 1-2 of the 1987 Philippine Constitution"
+  ],
+  [
+   "When did the Rizal Law take effect?",
+   "Section 6: upon its approval.\n(A later slide says it was made effective thirty days after its implementation - the slides differ.)"
+  ],
+  [
+   "The 4 WHEREAS clauses (summary)",
+   "1. Need for re-dedication to ideals of freedom and nationalism for which our heroes lived and died\n2. In honoring them, especially national hero Jose Rizal, remember their lives and works that shaped the national character\n3. Rizal's life, works and writings (esp. Noli and Fili) are a constant, inspiring source of patriotism for the youth in their formative years in school\n4. All educational institutions are under State supervision; schools must develop moral character, personal discipline, civic conscience and teach duties of citizenship"
+  ],
+  [
+   "Section 1",
+   "Courses on the life, works and writings of Rizal (esp. Noli and Fili) shall be included in the curricula of all schools, colleges and universities, public or private. In collegiate courses, the original or unexpurgated editions (or English translation) shall be used as basic texts."
+  ],
+  [
+   "Under Section 1, what editions are used as basic texts in college?",
+   "The original or unexpurgated editions of Noli Me Tangere and El Filibusterismo, or their English translation"
+  ],
+  [
+   "Section 2",
+   "Obligatory for all schools, colleges and universities to keep in their libraries an adequate number of copies of the original and unexpurgated editions of Noli and Fili, plus Rizal's other works and biography; these shall be in the list of approved books for required reading."
+  ],
+  [
+   "Section 3",
+   "The Board of National Education shall translate Noli, Fili and other writings into English, Tagalog and principal Philippine dialects, print them in cheap popular editions, and distribute them free of charge through the Purok organizations and Barrio Councils."
+  ],
+  [
+   "Which body is tasked to translate and distribute Rizal's works (Sec. 3)?",
+   "The Board of National Education"
+  ],
+  [
+   "Through what organizations are free copies distributed (Sec. 3)?",
+   "Purok organizations and Barrio Councils"
+  ],
+  [
+   "Section 4",
+   "Nothing in the Act amends or repeals Section 927 of the Administrative Code, which prohibits discussion of religious doctrines by public school teachers and others in any public school."
+  ],
+  [
+   "Section 927 of the Administrative Code",
+   "Prohibits the discussion of religious doctrines by public school teachers and other persons engaged in any public school (RA 1425 Sec. 4 does not amend/repeal it)."
+  ],
+  [
+   "Section 5",
+   "Appropriates three hundred thousand pesos (P300,000) from the National Treasury to carry out the Act."
+  ],
+  [
+   "Section 6",
+   "This Act shall take effect upon its approval."
+  ],
+  [
+   "Positive effects of the Rizal Law (first slide)",
+   "1. Youth made aware of Rizal's contributions and principled life\n2. Essence of freedom and independence emphasized to the youth\n3. Awaken nationalism and patriotism to achieve national consciousness"
+  ],
+  [
+   "Positive effects of the Rizal Law (second slide)",
+   "Insights on dealing with current problems; helps us understand ourselves as Filipinos; teaches nationalism and patriotism; essential life lessons; develops logical and critical thinking; Rizal as model and inspiration to every Filipino; rich source of entertaining narratives"
+  ],
+  [
+   "Negative effects of the Rizal Law",
+   "1. Mass confusion between faith and nationalism\n2. Faith of people is compromised\n3. Considered a laborious subject that adds unnecessary workload to students"
+  ]
+ ],
+ "M1: Historical & Legal Basis (Rizal Day & Memorials)": [
+  [
+   "Source article of this lesson",
+   "Palafox (2012), posted by NHCP: Historical Context and Legal Basis of Rizal Day and Other Memorials in Honor of Jose Rizal"
+  ],
+  [
+   "Where was Rizal executed?",
+   "Bagumbayan"
+  ],
+  [
+   "Dec. 20, 1898 decree",
+   "Gen. Emilio Aguinaldo designated Dec. 30 as the anniversary of Rizal's death and a national day of mourning for Rizal and other victims of Spanish rule."
+  ],
+  [
+   "Aguinaldo's mourning directives",
+   "National flags at half-mast from 12 noon of Dec. 29; all government offices closed the whole day of Dec. 30."
+  ],
+  [
+   "First Rizal Day celebration: date and venue",
+   "December 30, 1898 at Club Filipino, Manila"
+  ],
+  [
+   "Why did the Americans give Rizal official recognition?",
+   "To win the sympathy of Filipinos, convince them the Americans were more pro-Filipino than the Spaniards, and make them conform to the new government."
+  ],
+  [
+   "When and under whom did Rizal get the official title of Philippine National Hero?",
+   "1901, under William Howard Taft, the first American civil governor"
+  ],
+  [
+   "Act 137 (June 11, 1901)",
+   "Taft Commission renamed the district of Morong into the Province of Rizal, on the recommendation of Trinidad Pardo de Tavera."
+  ],
+  [
+   "Who recommended renaming Morong to Rizal Province?",
+   "Trinidad Pardo de Tavera"
+  ],
+  [
+   "Act No. 243 (Sept. 28, 1901)",
+   "Granted the right to use public land upon the Luneta in Manila to erect a statue of Jose Rizal."
+  ],
+  [
+   "Act No. 345 (Feb. 1, 1902)",
+   "Philippine Commission set December 30 of each year as Rizal Day, one of the ten official holidays."
+  ],
+  [
+   "Republic Act No. 229 (June 9, 1948)",
+   "Approved by Pres. Quirino; prohibits cockfighting, horse racing and jai-alai every December 30 for proper observance of Rizal Day."
+  ],
+  [
+   "Executive Order No. 52 (Aug. 10, 1954)",
+   "Pres. Ramon Magsaysay created the Rizal National Centennial Commission (JRNCC) to build a National Cultural Shrine and other memorials for Rizal's 1961 birth centenary."
+  ],
+  [
+   "Executive Order No. 14 (July 1, 1962)",
+   "Pres. Diosdado Macapagal turned the JRNCC into the Rizal Presidential Committee."
+  ],
+  [
+   "Year of Rizal's birth centenary",
+   "1961"
+  ],
+  [
+   "Executive Order No. 429 (June 2, 1961)",
+   "Pres. Garcia created the Rizal Pro Patria Award, given by the President to those with outstanding work for their community."
+  ],
+  [
+   "Recipients of the Rizal Pro Patria Award named in the slides",
+   "N. V. M. Gonzalez, Alejandro Roces, Juan Nakpil, Felipe Padilla De Leon, Wilfredo Ma. Guerero"
+  ],
+  [
+   "Manila streets named after Rizal's pen names (in Sampaloc)",
+   "Laong Laan and Dimasalang"
+  ],
+  [
+   "Blumentritt street is named after...",
+   "Dr. Ferdinand Blumentritt, Rizal's friend"
+  ],
+  [
+   "Dapitan street (near UST) is named after...",
+   "A municipality in Zamboanga del Norte where Rizal was deported in 1892"
+  ],
+  [
+   "Streets named after characters in Rizal's novels",
+   "Sisa, Basilio, and Simoun"
+  ],
+  [
+   "Rizal monument in Manila unveiled",
+   "December 30, 1913, the 17th anniversary of Rizal's martyrdom"
+  ],
+  [
+   "First Rizal monument ever erected",
+   "In the town of Daet, Camarines Norte"
+  ],
+  [
+   "Commonwealth Act No. 184 (Dec. 30, 1937)",
+   "Pres. Quezon, in his Rizal Day address, declared adoption of Tagalog as the basis of the national language."
+  ],
+  [
+   "Rizal Day 1942 (Japanese period)",
+   "Japanese flags displayed in Filipino homes; Nippongo program attended by Jorge Vargas, Benigno Aquino Sr., Jose P. Laurel Sr.; \"Ultimo Adios\" recited in Japanese; inauguration of Kalibapi."
+  ],
+  [
+   "Rizal Day 1946",
+   "Floral offerings and civic parade; Pres. Roxas with officials and US Army/Navy and foreign representatives laid wreaths at Rizal's monument."
+  ],
+  [
+   "Rizal Day 1950",
+   "All Philippine flags at half-mast in public buildings and vessels; floral offering at Luneta monument and afternoon concert."
+  ],
+  [
+   "December 30, 1953",
+   "Inauguration of Ramon Magsaysay at Luneta (300-500 people). The 1935 Constitution (Art. VII Sec. 4) set Dec. 30 as presidential inauguration day; the 1987 Constitution moved it to June 30."
+  ],
+  [
+   "December 30, 1996",
+   "Centenary of Rizal's martyrdom: tracing of his last walk from Fort Santiago, reenactment of execution, flag raising at Luneta."
+  ],
+  [
+   "Rizal monument in Madrid",
+   "Inaugurated 5 December 1996 along Avenida de Las Islas Filipinas, Madrid, Spain"
+  ],
+  [
+   "Rizal Day in the 1920s",
+   "Very popular; city went to Luneta for a parade as glamorous as the February carnival parade."
+  ],
+  [
+   "Who said Rizal \"remains the supreme hero of the Philippines because of the quality of his sacrifice...\"?",
+   "The late Sen. Blas Ople"
+  ]
+ ],
+ "M2: Economic & Political Context": [
+  [
+   "What brought increasing prosperity to the Filipino middle and upper classes?",
+   "The growth of an export economy in 1830"
+  ],
+  [
+   "Trade figures: 1825",
+   "Exports P1,000,000; Imports P1,800,000; Total P2,800,000"
+  ],
+  [
+   "Trade figures: 1875",
+   "Exports P18,900,000; Imports P12,200,000; Total P31,100,000"
+  ],
+  [
+   "Trade figures: 1895",
+   "Exports P36,600,000; Imports P25,400,000; Total P62,000,000"
+  ],
+  [
+   "In which year (of the table) did imports exceed exports?",
+   "1825 (imports 1.8M vs exports 1M)"
+  ],
+  [
+   "What were Philippine exports in this economy?",
+   "Agricultural products; the growing population also needed more rice."
+  ],
+  [
+   "Land hierarchy shown in the slides",
+   "Friar haciendas -> Inquilinos -> Kasama"
+  ],
+  [
+   "Domingo Lam-co",
+   "Rizal's Chinese ancestor"
+  ],
+  [
+   "How much land did the Rizal family rent from the hacienda in the 1890s?",
+   "Over 390 hectares"
+  ],
+  [
+   "Cause of friction between inquilinos and haciendas",
+   "Rising prosperity: lands grew in value and rents were raised."
+  ],
+  [
+   "Was the upheaval an \"agrarian revolt\"?",
+   "No - it was political and economic; inquilinos wanted to weaken the friars' influence in Philippine political life."
+  ],
+  [
+   "Filipinos in the bureaucracy",
+   "Deprived of the few positions they had held; most Spanish bureaucrats had no interest in or knowledge of the country."
+  ],
+  [
+   "Why Spanish appointees did not want to be in the Philippines",
+   "Extremely hot weather; separation from families; encountering indios (\"monkeys\"). They hoarded resources and held social gatherings every night."
+  ],
+  [
+   "Who appointed Spanish officials in the Philippines?",
+   "The King of Spain"
+  ],
+  [
+   "Sources of abuses in the administrative system (list)",
+   "1. Officials with inferior qualifications\n2. Too complicated functions of the union of church and state\n3. Manner of obtaining the position\n4. Term of office\n5. Distance of the colony\n6. Personal interest over welfare of the State\n7. Corrupt officials"
+  ],
+  [
+   "Manner of obtaining position",
+   "Positions obtained by the highest bidder, which is the Governor-General."
+  ],
+  [
+   "Term of office",
+   "Length of time a person serves in an office; dependent on the desire of the King."
+  ],
+  [
+   "Alcaldes mayores",
+   "Governors; heads of the provinces (alcaldias)"
+  ],
+  [
+   "Gobernadorcillos",
+   "Mayors of the towns (pueblos)"
+  ],
+  [
+   "Cabezas de barangay",
+   "Heads of the barangay"
+  ],
+  [
+   "Opening of the Suez Canal",
+   "1869 - easy access -> more stealing"
+  ],
+  [
+   "Failures of the corrupt colonial government (list)",
+   "1. Unable to provide public works, schools, peace and order\n2. Failed to get rid of bands of tulisanes\n3. Antiquated system of taxation\n4. Highly protected tariffs"
+  ],
+  [
+   "Tulisanes",
+   "Bands the government failed to get rid of (a peace-and-order failure)"
+  ],
+  [
+   "Result of an exploitative, unproductive system",
+   "Liberal nationalists and even conservative upper-class Filipinos no longer found a compelling motive to maintain the Spanish colonial regime."
+  ]
+ ],
+ "M2: Socio-Cultural & Religious Context": [
+  [
+   "What relationship did 19th-century Filipinos suffer under Spain?",
+   "Feudalistic and master-slave relationship"
+  ],
+  [
+   "Three social classes",
+   "1. Highest: Spanish officials, Peninsulares, Friars\n2. Middle: Natives, Mestizos\n3. Lowest: Indios"
+  ],
+  [
+   "Highest class",
+   "Spanish Officials, Peninsulares, Friars"
+  ],
+  [
+   "Middle class",
+   "Natives, Mestizos"
+  ],
+  [
+   "Lowest class",
+   "Indios"
+  ],
+  [
+   "Key factor in the emergence of late-19th-century nationalism",
+   "Cultural development from the rapid spread of education from about 1860"
+  ],
+  [
+   "Ilustrados (education)",
+   "Were made to study in Europe"
+  ],
+  [
+   "What did the returning Jesuits take charge of?",
+   "Evangelization of Mindanao"
+  ],
+  [
+   "Ateneo Municipal founded",
+   "1859, by the Jesuits (facade on Sta. Lucia St., Intramuros)"
+  ],
+  [
+   "Escuela Normal de Maestros",
+   "Established by the Jesuits to provide Spanish-speaking teachers for the projected new primary schools"
+  ],
+  [
+   "Where were nationalism to awaken?",
+   "In secondary schools"
+  ],
+  [
+   "UST Library",
+   "Created 1610 at the request of Archbishop Miguel de Benavides, O.P.; oldest existing university library in Asia; had its own printing press from Europe"
+  ],
+  [
+   "Three areas of Ateneo's humanistic education",
+   "Literature, science, philosophy"
+  ],
+  [
+   "How did the Ateneo undermine the colonial regime?",
+   "Not by teaching nationalism, but by a humanistic education and principles of human dignity, justice and equality of all men - even without the Spanish Jesuits wishing it."
+  ],
+  [
+   "Defects of the educational system (9)",
+   "1. Over-emphasis on religious matters\n2. Obsolete teaching methods\n3. Limited curriculum\n4. Poor classroom facilities\n5. Absence of teaching materials\n6. Primary education neglected\n7. Absence of academic freedom\n8. Prejudice against Filipinos in higher learning\n9. Friar control over the system"
+  ],
+  [
+   "Ilustrados' religious stance",
+   "Increasingly anti-friar, at times anticlerical or anti-Catholic"
+  ],
+  [
+   "Juan Alaminos",
+   "An anticlerical who said the friars' patriotism \"verges on fanaticism\" and they make the Indio believe only in loving the Spaniards can he save his soul."
+  ],
+  [
+   "Two devotions shown (Religious Development)",
+   "Devotion to Religion and Devotion to Spain"
+  ],
+  [
+   "\"Do you call those external practices faith? ... cords and scapulars, religion?\" - who says this?",
+   "Elias, in Noli Me Tangere"
+  ],
+  [
+   "\"I wanted to hit the friars... God must not serve as shield and protection of abuses, nor must religion.\"",
+   "Quote: friars use religion as shield and weapon, so the writer was forced to attack their false and superstitious religion."
+  ],
+  [
+   "The two Governor-Generals",
+   "Carlos Maria de la Torre and Rafael Izquierdo"
+  ],
+  [
+   "Year of the Cavite Mutiny",
+   "1872"
+  ],
+  [
+   "GOMBURZA",
+   "The three priests shown after the Cavite Mutiny (1872) slide"
+  ],
+  [
+   "Five main currents of the nationalist movement",
+   "1. Reformist\n2. Liberal\n3. Anticlerical\n4. Modernization\n5. Nationalist"
+  ],
+  [
+   "Reformist current",
+   "The Spanish regime obviously failed to satisfy the basic needs and desires of the Filipino people."
+  ],
+  [
+   "Liberal current",
+   "Safeguards of personal liberty: freedom of speech and press, association, religion, freedom from detention; propaganda movement"
+  ],
+  [
+   "Anticlerical current",
+   "Against the teachings of the friars"
+  ],
+  [
+   "Modernization current",
+   "An economic goal; many sought progressive measures for their own profit, not for the country"
+  ],
+  [
+   "Nationalist current",
+   "Assurance that main goals would be achieved: modernizing reforms in government and economy, civil liberties, elimination of \"theocratical control\""
+  ]
+ ],
+ "M3: Name & Family": [
+  [
+   "Rizal's full name (parts explained in the module)",
+   "Jose Protacio Mercado Rizal Alonzo y Realonda"
+  ],
+  [
+   "Meaning of 'Jose'",
+   "Chosen by his mother, a devotee of the Christian saint San Jose (St. Joseph)"
+  ],
+  [
+   "Meaning of 'Protacio'",
+   "From Gervacio O., taken from a Christian calendar (one of the names that could be given to infants born on the 19th day of the month)"
+  ],
+  [
+   "Meaning of 'Mercado'",
+   "Spanish for 'market'; adopted in 1731 by Domingo Lam-co, Rizal's paternal great-grandfather"
+  ],
+  [
+   "Who was Domingo Lam-co?",
+   "Rizal's paternal great-grandfather, a Chinese immigrant, who adopted the surname Mercado in 1731"
+  ],
+  [
+   "Meaning of 'Rizal'",
+   "From the Spanish 'ricial': a field where wheat, cut while still green, sprouts again ('green fields')"
+  ],
+  [
+   "Meaning of 'Alonzo'",
+   "The old surname of his mother"
+  ],
+  [
+   "Meaning of 'Realonda'",
+   "Used by Doña Teodora; taken from the surname of her godmother, following the custom of the time"
+  ],
+  [
+   "Father of Rizal",
+   "Francisco Alejandro Mercado\n- Descendant of Chinese immigrant Domingo Lam-co\n- Attended Colegio de San Jose in Manila\n- Became wealthy, built a fine library, befriended Spanish officials"
+  ],
+  [
+   "School attended by Francisco Mercado",
+   "Colegio de San Jose, Manila"
+  ],
+  [
+   "Mother of Rizal",
+   "Teodora Alonso y Quintos\n- From one of the wealthiest families of Sta. Cruz, Manila\n- Her father was a member of the Spanish Courts\n- Attended Colegio de Sta. Rosa\n- Disciplinarian, dedicated, hard-working"
+  ],
+  [
+   "School attended by Teodora Alonso",
+   "Colegio de Sta. Rosa"
+  ],
+  [
+   "Who was Rizal's first teacher?",
+   "His mother, Teodora Alonso; she was also his inspiration for taking up medicine"
+  ],
+  [
+   "The 11 Rizal children (in the slides' order)",
+   "Saturnina (1850-1913), Paciano (1851-1930), Narcisa (1852-1939), Olympia (1855-1887), Lucia (1857-1919), Maria (1859-1945), Jose (1861-1896), Josefa (1865-1945), Concepcion (1862-1865), Trinidad (1868-1951), Soledad (1870-1929)"
+  ],
+  [
+   "Saturnina",
+   "Eldest sibling (1850-1913); was studying at La Concordia College in Sta. Ana when Jose visited in 1868"
+  ],
+  [
+   "Paciano",
+   "Only brother (1851-1930); took Jose to Biñan (1870) and to Manila/Ateneo (1872); wanted Jose to pursue college"
+  ],
+  [
+   "Concepcion",
+   "Sister (1862-1865) who died at age three in 1865; at her death Jose shed real tears for the first time"
+  ],
+  [
+   "Jose's own years",
+   "1861-1896"
+  ],
+  [
+   "Inquilinos",
+   "Tenants: the Rizals were inquilinos who rented the Dominican friars' estate in Calamba"
+  ],
+  [
+   "Why did the family adopt 'Rizal'?",
+   "Following a royal decree; Jose was the first of his family to use the surname 'Rizal' (when entering Ateneo)"
+  ],
+  [
+   "Rizal's nickname within his family",
+   "'Moy' (it is a BLUFF that his family called him Pepe)"
+  ],
+  [
+   "Origin of the nickname 'Pepe' (per Felice Prudente Santa Maria, 'In Excelsis')",
+   "St. Joseph's Latin name is followed by 'P.P.' (pater putativus); Spanish 'P' is pronounced 'peh' -> Pepe"
+  ],
+  [
+   "Characteristics of young Rizal",
+   "Frail body; always liked to speculate; not physically fit; skillful in drawing, sketching and molding clay or wax"
+  ]
+ ],
+ "M3: Childhood in Calamba & Biñan": [
+  [
+   "1864 (barely 3 years old)",
+   "Rizal learned the alphabet from his mother"
+  ],
+  [
+   "1865 (age 4)",
+   "Death of his sister Concepcion; first time he shed real tears"
+  ],
+  [
+   "1865-1867",
+   "His mother taught him to read and write; Leon Monroy taught him the rudiments of Latin"
+  ],
+  [
+   "Leon Monroy",
+   "Classmate of Rizal's father, hired to teach Rizal the rudiments of Latin for five months until Monroy's death"
+  ],
+  [
+   "Uncle Manuel Alberto",
+   "Mother's cousin; saw Rizal was frail, developed his body; taught love for open air, nature, swimming, fencing, wrestling and other sports"
+  ],
+  [
+   "Uncle Gregorio",
+   "Mother's cousin, a scholar; instilled love for education; taught him to work hard and observe life keenly"
+  ],
+  [
+   "Uncle Jose",
+   "Taught Rizal to sketch, paint and make sculptures"
+  ],
+  [
+   "Uncle Gregorio's advice",
+   "'Work hard and perform every task very carefully; learn to be swift as well as thorough; be independent in thinking and make visual pictures of everything.'"
+  ],
+  [
+   "6 June 1868",
+   "Pilgrimage with his father to the Shrine of the Virgin of Antipolo (to fulfill his mother's vow after his difficult birth); then visited Saturnina in Manila"
+  ],
+  [
+   "Why the Antipolo pilgrimage?",
+   "His mother vowed to bring the child to the Virgin of Antipolo if both survived the delivery, which nearly cost her life"
+  ],
+  [
+   "1869 (age 8)",
+   "Rizal supposedly wrote his first poem in Tagalog, 'Sa Aking Mga Kabata'"
+  ],
+  [
+   "1870 - Biñan",
+   "Paciano brought Rizal to Biñan, Laguna; studied Latin and Spanish under Justiniano Aquino Cruz"
+  ],
+  [
+   "Justiniano Aquino Cruz",
+   "Rizal's teacher in Biñan (Latin and Spanish)"
+  ],
+  [
+   "Juancho Carrera",
+   "Old painter who taught Rizal the art of painting in Biñan"
+  ],
+  [
+   "17 December 1870",
+   "Rizal returned from Biñan to Calamba aboard the motorboat Talim"
+  ],
+  [
+   "Talim",
+   "The motorboat Rizal rode home to Calamba from Biñan (Dec 17, 1870)"
+  ],
+  [
+   "Book that impacted young Rizal",
+   "'Children's Friend' by Abbé Sabatier: the story of the moth / 'Foolish Butterfly'"
+  ],
+  [
+   "What fed young Rizal's eagerness to learn?",
+   "His father's huge library of books"
+  ],
+  [
+   "Arguments against Rizal writing 'Sa Aking Mga Kabata'",
+   "- Rizal never published or claimed it\n- His poems were in Spanish\n- Published a decade after his execution\n- 'Kalayaan' spelled with k, not c\n- 'Kalayaan' not widely used in the 19th century\n- His 1886 letter shows he first met the word later"
+  ],
+  [
+   "Chain of who passed on 'Sa Aking Mga Kabata'",
+   "Published as appendix in the work of Herminigildo Cruz, who got it from Gabriel Beato Francisco, who got it from Saturnino Raselis of Lukban (who allegedly got it from Rizal)"
+  ],
+  [
+   "Rizal's letter to Paciano, Oct. 12, 1886",
+   "About his Tagalog translation of Schiller's 'Wilhelm Tell'; shows he had trouble finding a Tagalog word for 'Freiheit' (liberty); he was 25"
+  ],
+  [
+   "In the 1886 letter, where did Rizal encounter 'kalayahan'?",
+   "In the translation of 'Amor Patrio' by Marcelo del Pilar; not found in his only Tagalog book, 'Florante at Laura'"
+  ]
+ ],
+ "M3: Ateneo Years (1872-1877)": [
+  [
+   "June 10, 1872",
+   "Rizal, accompanied by Paciano, went to Manila (his father then decided on Ateneo)"
+  ],
+  [
+   "School where Rizal matriculated",
+   "Ateneo Municipal"
+  ],
+  [
+   "Father Magin Ferrando",
+   "Ateneo college registrar who refused to admit Rizal"
+  ],
+  [
+   "Who interceded so Rizal could enter Ateneo?",
+   "Manuel Xerez Burgos"
+  ],
+  [
+   "Rizal's age when entering Ateneo",
+   "Eleven years old"
+  ],
+  [
+   "Where did Rizal first board?",
+   "In a house outside Intramuros"
+  ],
+  [
+   "Two groups of Ateneo students",
+   "'Roman Empire' and 'Carthaginian Empire'; each led by an 'emperor', the best student"
+  ],
+  [
+   "Ateneo uniform in Rizal's time",
+   "Hemp-fabric trousers and a striped cotton coat"
+  ],
+  [
+   "Fr. Jose Bech",
+   "Rizal's first professor in the Ateneo"
+  ],
+  [
+   "Rizal's first month at Ateneo",
+   "Placed at the bottom of the class, progressed rapidly, became 'emperor' by month's end"
+  ],
+  [
+   "Where did Rizal take private lessons?",
+   "Santa Isabel College"
+  ],
+  [
+   "Prophecy of Rizal to his mother",
+   "He visited her in Santa Cruz and predicted her release; Doña Teodora compared his dream-interpreting ability to Joseph's"
+  ],
+  [
+   "Books read in summer vacation 1874 (Calamba)",
+   "- 'The Count of Monte Cristo' by Alexander Dumas\n- 'Universal History' by Cesar Cantu\n- 'Travels in the Philippines' by Dr. Feodor Jagor"
+  ],
+  [
+   "School year 1874-75 (ended March 1875)",
+   "Won only one gold medal (Latin); failed to win the medal in Spanish; his mother was released from prison"
+  ],
+  [
+   "June 16, 1875",
+   "Rizal became an interno (boarder) in the Ateneo"
+  ],
+  [
+   "Fr. Francisco de Paula Sanchez",
+   "Ateneo professor named on the slide for 1875 (when Rizal became interno); also his mentor in literature"
+  ],
+  [
+   "Medals won at end of 1875-76 term",
+   "Five medals"
+  ],
+  [
+   "Last year in Ateneo (1876-77)",
+   "'The pride of the Jesuits'; obtained the highest grades in all subjects"
+  ],
+  [
+   "March 23, 1877",
+   "Commencement Day: Rizal graduated from Ateneo with highest honors"
+  ],
+  [
+   "Extracurricular activities & mentors at Ateneo",
+   "Marian Congregation (secretary), Spanish Literature, Academy of Natural Sciences; Fr. Sanchez - literature; Fr. Jose Villaclara - practical studies; Agustin Saez - painting; Romualdo de Jesus - sculpting; Tio Manuel - gymnastics and fencing"
+  ],
+  [
+   "Sculptural works in Ateneo",
+   "Image of the Virgin Mary carved from batikuling with a pocket knife; Fr. Lleonart asked him to carve the Sacred Heart of Jesus"
+  ],
+  [
+   "'Mi Primera Inspiracion'",
+   "'My First Inspiration' - poem dedicated to his mother"
+  ],
+  [
+   "Poems of 1875",
+   "Felicitacion; El Embarque: Himno a la Flota de Magallanes; Y Es Español: Elcano, el Primero en dar la Vuelta al Mundo; El Combate: Urbiztondo, Terror de Jolo"
+  ],
+  [
+   "Poems of 1876 (themes: religion, education, childhood memories, war)",
+   "'Through Education Our Motherland Receives Light'; 'The Intimate Alliance Between Religion and Good Education'; 'Al Niño Jesus' (To the Child Jesus)"
+  ]
+ ],
+ "M3: UST, Loves & Going Abroad": [
+  [
+   "Mother's opposition to higher education",
+   "Her reason: if Rizal learns more, the Spaniards will cut off his head. Paciano and Don Francisco wanted him to go to college"
+  ],
+  [
+   "Bachelor of Arts in Spanish times was equivalent to...",
+   "A high school diploma today"
+  ],
+  [
+   "1877-1878 at UST",
+   "Enrolled in Philosophy and Letters; same year earned Land Surveyor's and Assessor's degree from Ateneo"
+  ],
+  [
+   "Why Philosophy & Letters?",
+   "1. Don Francisco liked it\n2. Uncertainty on what course to take\n3. Could not get advice from Fr. Ramon Pablo, Ateneo Rector, who was in Mindanao"
+  ],
+  [
+   "Why did Rizal shift to Medicine?",
+   "1. Fr. Pablo Ramon, Ateneo Rector, advised it\n2. He wanted to cure his mother's growing blindness"
+  ],
+  [
+   "Spanish-era grade conversion",
+   "Sobresaliente 1.00 Excellent; Notable/Aprovechado 1.50 Very Good; Bueno 2.00 Good; Mediano 2.50 Fair; Aprovado 3.00 Passed; Suspenso 4.00 Conditioned; Reprobado 5.00 Failed"
+  ],
+  [
+   "Religious order running UST",
+   "The Dominicans, rivals of the Jesuits in education"
+  ],
+  [
+   "Ateneo activities while studying at UST",
+   "President, Academy of Spanish Literature; Secretary, Academy of Natural Sciences; Secretary, Marian Congregation"
+  ],
+  [
+   "1879 literary contest",
+   "'A La Juventud Filipina' (To the Filipino Youth) won first prize"
+  ],
+  [
+   "1880 literary contest",
+   "Prose 'Consejo de los Dioses' (The Council of the Gods) won against Spanish peninsulares"
+  ],
+  [
+   "Other UST-era works",
+   "One-act play 'Junto al Pasig'; poems 'Abd el-Aziz y Mahoma' and 'Al M.R.P. Pablo Ramon'"
+  ],
+  [
+   "Reasons Rizal didn't enjoy UST",
+   "1. Hostility of Dominican professors\n2. Racial discrimination against Filipino students\n3. Dissatisfaction with the method of instruction"
+  ],
+  [
+   "Reasons Rizal performed poorly at UST",
+   "1. Medicine is not his vocation\n2. Discontentment with the system of education\n3. Distractions of youth"
+  ],
+  [
+   "Student activism at UST",
+   "Rizal led; hostility between 'Indio/chongo' (Filipinos) and 'Kastila/bangus' (Spaniards)"
+  ],
+  [
+   "Finishing Medicine at UST",
+   "Notable in all subjects; 2nd best in a class of seven who passed"
+  ],
+  [
+   "Rizal's first love",
+   "Segunda Katigbak ('rather short... eloquent and ardent eyes... rosy-cheeked')"
+  ],
+  [
+   "Leonor Valenzuela",
+   "Tall girl with regal bearing, daughter of Capitan Juan and Capitana Sanday Valenzuela of Pagsanjan, Laguna; pet name 'Orang'"
+  ],
+  [
+   "Where Rizal boarded near Leonor Valenzuela",
+   "House of Doña Concha Leyva, Intramuros"
+  ],
+  [
+   "Invisible ink",
+   "Water and table salt; read by heating over a lamp or candle - used in love notes to Leonor Valenzuela"
+  ],
+  [
+   "Leonor Rivera",
+   "Rizal's first engagement; 'tender as a budding flower'; signed her letters 'Taimis' to hide the relationship from her parents"
+  ],
+  [
+   "Reasons for going to Europe (Decision to Go to Europe)",
+   "1. Complete medical course in Barcelona, Spain\n2. Make a name in journalism\n3. Observe and study European society\n4. Prepare to liberate Filipinos from Spanish tyranny"
+  ],
+  [
+   "Secret Mission in Spain (1882-1885)",
+   "Observe life, culture, languages, customs, industries, commerce, governments and laws of European nations; prepare to liberate his people"
+  ],
+  [
+   "Why was his departure secret?",
+   "To avoid detection by Spanish authorities and friars; even his parents did not know, since they would not allow it"
+  ],
+  [
+   "November 3, 1882",
+   "Enrolled at Universidad de Madrid in Medicine and Philosophy and Letters"
+  ],
+  [
+   "Circulo Hispano Filipino",
+   "Group of Filipinos and Spaniards wanting government reform; Rizal joined in Madrid and wrote 'Me Piden Versos'"
+  ],
+  [
+   "In Paris (Nov 1885 - Feb 1, 1886)",
+   "Finished at Central University of Madrid at 24; in Paris ~4 months as assistant of Dr. Louis de Weckert (ophthalmology); Jan 1, 1886 letter to parents; left 'Gay Paris' Feb 1, 1886"
+  ]
+ ],
+ "M3: Timeline": [
+  [
+   "1731",
+   "Domingo Lam-co adopts surname Mercado"
+  ],
+  [
+   "1861",
+   "Jose Rizal is born"
+  ],
+  [
+   "1864",
+   "Learns the alphabet from his mother"
+  ],
+  [
+   "1865",
+   "Concepcion dies; first real tears"
+  ],
+  [
+   "1865-1867",
+   "Mother teaches reading/writing; Leon Monroy teaches Latin; uncles' influence"
+  ],
+  [
+   "June 6, 1868",
+   "Pilgrimage to Antipolo; visits Saturnina at La Concordia"
+  ],
+  [
+   "1869",
+   "'Sa Aking Mga Kabata' supposedly written"
+  ],
+  [
+   "1870",
+   "Studies in Biñan under Justiniano Aquino Cruz"
+  ],
+  [
+   "December 17, 1870",
+   "Returns to Calamba on the Talim"
+  ],
+  [
+   "June 10, 1872",
+   "Goes to Manila with Paciano; enters Ateneo Municipal"
+  ],
+  [
+   "Summer 1874",
+   "Reads Monte Cristo, Cantu, Jagor in Calamba"
+  ],
+  [
+   "June 16, 1875",
+   "Becomes interno at Ateneo"
+  ],
+  [
+   "March 23, 1877",
+   "Ateneo commencement, highest honors"
+  ],
+  [
+   "1877-1878",
+   "UST Philosophy & Letters; surveyor's degree from Ateneo"
+  ],
+  [
+   "1879",
+   "'A La Juventud Filipina' wins first prize"
+  ],
+  [
+   "1880",
+   "'Consejo de los Dioses' wins"
+  ],
+  [
+   "October 12, 1886",
+   "Letter to Paciano on translating Wilhelm Tell"
+  ],
+  [
+   "November 3, 1882",
+   "Enrolls at Universidad de Madrid"
+  ],
+  [
+   "Nov 1885 - Feb 1886",
+   "In Paris with Dr. Weckert"
+  ],
+  [
+   "January 1, 1886",
+   "Letter to parents on progress in ophthalmology"
+  ],
+  [
+   "February 1, 1886",
+   "Leaves Paris"
+  ]
+ ],
+ "M4: First Trip & Life in Spain (1882-1885)": [
+  [
+   "Five stages of Rizal's development of humanism",
+   "1. Calamba to Biñan\n2. Biñan to Intramuros\n3. Intramuros to Europe\n4. Europe to Dapitan\n5. Dapitan to Death"
+  ],
+  [
+   "Evidence there was no discrimination at UST",
+   "Allowed Curso de Ampliacion in 1st-year Medicine; Ateneo vs UST grades not comparable; of 24 students (6 insulares) only 7 (1 insular) reached 4th year, Rizal ranked 2nd"
+  ],
+  [
+   "Evidence UST education was not below standard",
+   "Faculty of Medicine est. 1871; 1883 museum had 5,747 specimens; library 12,000 books; lab with 300 instruments; graduates like M.H. del Pilar, Mabini, Jacinto, Numeriano Adriano, Nicanor Padilla"
+  ],
+  [
+   "Reasons Rizal did not perform well at UST (M4)",
+   "Different university culture; inclined to humanities, not sciences; medicine is difficult; distractions (Academias of Ateneo, El Compañerismo, love affairs)"
+  ],
+  [
+   "Loves listed as UST distractions",
+   "Segunda Katigbak, Miss L, Leonor Valenzuela (Orang), Leonor Rivera (Taimis), Vicenta Ybardaloza"
+  ],
+  [
+   "More factual reasons for going to Europe",
+   "Family had means; Europe flourished in science & education; tradition of the Principalia; to work for reforms through propaganda"
+  ],
+  [
+   "May 1 / May 3, 1882",
+   "Left Calamba (May 1); left Manila on Spanish steamer Salvadora for Singapore (May 3) with 700 pesos and a diamond ring"
+  ],
+  [
+   "May 8-9, 1882",
+   "Saw an island reminding him of Talim Island; docked in Singapore, stayed at Hotel de la Paz"
+  ],
+  [
+   "May 11, 1882",
+   "Transferred to French steamer Djemnah in Singapore"
+  ],
+  [
+   "May 17-18, 1882",
+   "Point Galle (Ceylon/Sri Lanka), then Colombo"
+  ],
+  [
+   "Route after Colombo",
+   "Indian Ocean -> Cape of Guardafui ('inhospitable land but famous') -> Aden (hotter than Manila) -> Suez (5 days through the canal) -> Port Said"
+  ],
+  [
+   "June 11 / June 12, 1882",
+   "Naples (June 11); Marseilles (June 12)"
+  ],
+  [
+   "June 16, 1882",
+   "Arrived in Barcelona by train (left Marseilles June 15); first impression unfavorable"
+  ],
+  [
+   "Universidad Central de Madrid degrees",
+   "Medicine (1884); Philosophy and Letters (1885)"
+  ],
+  [
+   "Academy of San Carlos",
+   "Where he took private lessons in painting, sculpture, and languages (French, German, English)"
+  ],
+  [
+   "Rizal's ophthalmology mentors",
+   "Dr. Louis Weckert (France 1885-86); Dr. Javier Galezowsky & Dr. Otto Becker (Heidelberg 1886); Dr. R. Schulzer & Dr. Schwigger (1887)"
+  ],
+  [
+   "'Dr. Uliman'",
+   "What Rizal was called in Calamba when he came back in 1887; he became the first Asian eye doctor"
+  ],
+  [
+   "Amor Patrio",
+   "'Love of Country', first article written on Spanish soil; pen name Laong Laan; Diariong Tagalog, August 20, 1882; in Spanish and Tagalog"
+  ],
+  [
+   "Freemasonry (1883)",
+   "Joined via Lodge Acacia, Madrid; Masonic name 'Dimasalang'; master mason at Lodge Solidaridad (1890) and Le Grand Orient, Paris (1892)"
+  ],
+  [
+   "Consequences of Masonry",
+   "Spanish authorities called him 'hereje en filibustero'; the Church punished Masons with excommunication"
+  ],
+  [
+   "Rizal's first public speech",
+   "The Brindis speech honoring Juan Luna and Felix Hidalgo"
+  ],
+  [
+   "November 20, 1884",
+   "Dr. Miguel Morayta, university president, declared liberty from the Church; removed via friars; 3-day student riot in which Rizal took part"
+  ],
+  [
+   "Why Rizal settled for a licentiate",
+   "The student riot and financial problems; did not pursue the doctorate"
+  ],
+  [
+   "Novels, sculptures, poems (M4)",
+   "Novels: Noli Me Tangere (1887), El Filibusterismo (1891)\nSculptures: Triumph of Death over Life; Triumph of Science over Death\nPoems: A Las Flores de Heidelberg; Me Piden Versos"
+  ]
+ ],
+ "M4: Intellectual Trends & Loves": [
+  [
+   "Six things European philosophers inspired in Rizal (Hornedo)",
+   "1. Liberalism\n2. Enlightenment mentality and anti-obscurantism\n3. Anti-clericalism and Deism\n4. Social reformism\n5. Positivism / dedication to science\n6. Romanticism"
+  ],
+  [
+   "Source: 'Ideas and Ideals'",
+   "By Florentino Hornedo, UST Publishing"
+  ],
+  [
+   "Auguste Comte",
+   "Propounded Positivism"
+  ],
+  [
+   "Charles Darwin",
+   "Evolution; Law of Natural Selection"
+  ],
+  [
+   "John Stuart Mill",
+   "Wrote 'On Liberty'"
+  ],
+  [
+   "Henry David Thoreau",
+   "Wrote 'Civil Disobedience'"
+  ],
+  [
+   "Schelling's 1841 Berlin lecture attendees",
+   "Kierkegaard (father of Existentialism), Bakunin (Russian anarchist), Engels, Marx, Feuerbach (father of Radical Materialism), Jacob Burckhardt (Swiss historian)"
+  ],
+  [
+   "Marx and Engels",
+   "Wrote the Communist Manifesto (1848)"
+  ],
+  [
+   "Voltaire",
+   "Father of the Enlightenment, champion of human rights; influenced Rizal's belief in human rights and Deism"
+  ],
+  [
+   "Costumbrismo",
+   "Local colorism - literary fashion in Spain when Rizal arrived, with literature as social criticism"
+  ],
+  [
+   "Source of Noli's plot",
+   "'Doña Perfecta' (1876) by Benito Perez Galdos"
+  ],
+  [
+   "Direct influence of El Filibusterismo",
+   "'The Count of Monte Cristo' (1844) by Alexandre Dumas"
+  ],
+  [
+   "Consuelo Ortiga y Rey",
+   "Daughter of Spanish liberal Don Pablo Ortiga y Rey; Rizal held back since engaged to Leonor Rivera; poem 'A la Señorita C.O. y R.'"
+  ],
+  [
+   "Usui Seiko (O-Sei-San)",
+   "Daughter of a former samurai, worked at the Spanish legation in Japan; his guide, interpreter and tutor"
+  ],
+  [
+   "Gertrude Beckett",
+   "Eldest daughter of his London landlord; 'Gettie/Tottie'; Rizal called her 'Pettie'; helped mix colors and prepare clay"
+  ],
+  [
+   "Nelly Boustead",
+   "Daughter of a businessman in Manila; Rizal proposed in Biarritz"
+  ],
+  [
+   "Why Rizal and Nelly did not marry",
+   "1. He refused to give up Catholicism for Protestantism\n2. Her mother disapproved of him"
+  ],
+  [
+   "Suzanne Jacoby",
+   "Belgian niece of his landlady in Brussels ('Petite Suzanne')"
+  ],
+  [
+   "Leonor Rivera's husband",
+   "Henry Charles Kipping (Rizal heard the news in 1890)"
+  ]
+ ],
+ "M4: Second Trip - HK, Japan, US, London": [
+  [
+   "Steamer to Hong Kong (Feb 1888)",
+   "'Zafiro'; emergency stopover in Amoy (Feb 7)"
+  ],
+  [
+   "Hotel in Hong Kong & Filipino friends who welcomed him",
+   "Victoria Hotel; Jose Maria Basa, Balbino Mauricio, Manuel Yriarte"
+  ],
+  [
+   "Macau trip (Feb 18)",
+   "With Jose Ma. Basa on ferry 'Kiu-Kiang'; stayed with Don Juan Francisco Lecaros"
+  ],
+  [
+   "February 22, 1888",
+   "Left Hong Kong on the American steamer Oceanic for Japan"
+  ],
+  [
+   "February 28, 1888",
+   "Reached Yokohama; Grand Hotel; then Tokyo Hotel (March 2-7)"
+  ],
+  [
+   "Juan Perez Caballero",
+   "Secretary of the Spanish legation; Rizal lived with him at the legation in Tokyo"
+  ],
+  [
+   "Rizal's impressions of Japan",
+   "Beauty, cleanliness, politeness, industry; charm of Japanese women; few thieves; beggars rarely seen"
+  ],
+  [
+   "April 1888",
+   "Left Japan (and O-Sei-San) on the 'Belgic'"
+  ],
+  [
+   "Tetcho Suehiro",
+   "Japanese human rights fighter; met on the Belgic; Rizal was his interpreter; they parted Dec 1, 1888"
+  ],
+  [
+   "April 28, 1888",
+   "Arrived San Francisco; quarantined a week due to cholera in Asia"
+  ],
+  [
+   "Hotel in San Francisco (May 4-6)",
+   "Palace Hotel"
+  ],
+  [
+   "'Biggest Little City in the World'",
+   "Reno, Nevada"
+  ],
+  [
+   "New York (May 13-16, 1888)",
+   "George Washington memorial, Statue of Liberty (saw Niagara Falls on the way)"
+  ],
+  [
+   "Rizal's impressions of the US",
+   "Material progress, American drive, natural beauty, high living standard, opportunities for immigrants - but racial inequality"
+  ],
+  [
+   "May 16, 1888",
+   "Left for London on the 'City of Rome'"
+  ],
+  [
+   "Liverpool / London arrival",
+   "Adelphi Hotel in Liverpool; May 25 to London at Antonio Ma. Regidor's house"
+  ],
+  [
+   "Beckett boarding house address",
+   "No. 37 Chalcot Crescent, Primrose Hill"
+  ],
+  [
+   "Dr. Reinhold Rost",
+   "Malayan language expert; called Rizal 'Una Perla de Hombre' (A Pearl of Man)"
+  ],
+  [
+   "Bad news Rizal received in London",
+   "1. Persecution of signers of the Anti-friar Petition of 1888\n2. Persecution of Calamba tenants\n3. Attacks by Senators Salamanca and Vida, Retana, Feced\n4. Exile of Manuel Hidalgo to Bohol; arrest of Laureano Viado"
+  ],
+  [
+   "The one good news (via Mariano Ponce)",
+   "Fr. Vicente Garcia's defense of the Noli against the friars"
+  ],
+  [
+   "Sucesos de las Islas Filipinas",
+   "By Antonio de Morga (1609); Rizal annotated it at the British Museum (May 1888 - March 1889)"
+  ],
+  [
+   "Christmas 1888 gifts",
+   "Bust of Augustus to Ferdinand Blumentritt; bust of Julius Caesar to Dr. Carlos Czepelak"
+  ],
+  [
+   "Works written in London",
+   "'La Revision del Fray Rodriguez' (pen name Dimasalang); 'Letter to the Young Women of Malolos' (Feb 22, 1889)"
+  ],
+  [
+   "March 19, 1889",
+   "Left London for Paris"
+  ]
+ ],
+ "M4: Paris, Spain, Belgium & Return (1888-1892)": [
+  [
+   "Bibliotheque Nationale (Sept 1888)",
+   "Where Rizal searched historical materials in Paris"
+  ],
+  [
+   "December 11, 1888",
+   "Visited Barcelona/Madrid; met M.H. del Pilar and Mariano Ponce for the first time"
+  ],
+  [
+   "Asociacion La Solidaridad (Dec 31, 1888)",
+   "Rizal honorary president; Galicano Apacible (pres.), Graciano Lopez Jaena (VP), Manuel Santa Maria (sec.), Mariano Ponce (treas.), Jose Ma. Panganiban (accountant)"
+  ],
+  [
+   "La Solidaridad newspaper",
+   "Founded Feb 15, 1889 by Graciano Lopez Jaena; organ of the Propaganda Movement"
+  ],
+  [
+   "Aims of La Solidaridad",
+   "1. Peaceful political & social reforms\n2. Portray Philippine conditions\n3. Advocate liberal ideas\n4. Champion Filipino aspirations"
+  ],
+  [
+   "Valentin Ventura",
+   "Rizal lived at his house (No. 45 Rue Maubeuge, Paris); later funded El Fili's printing and received its original manuscript"
+  ],
+  [
+   "June 24, 1889",
+   "Godfather of Juan Luna and Paz Pardo de Tavera's 2nd baby, Maria de la Paz Blanca Laureana Hermenegilda Juana Luna y Pardo de Tavera"
+  ],
+  [
+   "Paris Exposition",
+   "Opened May 6, 1889; Eiffel Tower; Felix Hidalgo 2nd; Juan Luna and Felix Pardo de Tavera 3rd"
+  ],
+  [
+   "Kidlat Club",
+   "Social society of young Filipinos in Paris (Lunas, Aguilera, Llorente, Roxas, Canon, Dimayuga)"
+  ],
+  [
+   "Indios Bravos",
+   "Replaced Kidlat Club; excel in judo, sword, pistol; inspired by American Indians in Buffalo Bill show"
+  ],
+  [
+   "Redencion de los Malayos",
+   "Secret society patterned after Freemasonry; propagate useful knowledge; mentioned only in letters to del Pilar (Nov 4, 1889) and Basa (Sept 21, 1889)"
+  ],
+  [
+   "Historical writings in Paris",
+   "Mayi; Tawalisi of Ibn Batuta; Filipinas dentro de Cien Años (Dec 1889); Sobre la Indolencia de los Filipinos (Sept 1890); Manila en el mes Diciembre 1872; Historia de la Familia Rizal; Los Pueblos del Archipelago Indico"
+  ],
+  [
+   "Brussels boarding house",
+   "38 Rue Philippe Champagne, run by the Jacoby sisters (Suzanne and Marie); with Jose Albert, then Jose Alejandrino"
+  ],
+  [
+   "Sobre la Nueva Ortografia de la Lengua Tagala",
+   "La Solidaridad, April 15, 1890; use 'k' and 'w' instead of 'c' and 'o'"
+  ],
+  [
+   "Calamba agrarian trouble",
+   "Dominican hacienda raised rents; father refused to pay; Paciano and in-laws Antonio Lopez & Silvestre Ubaldo deported to Mindoro; Manuel Hidalgo to Bohol"
+  ],
+  [
+   "June 20, 1890",
+   "Rizal wrote M.H. del Pilar to retain him as lawyer for the case in Spain's Supreme Court"
+  ],
+  [
+   "Rizal's 5 misfortunes in Spain",
+   "1. Failure to get justice (Ministerio de Ultramar)\n2. Death of Jose Ma. Panganiban\n3. Aborted duel with Antonio Luna\n4. Duel challenge to Wenceslao Retana\n5. Rivalry with del Pilar"
+  ],
+  [
+   "Duel with Antonio Luna",
+   "Luna insulted Nellie Boustead while drunk; Luna apologized when sober; they became friends again"
+  ],
+  [
+   "Wenceslao Retana",
+   "Wrote in La Epoca that the Rizals were ejected for not paying rent; retracted; later wrote Rizal's first biography"
+  ],
+  [
+   "January 1, 1891",
+   "~90 Filipinos met to elect the 'Responsable'; Rizal won votes but not two-thirds, then declined"
+  ],
+  [
+   "El Filibusterismo milestones",
+   "Finished in Biarritz Mar 29, 1891; final revisions in Brussels May 30; moved to Ghent July 5; printing suspended Aug 6; off the press Sept 18, 1891"
+  ],
+  [
+   "Why move to Ghent?",
+   "Cheaper printing; to escape Petite Suzanne"
+  ],
+  [
+   "Printing press of El Fili",
+   "F. Meyer Van Loo Press, No. 66 Viaanderen Street, Ghent (on installment)"
+  ],
+  [
+   "Who got copies of El Fili?",
+   "Original manuscript to Valentin Ventura; copies to Jose Ma. Basa and Sixto Lopez in Hong Kong"
+  ],
+  [
+   "Friends in Ghent",
+   "Jose Alejandrino and Edilberto Evangelista (University of Ghent students)"
+  ],
+  [
+   "November 20, 1891",
+   "Sailed to Hong Kong on SS Melbourne; lived at No. 2 Rednaxela Terrace with his clinic"
+  ],
+  [
+   "Christmas 1891",
+   "Family reunion in Hong Kong; happiest Yuletide of his life"
+  ],
+  [
+   "Dr. Lorenzo P. Marques",
+   "Helped Rizal build a wide clientele in Hong Kong"
+  ],
+  [
+   "Borneo colonization",
+   "Ship 'Menon' to Sandakan (Jan 1892); British offered 100,000 acres for 999 years; Hidalgo opposed; Gov. Gen. Eulogio Despujol rejected ('Philippines lacked laborers')"
+  ],
+  [
+   "Hong Kong writings",
+   "Ang Mga Karapatan Nang Tao (Rights of Man); A La Nacion Española; Sa Mga Kababayan"
+  ],
+  [
+   "'Rat is on trap'",
+   "Secret telegram of the Spanish consul in HK to Despujol after Rizal's June 21, 1892 letter/departure"
+  ],
+  [
+   "Return to the Philippines",
+   "With his sister Lucia, carrying a 'safe-conduct' passport from the Spanish consul general in Hong Kong"
+  ]
+ ],
+ "M4: Timeline": [
+  [
+   "May 3, 1882",
+   "Leaves Manila on Salvadora"
+  ],
+  [
+   "June 16, 1882",
+   "Reaches Barcelona"
+  ],
+  [
+   "August 20, 1882",
+   "Amor Patrio published in Diariong Tagalog"
+  ],
+  [
+   "1883",
+   "Joins Freemasonry"
+  ],
+  [
+   "November 20, 1884",
+   "Morayta affair / student riot"
+  ],
+  [
+   "1884 / 1885",
+   "Licentiate in Medicine / Philosophy and Letters"
+  ],
+  [
+   "1887",
+   "Noli Me Tangere; returns to Calamba as 'Dr. Uliman'"
+  ],
+  [
+   "February 22, 1888",
+   "Leaves HK for Japan on Oceanic"
+  ],
+  [
+   "February 28, 1888",
+   "Arrives in Yokohama"
+  ],
+  [
+   "April 28, 1888",
+   "Arrives in San Francisco"
+  ],
+  [
+   "May 16, 1888",
+   "Leaves New York for London on City of Rome"
+  ],
+  [
+   "December 31, 1888",
+   "Honorary president of Asociacion La Solidaridad"
+  ],
+  [
+   "February 15, 1889",
+   "La Solidaridad founded"
+  ],
+  [
+   "February 22, 1889",
+   "Letter to the Young Women of Malolos"
+  ],
+  [
+   "March 19, 1889",
+   "Leaves London for Paris"
+  ],
+  [
+   "May 6, 1889",
+   "Paris Exposition opens"
+  ],
+  [
+   "April 15, 1890",
+   "Article on new Tagalog orthography"
+  ],
+  [
+   "January 1, 1891",
+   "'Responsable' election in Madrid"
+  ],
+  [
+   "March 29, 1891",
+   "El Fili finished in Biarritz"
+  ],
+  [
+   "September 18, 1891",
+   "El Fili off the press in Ghent"
+  ],
+  [
+   "November 20, 1891",
+   "Sails to Hong Kong on SS Melbourne"
+  ],
+  [
+   "March 21, 1892",
+   "Second letter to Despujol on Borneo"
+  ],
+  [
+   "June 21, 1892",
+   "Third letter to Despujol; 'Rat is on trap'"
+  ]
+ ],
+ "M5: Morga's Sucesos & Rizal's Annotations": [
+  [
+   "Full title of Morga's book that Rizal annotated",
+   "Sucesos de las Islas Filipinas (Antonio de Morga's 1609 Philippine history)"
+  ],
+  [
+   "Year of Morga's Philippine history annotated by Rizal",
+   "1609"
+  ],
+  [
+   "Antonio de Morga - distinction",
+   "Governor Antonio de Morga was not only the FIRST TO WRITE but also the FIRST TO PUBLISH a Philippine history"
+  ],
+  [
+   "Father Chirino's work (printed at Rome, 1604) - how Rizal describes it",
+   "Rather a chronicle of the Missions than a history of the Philippines; the Jesuit admitted he abandoned writing a political history because Morga had already done so"
+  ],
+  [
+   "Where and when was Chirino's work printed?",
+   "Rome, 1604"
+  ],
+  [
+   "Rizal's annotation is addressed to whom?",
+   "\"To the Filipinos\""
+  ],
+  [
+   "Why did Rizal annotate Morga after writing the Noli? (purpose)",
+   "The Noli sketched the PRESENT state of the native land; its effect made him realize he must first post Filipinos on the PAST, so they can fairly judge the present and estimate progress during three centuries of Spanish rule"
+  ],
+  [
+   "Why quote Morga? (Rizal's reason)",
+   "Rizal was 'born and brought up in ignorance of our country's past', so he quoted the testimony of an illustrious Spaniard who controlled the destinies of the Philippines and had personal knowledge of 'our ancient nationality in its last days'"
+  ],
+  [
+   "Goal of the annotation, per Rizal",
+   "To awaken a consciousness of our past and to blot out or rectify what has been falsified or is calumny - then pass to the study of the future"
+  ],
+  [
+   "How did Rizal sign/date his 'To the Filipinos'?",
+   "Jose Rizal, Europe, 1889"
+  ],
+  [
+   "Photo in the Morga slides",
+   "Rizal, center, beside Marcelo H. Del Pilar and other Filipinos in Madrid, Spain, 1890"
+  ],
+  [
+   "Rizal on pre-Spanish Filipino civilization",
+   "Well advanced in regard to the duties of life for that age, as Morga's own EIGHTH chapter shows"
+  ],
+  [
+   "How did the islands come under Spanish sovereignty, per Rizal?",
+   "Through compacts, treaties of friendship and alliances for reciprocity - 'conquest' applies only to part of the islands; Cebu, Panay, Luzon, Mindoro cannot be said to have been conquered"
+  ],
+  [
+   "Rizal on Filipinos being 'unprotected' before Spain",
+   "Not true - Morga himself says the islands had arms and defended themselves; after natives were disarmed, pirates pillaged them with impunity (a reason for many insurrections)"
+  ],
+  [
+   "Rizal on the Spanish conversions",
+   "Not as general as claimed: Moros (Mahometans) in the south, negritos, igorots and other 'heathens' still occupied the greater part of the archipelago"
+  ],
+  [
+   "Weapons of ancient Filipinos noted from Morga",
+   "Army and navy with artillery; prized krises and kampilans of magnificent temper, some richly damascened"
+  ],
+  [
+   "Who gave the Holy Child (Santo Nino) image to the Cebuan queen?",
+   "Pigafetta, the Italian chronicler of Magellan's expedition (not angels, as religious writers believed)"
+  ],
+  [
+   "Original name of Cebu (Morga calls it 'City of the Most Holy Name of Jesus')",
+   "\"The village of San Miguel\""
+  ],
+  [
+   "Which expedition gave the name 'Philipina', and to what island?",
+   "Villalobos' expedition (between Magellan's and Legaspi's) - to Tendaya, now perhaps Leyte; later extended to the whole archipelago"
+  ],
+  [
+   "'Rahang mura' vs 'Rahang matanda'",
+   "Raja Soliman = Rahang mura (young king); distinguished from the old king, Rahang matanda"
+  ],
+  [
+   "Why were the Bisayas called 'Land of the Painted People' (Pintados)?",
+   "Natives' bodies were decorated with tracings made with fire, somewhat like tattooing"
+  ],
+  [
+   "Native name of Manila",
+   "\"Maynila\" (Tagalog name, a little changed by the Spaniards)"
+  ],
+  [
+   "Meaning of 'entrusted' (encomiendas) per Rizal",
+   "'Divided up among' - to entrust a province meant it was turned over to sack, abandoned to the cruelty and covetousness of the encomendero"
+  ],
+  [
+   "Salcedo - who, and his nickname",
+   "Legaspi's grandson; called the 'Hernando Cortez of the Philippines'; the conqueror's intelligent right arm; admired by Filipinos for honesty and bravery"
+  ],
+  [
+   "Panday Pira",
+   "Filipino cannon-maker; after his death no Spaniard was skilled enough to replace him, nor were his sons as expert"
+  ],
+  [
+   "Governor Corcuera",
+   "Earlier governor held to account - spent five years with Fort Santiago as his prison"
+  ],
+  [
+   "Origin of the anting-anting, per Rizal",
+   "Little silver boxes of prayers/invocations to saints found by the Dutch on five dead Spaniards in Morga's 'alleged victory' over Dutch ships"
+  ],
+  [
+   "Origin of Malay Filipinos per ancient traditions",
+   "Island of Sumatra (traditions nearly lost due to missionaries' zeal in eradicating 'heathen' remembrances)"
+  ],
+  [
+   "Malate (better 'Maalat')",
+   "Where the Tagalog aristocracy (incl. families of Raja Matanda and Raja Soliman) lived after being dispossessed of homes in the walled city"
+  ],
+  [
+   "Filipino chiefs in the 1605 Ternate expedition (at own expense)",
+   "Don Guillermo Palaot, Maestro De Campo, and Captains Francisco Palaot, Juan Lit, Luis Lont, Agustin Lont - with 400 Tagalogs and Pampangans"
+  ],
+  [
+   "Captain Gabriel de Rivera",
+   "First envoy from the Philippines to take up the archipelago's needs with the King of Spain"
+  ],
+  [
+   "Father Alonso Sanchez",
+   "Jesuit who visited the papal court at Rome and the Spanish King at Madrid - a mission like deputies now (Rizal asks why no representative now)"
+  ],
+  [
+   "Source reference for the Morga annotations",
+   "Austin Craig, Rizal's Life and Minor Writings (1929), pp. 310-331; translations by Chas. E. Derbyshire"
+  ]
+ ],
+ "M5: Noli - Title, Style, Cover, Preface, Theme": [
+  [
+   "Noli Me Tangere - meaning",
+   "Latin for \"Touch me not\""
+  ],
+  [
+   "Biblical source of the title",
+   "John 20:17 - Jesus tells Mary Magdalene not to touch/cling to him because he has not yet ascended to the Father"
+  ],
+  [
+   "Rizal's age and year/place of Noli's publication (per slides)",
+   "Age 26; 1887; slides say published in Belgium (the hidden dedication is dated Berlin, 21 February 1887)"
+  ],
+  [
+   "Noli's significance for the revolution",
+   "The book that gave a spark to the Philippine Revolution"
+  ],
+  [
+   "Noli as a genre",
+   "Historical novel - mostly fictional characters but also historical persons like Father Burgos; follows the basic rules of realism"
+  ],
+  [
+   "Technique vs style",
+   "Technique = method and devices the author uses; Style = language"
+  ],
+  [
+   "Characters Rizal admittedly exaggerated",
+   "Friars Damaso, Salvi, Sibyla; the two women preoccupied with prayers and novenas; the Espadañas"
+  ],
+  [
+   "Role of humor in the Noli",
+   "Avoids a darker, pessimistic tone; e.g. the lavish fiesta showing comic antics at church and ridiculous expense"
+  ],
+  [
+   "Cover symbols (list)",
+   "Silhouette of a Filipina; man in cassock with hairy feet; helmet of the Guardia Civil; whip; chains; bamboo stalks; cross; burning torch; pomelo blossoms & laurel leaves; sunflowers"
+  ],
+  [
+   "Cover: Silhouette of a Filipina",
+   "Maria Clara"
+  ],
+  [
+   "Cover: Man in a cassock with hairy feet",
+   "Priests using religion in a dirty way - specifically Padre Damaso"
+  ],
+  [
+   "Cover: Helmet of the Guardia Civil",
+   "Arrogance of those in authority"
+  ],
+  [
+   "Cover: Whip/cord",
+   "Cruelties (e.g., Doña Consolacion whipping Sisa)"
+  ],
+  [
+   "Cover: Chains",
+   "Slavery and imprisonment"
+  ],
+  [
+   "Cover: Bamboo stalks (cut down but grew back)",
+   "Resilience"
+  ],
+  [
+   "Cover: Cross",
+   "Suffering and death; also a grave (discrimination in proper burial)"
+  ],
+  [
+   "Cover: Burning torch",
+   "Rage and passion - 'The rise of the revolution is now at hand' (reference to the Olympic torch)"
+  ],
+  [
+   "Cover: Pomelo blossoms and laurel leaves",
+   "Faith, honor and fidelity (laurel = courage; pomelo = purity, worn by bride and groom)"
+  ],
+  [
+   "Cover: Sunflowers / mirasol",
+   "Loyalty and constancy; the mirasol = youth seeking the sun"
+  ],
+  [
+   "Cover: top vs bottom",
+   "Top = all that is best in Philippine life (woman, faith, laurel, pomelo); Bottom = all that is worst (Civil Guard helmet, whip/torture instruments, friar's foot)"
+  ],
+  [
+   "Hidden dedication on the cover",
+   "Partly covered by the title: a secret inner dedication to his parents ('A mis Padres...'), Berlin, 21 Feb 1887"
+  ],
+  [
+   "Rizal's promise in the preface/dedication",
+   "\"To reproduce thy condition faithfully, without discriminations; I will raise a part of the veil that covers the evil...\" - sacrifice to truth everything"
+  ],
+  [
+   "Theme: what 'Touch me not' symbolizes",
+   "The need for distance; longing and unfulfilment"
+  ],
+  [
+   "Faults of Filipinos Rizal ridiculed (list)",
+   "Superstitious/hypocritical fanaticism; ignorance, corruption, brutality of Filipino civil guards; passion for gambling; servility of wealthy Filipinos to friars/officials; efforts to dissociate from or lord over fellowmen"
+  ],
+  [
+   "Filipino virtues Rizal highlighted (list)",
+   "Modesty and devotion of the Filipina; hospitality of the family; devotion of parents and children; deep gratitude; solid common sense of the untutored peasant"
+  ],
+  [
+   "What the Noli calls on Filipinos to do",
+   "Recover self-confidence, appreciate own worth, return to ancestors' heritage, assert himself as equal of the Spaniard; need of education, dedication to country, absorbing helpful foreign culture"
+  ]
+ ],
+ "M5: Noli - Major Characters": [
+  [
+   "Crisostomo Ibarra (Juan Crisostomo Ibarra y Magsalin)",
+   "Protagonist; son of Don Rafael Ibarra; studied in Europe 7 years; Maria Clara's fiancé; asked San Diego to build a public school"
+  ],
+  [
+   "Ibarra's social class",
+   "Insulares (Creoles); mixed-race heir of a wealthy clan"
+  ],
+  [
+   "Maria Clara (Maria Clara de los Santos y Alba)",
+   "Raised by Capitan Tiago; most beautiful girl in San Diego; really the illegitimate daughter of Padre Damaso and Doña Pia Alba; enters the Beaterio de Santa Clara"
+  ],
+  [
+   "Maria Clara - what she represents",
+   "Held as the 'ideal Filipina'; with Sisa, her fate symbolizes the country - at once beautiful and miserable"
+  ],
+  [
+   "Capitan Tiago (Don Santiago de los Santos)",
+   "Filipino businessman, cabeza de barangay of San Diego; known father of Maria Clara; friend of Spanish government; never attended school; married Pia Alba of Santa Cruz"
+  ],
+  [
+   "Padre Damaso (Damaso Verdolagas)",
+   "Franciscan friar, former curate of San Diego; harsh, cruel; real father of Maria Clara; enemy of Rafael Ibarra; later reassigned and found dead"
+  ],
+  [
+   "Elias",
+   "Ibarra's mysterious friend and ally; first appears as a pilot at the picnic; wants to revolutionize the country - believes violence is the only option"
+  ],
+  [
+   "Pilosopo Tasyo (Filosofo Tacio)",
+   "Don Anastacio; writes in cryptic hieroglyph-like alphabet for future generations; called Tacio the Sage or Tacio el Loco"
+  ],
+  [
+   "Sisa, Crispin and Basilio represent...",
+   "A Filipino family persecuted by the Spanish authorities"
+  ],
+  [
+   "Sisa (Narcisa)",
+   "Deranged mother of Basilio and Crispin; cannot protect them from her husband Pedro; abused by Doña Consolacion"
+  ],
+  [
+   "Crispin",
+   "Sisa's 7-year-old son, altar boy, falsely accused of stealing; killed by Father Salvi and the head sacristan"
+  ],
+  [
+   "Basilio (Noli)",
+   "Sisa's 10-year-old son; acolyte who rings bells for the Angelus"
+  ],
+  [
+   "Padre Salvi (Bernardo Salvi)",
+   "Franciscan curate of San Diego; lusts for Maria Clara; thin and sickly; name hints 'Salvation' or 'Salvaje'; framed Ibarra"
+  ],
+  [
+   "Padre Hernando de la Sibyla",
+   "Dominican friar, short and fair; instructed to watch Ibarra"
+  ],
+  [
+   "Damaso vs Salvi's feelings for Maria Clara",
+   "Damaso = paternal; Salvi = carnal"
+  ],
+  [
+   "El Alferez",
+   "Chief of the Guardia Civil; rival of the priests for power; husband of Doña Consolacion"
+  ],
+  [
+   "Doña Consolacion",
+   "Wife of the Alferez; 'la musa de los guardias civiles'; ex-laundrywoman posing as Peninsular; abuses Sisa"
+  ],
+  [
+   "Doña Victorina de los Reyes de Espadaña",
+   "Ambitious Filipina who classifies herself as Spanish; heavy make-up; social climber"
+  ],
+  [
+   "Don Tiburcio de Espadaña",
+   "Spanish quack doctor; limp, submissive to Doña Victorina"
+  ],
+  [
+   "Alfonso Linares",
+   "Distant nephew of Don Tiburcio; would-be fiancé of Maria Clara; fake lawyer; died from Tiburcio's medicine"
+  ],
+  [
+   "Teniente Guevara",
+   "Friend of Don Rafael; tells Ibarra how his father died"
+  ],
+  [
+   "Tia Isabel",
+   "Capitan Tiago's cousin who raised Maria Clara"
+  ],
+  [
+   "Governor General (Noli)",
+   "Unnamed; most powerful official; disdains friars and corrupt officials; sympathizes with Ibarra"
+  ],
+  [
+   "Don Rafael Ibarra",
+   "Ibarra's father; richest, most virtuous and generous man in San Diego; denied Catholic burial by Damaso"
+  ],
+  [
+   "Doña Pia Alba",
+   "Wife of Capitan Tiago, mother of Maria Clara; raped by Damaso; died giving birth"
+  ],
+  [
+   "Don Filipo Lino",
+   "Vice mayor of San Diego, leader of the liberals"
+  ],
+  [
+   "Padre Manuel Martin",
+   "Linguistic curate of a nearby town; gives the sermon at San Diego's fiesta"
+  ]
+ ],
+ "M5: Noli - Minor Characters, Plot & Conflict": [
+  [
+   "Don Pedro Eibarramendia",
+   "Ibarra's great-grandfather from the Basque area; started the misfortunes of Elias' family; found as a decaying corpse on a balite tree"
+  ],
+  [
+   "Don Saturnino Ibarra",
+   "Son of Don Pedro, father of Don Rafael; developed San Diego; cruel but clever"
+  ],
+  [
+   "Salome",
+   "Elias' sweetheart, lives by the lake"
+  ],
+  [
+   "Sinang",
+   "Maria Clara's friend; Ibarra offered her half of the school, winning Capitan Basilio's support"
+  ],
+  [
+   "Iday, Andeng and Victoria",
+   "Maria Clara's other friends"
+  ],
+  [
+   "Capitan Basilio",
+   "Sinang's father, leader of the conservatives"
+  ],
+  [
+   "Capitana Tika",
+   "Sinang's mother, wife of Capitan Basilio"
+  ],
+  [
+   "Pedro",
+   "Sisa's abusive husband who loves cockfighting"
+  ],
+  [
+   "Tandang Pablo",
+   "Leader of the tulisanes (bandits); family destroyed by the Spaniards"
+  ],
+  [
+   "El hombre amarillo (Taong Madilaw)",
+   "Would-be assassin of Ibarra; carved the school cornerstone; killed by it instead"
+  ],
+  [
+   "Lucas",
+   "Brother of the Taong Madilaw; scar on left cheek; planned revolt with Ibarra as leader; killed by the Sakristan Mayor"
+  ],
+  [
+   "Bruno and Tarsilo",
+   "Brothers whose father was killed by the Spaniards"
+  ],
+  [
+   "Ñor Juan",
+   "Foreman of Ibarra's school"
+  ],
+  [
+   "Albino",
+   "Former seminarian at the picnic; captured during the revolution"
+  ],
+  [
+   "Capitana Maria Elena",
+   "Nationalist woman who defends Ibarra and his father's memory"
+  ],
+  [
+   "Sacristan Mayor",
+   "Governs the altar boys; killed Crispin"
+  ],
+  [
+   "Why was Ibarra excommunicated?",
+   "He hit Padre Damaso, who refused Don Rafael a Catholic burial; the governor general had the decree rescinded"
+  ],
+  [
+   "Ibarra vs Elias (point of conflict)",
+   "Privileged Ibarra favors peaceful means; Elias, who suffered injustice, believes violence is the only option"
+  ],
+  [
+   "How do Ibarra's enemies bring him down?",
+   "Salvi implicates him in a fake insurrection; Maria Clara betrays him to protect a dark family secret"
+  ],
+  [
+   "Ending of the Noli",
+   "Elias helps Ibarra escape; chased by the Guardia Civil on the lake, one dies; Maria Clara, thinking Ibarra dead, enters the nunnery, refusing Damaso's arranged marriage"
+  ],
+  [
+   "Ibarra's external conflicts (list)",
+   "vs the society of his time; vs Father Damaso (and other friars); vs Kapitan Tiago (self-preservation)"
+  ],
+  [
+   "Maria Clara's way of handling her conflict",
+   "She did not resolve it - she escaped by entering the convent"
+  ],
+  [
+   "Ibarra's internal conflict - why interesting",
+   "Expresses the dilemma of present-day Filipinos: traditional values vs personal values developed through time"
+  ],
+  [
+   "Noli's characters as a whole",
+   "A microcosm of Philippine society"
+  ]
+ ],
+ "M5: El Filibusterismo": [
+  [
+   "Three Faces of Evil (list)",
+   "1. Institutional Evil\n2. Personal Evil\n3. Evil as Means for a Noble End"
+  ],
+  [
+   "Institutional Evil",
+   "Evil due to unjust social structures"
+  ],
+  [
+   "Personal Evil",
+   "Due to personal traits and actions, made more harmful by unjust structures"
+  ],
+  [
+   "Evil as Means for a Noble End",
+   "An originally good person using evil means to reach good objectives (Simoun)"
+  ],
+  [
+   "Example of Institutional Evil",
+   "The tragedy of Cabesang Tales - the system of land tenure; also the Eviction from Calamba"
+  ],
+  [
+   "\"Take heart, men of Calamba! Your name is not Tales. You have committed no crime.\"",
+   "Quote linked to the Eviction from Calamba (institutional evil)"
+  ],
+  [
+   "Chief unjust structure in El Fili",
+   "Land tenure: huge tracts assigned to individuals/corporations, making people perpetual 'tenants'"
+  ],
+  [
+   "Examples of Personal Evil",
+   "Dominican physics teacher (Chapter 13); Fray Camorra, a Franciscan who destroys Juliana (Juli)"
+  ],
+  [
+   "Good Dominican in El Fili",
+   "Fr. Fernandez"
+  ],
+  [
+   "Simoun",
+   "The hero of the Noli (Ibarra) becomes a chief malefactor in El Fili"
+  ],
+  [
+   "Other villains' objective vs Simoun's",
+   "Villains: preserve power, wealth, prestige, keep people in subjection. Simoun: free his people from bondage"
+  ],
+  [
+   "Other villains' means (keep Indios powerless)",
+   "Deprive them of education; keep them ignorant; keep them dependent on the colonizer; manipulate them through religion"
+  ],
+  [
+   "Simoun's means ('Satanic Strategy')",
+   "Force the people into an armed explosion: increase tyranny, worsen humiliation, incite powers to greater injustice until people explode in vengeance"
+  ],
+  [
+   "Two chapters condemning the Satanic Strategy",
+   "Chapter 33 - Simoun discloses his plot to Basilio; Last chapter - Simoun tells his life story to Padre Florentino"
+  ],
+  [
+   "Simoun's plot told to Basilio",
+   "Blow up the entire establishment - 'All must be destroyed... The race must be renewed'"
+  ],
+  [
+   "Basilio's reaction to Simoun's plot",
+   "Numbed; weakened by 3+ months in prison and blinded by revenge; could only ask 'What will the world say to such carnage?'"
+  ],
+  [
+   "Four answers Basilio failed to give (values)",
+   "Faith in Human Dignity; Absolute Respect for the Human Person; Love of Enemies; Submission to God's Will"
+  ],
+  [
+   "Padre Florentino",
+   "Filipino secular priest, Rizal's mouthpiece; appears only in the first and last scenes"
+  ],
+  [
+   "Padre Florentino's key lines",
+   "Salvation of a country cannot come from the means used to destroy it; hate produces only monsters; crime begets criminals; only love produces marvelous results"
+  ],
+  [
+   "\"Redemption requires ___, ___ requires ___, and ___, love.\"",
+   "Redemption requires virtue, virtue requires sacrifice, and sacrifice, love"
+  ],
+  [
+   "Rizal's thinking (3 points)",
+   "Evil is evil wherever found; the end does not justify an evil means; Absolute Love is the only power that can destroy evil"
+  ],
+  [
+   "The Challenge to the youth",
+   "\"Where are the youth who will consecrate their most precious hours, their ambitions and enthusiasms, for the welfare of the country?\""
+  ]
+ ],
+ "M5: Malolos, Indolence & A Century Hence": [
+  [
+   "Letter to the Women of Malolos - date and language",
+   "February 17, 1889; written in Tagalog"
+  ],
+  [
+   "What did the women of Malolos petition for, and when?",
+   "December 12, 1888 - 20 young women petitioned Gov-Gen. Weyler for a night school to learn Spanish"
+  ],
+  [
+   "Intended teacher of the Malolos women",
+   "Teodoro Sandiko, a Latin professor"
+  ],
+  [
+   "Who opposed the Malolos petition?",
+   "Padre Felipe Garcia, the parish priest"
+  ],
+  [
+   "Outcome of the Malolos school",
+   "Eventually allowed but lasted only three months; Señora Guadalupe Reyes served as teacher"
+  ],
+  [
+   "Rizal's view on mothers (Letter to Malolos)",
+   "The mother's duty is very heavy; responsible for the home, raising children and domestic problems"
+  ],
+  [
+   "Governor-General petitioned by the Malolos women",
+   "Weyler"
+  ],
+  [
+   "On the Indolence of the Filipinos - skill shown",
+   "Keen economic sense - economics and geography, economics and institutions"
+  ],
+  [
+   "Did Rizal deny Filipino indolence?",
+   "No - admitted it exists, but said it is fostered and magnified; a manifestation, not a cause, of backwardness"
+  ],
+  [
+   "Causes of indolence (list)",
+   "Wars/piracy/disorders; abusive taxes and forced labor; galleon trade & encomienda; no justice/peace; corruption; vice like gambling; discrimination of indios"
+  ],
+  [
+   "Two classes of causes of indolence",
+   "Defects of training and lack of national sentiment"
+  ],
+  [
+   "The Philippines a Century Hence - purpose",
+   "Forecast the country's future within 100 years; warn Spain that what caused the French Revolution could happen here"
+  ],
+  [
+   "Where was 'A Century Hence' published (per slides)?",
+   "La Solidaridad"
+  ],
+  [
+   "Causes of Filipino miseries (Century Hence)",
+   "Spain's military policies; destruction of indigenous culture; passivity and submissiveness to the colonizers"
+  ],
+  [
+   "Spain's military policies (Century Hence)",
+   "Population decreased, poverty rampant, farmlands withered, family neglected"
+  ],
+  [
+   "Spain came with the ___ and the ___",
+   "Sword and the cross - destroying native culture"
+  ],
+  [
+   "Main force behind the 'culture of silence'",
+   "The Spanish friars"
+  ],
+  [
+   "Three failed ways Spain tried to stop progress",
+   "1. Keeping people ignorant\n2. Keeping people poor\n3. Exterminating the people"
+  ],
+  [
+   "What Spain must do, per Century Hence",
+   "Change her colonial policies to meet Philippine needs and rising nationalism"
+  ],
+  [
+   "Prediction that came true (Century Hence)",
+   "1898 Americans took the Philippines; independence came five decades after Rizal's death"
+  ],
+  [
+   "Famous quote from Century Hence",
+   "\"History does not record in its annals any lasting domination by one people over another... One of the two had to yield and succumb.\""
+  ]
+ ]
+};
+
+// [question, [options], correctIndex, why]
+const QUIZ = [["Who signed RA 1425 into law?",["Elpidio Quirino","Manuel Quezon","Carlos P. Garcia","Ramon Magsaysay"],3,"Signed by Pres. Magsaysay on June 12, 1956."],["When was RA 1425 approved?",["December 30, 1896","June 9, 1948","June 12, 1956","August 10, 1954"],2,""],["Who authored/sponsored the Rizal Bill?",["Claro M. Recto","Jose P. Laurel","Blas Ople","Trinidad Pardo de Tavera"],0,"Laurel co-authored."],["Who co-authored the Rizal Bill?",["Jose P. Laurel","Benigno Aquino Sr.","Jorge Vargas","Alejandro Roces"],0,""],["Which section of RA 1425 appropriates P300,000?",["Section 2","Section 3","Section 4","Section 5"],3,""],["Which body must translate and distribute Rizal's works under Section 3?",["Board of National Education","Philippine Commission","Rizal Presidential Committee","NHCP"],0,""],["Section 4 of RA 1425 preserves which law?",["Act No. 345","Section 927 of the Administrative Code","Commonwealth Act No. 184","RA 229"],1,"It prohibits public school teachers from discussing religious doctrines."],["Which is NOT a negative effect of the Rizal Law per the slides?",["Confusion between faith and nationalism","Faith of people is compromised","Adds unnecessary workload","Removes Noli from libraries"],3,""],["Gen. Emilio Aguinaldo's decree designating Dec. 30 as a day of mourning was issued on:",["Dec. 30, 1896","June 11, 1901","Feb. 1, 1902","Dec. 20, 1898"],3,""],["Where was the first Rizal Day celebrated in 1898?",["Luneta","Fort Santiago","Club Filipino, Manila","Bagumbayan"],2,""],["Act 137 (1901) renamed which district into the Province of Rizal?",["Morong","Daet","Dapitan","Sampaloc"],0,""],["Which act made December 30 Rizal Day, one of ten official holidays?",["Act No. 243","Act No. 137","Act No. 345","RA 229"],2,"Feb. 1, 1902."],["Act No. 243 (Sept. 28, 1901) granted:",["Rizal the title of national hero","Use of Luneta public land for a Rizal statue","The Rizal Pro Patria Award","A ban on cockfighting"],1,""],["RA 229 (1948) prohibits which on December 30?",["Parades","School classes","Flag raising","Cockfighting, horse racing and jai-alai"],3,"Approved by Pres. Quirino."],["Which Executive Order created the Rizal Pro Patria Award?",["EO 52","EO 14","EO 429","EO 184"],2,"Pres. Garcia, June 2, 1961."],["Where was the first Rizal monument ever erected?",["Manila","Madrid","Daet, Camarines Norte","Calamba"],2,""],["The Rizal monument in Manila was unveiled on:",["Dec. 30, 1913","Dec. 30, 1898","Dec. 5, 1996","June 12, 1956"],0,"17th anniversary of his martyrdom."],["Commonwealth Act No. 184 (Dec. 30, 1937) adopted:",["Tagalog as basis of the national language","Spanish as official language","Rizal Day as holiday","The Rizal Law"],0,"Pres. Quezon's Rizal Day address."],["Which streets in Sampaloc are named after Rizal's pen names?",["Sisa and Basilio","Laong Laan and Dimasalang","Blumentritt and Dapitan","Simoun and Elias"],1,""],["Final grade weights in this course:",["CS 60%, ME 40%","CS 40%, FE 60%","CS 50%, ME 25%, FE 25%","CS 60%, ME 15%, FE 25%"],3,"Passing raw score: 70."],["The 1987 Constitution moved the presidential inauguration from Dec. 30 to:",["June 12","July 4","June 30","Feb. 25"],2,""],["Who became the first American civil governor, under whom Rizal got the title of national hero (1901)?",["William Howard Taft","Trinidad Pardo de Tavera","Rafael Izquierdo","Ferdinand Blumentritt"],0,""],["Total Philippine trade in 1895 was:",["P2,800,000","P31,100,000","P62,000,000","P36,600,000"],2,""],["The growth of an export economy began in:",["1825","1830","1859","1869"],1,""],["Domingo Lam-co was Rizal's:",["Chinese ancestor","Teacher","Friend in Europe","Jesuit mentor"],0,""],["The Rizal family in the 1890s rented over how many hectares?",["90","190","390","590"],2,""],["The upheaval between inquilinos and haciendas was mainly:",["An agrarian revolt","A religious war","Political and economic, to weaken friar influence","A Chinese uprising"],2,""],["Gobernadorcillos were:",["Heads of provinces","Governor-Generals","Heads of barangays","Mayors of towns (pueblos)"],3,""],["Alcaldes mayores headed the:",["Alcaldias (provinces)","Pueblos","Barangays","Haciendas"],0,""],["The Suez Canal opened in:",["1869","1859","1872","1887"],0,"Easy access -> more stealing."],["Which is NOT listed as a failure of the colonial government?",["Tulisanes not eliminated","Antiquated taxation","Highly protected tariffs","Too many public schools"],3,""],["In the social structure, mestizos belonged to the:",["Highest class","Middle class","Lowest class","Clergy"],1,""],["The lowest social class was the:",["Peninsulares","Mestizos","Indios","Friars"],2,""],["The Jesuits built Ateneo Municipal in:",["1610","1872","1860","1859"],3,""],["The Escuela Normal de Maestros was established to:",["Provide Spanish-speaking teachers for primary schools","Train priests","Teach medicine","Train soldiers"],0,""],["The UST Library, oldest existing university library in Asia, was created in:",["1610","1859","1887","1611"],0,"At the request of Archbishop Miguel de Benavides."],["\"Do you call those external practices faith?\" is said by which Noli character?",["Ibarra","Elias","Sisa","Basilio"],1,""],["Juan Alaminos is described as a(n):",["Anticlerical","Friar","Governor-General","Ilustrado poet"],0,""],["The Cavite Mutiny happened in:",["1869","1898","1896","1872"],3,""],["Which current of the nationalist movement demanded freedom of speech, press, association and religion?",["Reformist","Anticlerical","Modernization","Liberal"],3,"Linked with the propaganda movement."],["Which current sought progressive economic measures often for personal profit?",["Modernization","Nationalist","Reformist","Liberal"],0,""],["The two Governor-Generals in the slides are:",["De la Torre and Izquierdo","Taft and Pardo de Tavera","Benavides and Alaminos","Laurel and Recto"],0,""],["Who chose the name 'Jose' for Rizal?",["His father","His mother","Paciano","A friar"],1,"His mother was a devotee of St. Joseph."],["The surname Mercado was adopted in 1731 by:",["Domingo Lam-co","Francisco Mercado","Paciano Mercado","Gregorio Alberto"],0,"His paternal great-grandfather."],["'Mercado' means:",["Field","Green wheat","Merchant ship","Market"],3,""],["Rizal's mother attended:",["La Concordia College","Colegio de San Jose","Colegio de Sta. Rosa","Santa Isabel College"],2,""],["What was Rizal's nickname within his family?",["Pepe","Moy","Pito","Laong Laan"],1,"Calling him 'Pepe' is a bluff per the slides."],["Rizal shed real tears for the first time when this sister died:",["Concepcion","Olympia","Soledad","Josefa"],0,"1865."],["Who taught Rizal the rudiments of Latin for five months in Calamba?",["Justiniano Aquino Cruz","Juancho Carrera","Fr. Jose Bech","Leon Monroy"],3,""],["Which uncle taught Rizal swimming, fencing and wrestling?",["Uncle Gregorio","Uncle Jose","Uncle Manuel","Uncle Francisco"],2,""],["Rizal's painting teacher in Biñan was:",["Agustin Saez","Juancho Carrera","Romualdo de Jesus","Leon Monroy"],1,""],["Rizal returned home from Biñan on the motorboat:",["Talim","Salvadora","Djemnah","Zafiro"],0,"December 17, 1870."],["The 'Foolish Butterfly' story came from:",["Universal History","Travels in the Philippines","Florante at Laura","Children's Friend by Abbé Sabatier"],3,""],["Which is NOT an argument against Rizal's authorship of 'Sa Aking Mga Kabata'?",["'Kalayaan' spelled with k","Rizal's poems were in Spanish","It was published by Rizal in 1869","Rizal never asserted authorship"],2,"It was published a decade after his execution."],["The Ateneo registrar who refused to admit Rizal:",["Fr. Jose Bech","Fr. Magin Ferrando","Fr. Francisco de Paula Sanchez","Fr. Lleonart"],1,""],["Whose intercession got Rizal admitted to Ateneo?",["Manuel Xerez Burgos","Paciano","Fr. Pablo Ramon","Jose Ma. Basa"],0,""],["Ateneo students were divided into the 'Roman Empire' and the:",["Greek Empire","Spanish Empire","Ottoman Empire","Carthaginian Empire"],3,""],["Rizal became an interno at Ateneo on:",["June 10, 1872","March 23, 1877","June 16, 1875","December 17, 1870"],2,""],["Rizal graduated from Ateneo with highest honors on:",["June 16, 1875","March 23, 1877","March 1876","November 3, 1882"],1,""],["The Virgin Mary image Rizal carved at Ateneo was made of:",["Batikuling","Narra","Clay","Wax"],0,""],["Why did Rizal first take Philosophy and Letters at UST?",["His mother wanted it","Fr. Sanchez required it","It was the only course open","His father liked it"],3,"Also uncertainty, and Fr. Ramon Pablo was in Mindanao."],["In the Spanish grading system, 'Sobresaliente' means:",["Passed","Good","Excellent","Failed"],2,"= 1.00."],["'A La Juventud Filipina' won first prize in:",["1877","1879","1880","1882"],1,""],["Rizal's first love was:",["Segunda Katigbak","Leonor Rivera","Leonor Valenzuela","Consuelo Ortiga"],0,""],["Leonor Rivera signed her letters as:",["Orang","Pettie","Petite","Taimis"],3,"To hide the relationship from her parents."],["Rizal's invisible ink was made of:",["Lemon juice and water","Milk","Water and table salt","Vinegar and sugar"],2,""],["Rizal enrolled at Universidad de Madrid on:",["June 16, 1882","November 3, 1882","May 3, 1882","January 1, 1886"],1,""],["In Paris, Rizal worked as the assistant of:",["Dr. Louis de Weckert","Dr. Otto Becker","Dr. Reinhold Rost","Dr. Schwigger"],0,""],["Rizal left Manila for Singapore in 1882 aboard:",["Djemnah","Oceanic","Belgic","Salvadora"],3,"May 3, 1882, with 700 pesos and a diamond ring."],["The French steamer Rizal boarded in Singapore was the:",["Melbourne","City of Rome","Djemnah","Zafiro"],2,""],["Rizal finally reached Barcelona on:",["June 11, 1882","June 16, 1882","June 12, 1882","May 9, 1882"],1,""],["'Amor Patrio' was published under the pen name:",["Laong Laan","Dimasalang","Plaridel","Taimis"],0,"Diariong Tagalog, August 20, 1882."],["Rizal's Masonic name was:",["Laong Laan","Kidlat","Uliman","Dimasalang"],3,"Through Lodge Acacia, Madrid."],["The plot of Noli Me Tangere was sourced from:",["The Count of Monte Cristo","Uncle Tom's Cabin","Doña Perfecta","On Liberty"],2,"By Benito Perez Galdos."],["El Filibusterismo was directly influenced by:",["Doña Perfecta","The Count of Monte Cristo","Civil Disobedience","Wilhelm Tell"],1,""],["Who propounded Positivism?",["Auguste Comte","Charles Darwin","John Stuart Mill","Voltaire"],0,""],["Known as the father of the Enlightenment and champion of human rights:",["Rousseau","Kierkegaard","Feuerbach","Voltaire"],3,""],["The Japanese woman who was Rizal's guide and tutor in Japan:",["Gertrude Beckett","Suzanne Jacoby","Usui Seiko","Nelly Boustead"],2,""],["Rizal served as interpreter on the Belgic for:",["Juan Perez Caballero","Tetcho Suehiro","Reinhold Rost","Carlos Czepelak"],1,""],["Rizal was quarantined in San Francisco because of:",["Cholera outbreak in Asia","Smallpox","Missing papers","Bubonic plague"],0,"Arrived April 28, 1888."],["Who called Rizal 'Una Perla de Hombre'?",["Ferdinand Blumentritt","Antonio Regidor","Mariano Ponce","Dr. Reinhold Rost"],3,""],["In London, Rizal annotated the 1609 work of:",["Pedro Chirino","Feodor Jagor","Antonio de Morga","Cesar Cantu"],2,"'Sucesos de las Islas Filipinas'."],["La Solidaridad was founded on February 15, 1889 by:",["Marcelo H. del Pilar","Graciano Lopez Jaena","Mariano Ponce","Galicano Apacible"],1,""],["Secret society founded by Rizal, patterned after Freemasonry:",["Redencion de los Malayos","Kidlat Club","Indios Bravos","Circulo Hispano Filipino"],0,""],["Rizal's aborted duel over insults to Nellie Boustead was with:",["Wenceslao Retana","Marcelo del Pilar","Juan Luna","Antonio Luna"],3,""],["Who later wrote the first biography of Rizal after retracting his insult?",["Pablo Feced","Senator Vida","Wenceslao Retana","Manuel Hidalgo"],2,""],["El Filibusterismo came off the press on:",["March 29, 1891","September 18, 1891","May 30, 1891","August 6, 1891"],1,"In Ghent, F. Meyer Van Loo Press."],["Who sent the funds that saved El Fili's printing?",["Valentin Ventura","Jose Ma. Basa","Sixto Lopez","Paciano"],0,""],["Why did Nelly Boustead and Rizal not marry?",["He was too poor","She married Kipping","Paciano objected","He refused to convert to Protestantism and her mother disapproved"],3,""],["The Governor General who rejected the Borneo colony plan:",["Valeriano Weyler","Emilio Terrero","Eulogio Despujol","Juan Perez Caballero"],2,"'Philippines lacked laborers.'"],["Who was the first to write and publish a Philippine history?",["Antonio de Morga","Father Chirino","Pigafetta","Colin"],0,"Morga's Sucesos de las Islas Filipinas (1609)."],["Father Chirino's work, printed at Rome in 1604, is described by Rizal as:",["A political history","A chronicle of the Missions","A novel","A travel diary"],1,""],["Rizal's 'To the Filipinos' in the Morga annotation was signed:",["Berlin, 1887","Madrid, 1890","Europe, 1889","Ghent, 1891"],2,""],["Who, according to Rizal, gave the Holy Child image to the Cebuan queen?",["Legaspi","Magellan","Angels","Pigafetta"],3,"Not angels, as religious writers believed."],["The name 'Philipina' was first given to Tendaya (perhaps Leyte) by the expedition of:",["Villalobos","Legaspi","Magellan","Salcedo"],0,""],["Raja Soliman was called:",["Rahang matanda","Lakandula","Raja Tupas","Rahang mura"],3,"Rahang mura = young king."],["Cebu was first called:",["Village of San Miguel","City of the Most Holy Name of Jesus","Maynila","Pintados"],0,""],["Who was called the 'Hernando Cortez of the Philippines'?",["Goiti","Corcuera","Salcedo","Dasmariñas"],2,"Legaspi's grandson."],["Which Filipino cannon-maker could not be replaced by Spaniards after his death?",["Panday Pira","Raja Matanda","Juan Lit","Luis Lont"],0,""],["The Bisayas were called 'Land of the Painted People' because natives:",["Painted houses","Had fire-traced body decoration like tattoos","Dyed cloth red","Painted boats"],1,""],["'Noli Me Tangere' is taken from which Bible verse?",["Matthew 5:3","Luke 23:34","John 20:17","John 3:16"],2,""],["On the Noli cover, the man in a cassock with hairy feet represents:",["Elias","Capitan Tiago","The Alferez","Priests using religion in a dirty way (Padre Damaso)"],3,""],["On the Noli cover, bamboo stalks represent:",["Resilience","Slavery","Purity","Rage"],0,""],["On the Noli cover, the helmet of the Guardia Civil represents:",["Courage","Resilience","Loyalty","Arrogance of those in authority"],3,""],["The silhouette of a Filipina on the Noli cover is believed to be:",["Sisa","Doña Victorina","Maria Clara","Salome"],2,""],["Maria Clara's real father was:",["Capitan Tiago","Padre Salvi","Padre Damaso","Don Rafael"],2,""],["Who killed Crispin?",["Father Salvi and the head sacristan","Padre Damaso and the Alferez","Pedro","Lucas"],0,""],["Which character is described as the 'muse of the Civil Guards'?",["Doña Victorina","Doña Consolacion","Tia Isabel","Capitana Tika"],1,""],["Pilosopo Tasyo's real name is:",["Don Anastacio","Don Filipo","Don Tiburcio","Don Saturnino"],0,""],["Who was the leader of the liberals in San Diego?",["Capitan Basilio","Teniente Guevara","Capitan Tiago","Don Filipo Lino"],3,""],["The would-be assassin killed by the school cornerstone was:",["Lucas","Tandang Pablo","El hombre amarillo","Bruno"],2,""],["Where did Maria Clara end up?",["Beaterio de Santa Clara","Married Linares","Spain","Died on the lake"],0,""],["In El Fili, Fray Camorra illustrates which face of evil?",["Institutional evil","Evil as means for a noble end","Natural evil","Personal evil"],3,""],["The tragedy of Cabesang Tales illustrates:",["Institutional evil","Personal evil","Evil as means for a noble end","Love of enemies"],0,"Land tenure system."],["Simoun's use of evil to free his people is an example of:",["Personal evil","Institutional evil","Evil as means for a noble end","Submission to God's Will"],2,""],["Padre Florentino is described as:",["A Franciscan friar","A Filipino secular priest and Rizal's mouthpiece","A Dominican teacher","A Jesuit historian"],1,""],["In which chapter does Simoun disclose his plot to Basilio?",["Chapter 13","Last chapter","Chapter 39","Chapter 33"],3,""],["When was the Letter to the Women of Malolos written?",["Dec 12, 1888","Feb 21, 1887","Feb 17, 1889","1890"],2,""],["Who opposed the Malolos women's petition?",["Gov-Gen. Weyler","Teodoro Sandiko","Padre Felipe Garcia","Guadalupe Reyes"],2,""],["Rizal reduced the causes of indolence to two classes:",["Defects of training and lack of national sentiment","Climate and laziness","Taxes and wars","Religion and race"],0,""],["'The Philippines a Century Hence' warned Spain that conditions like those before which event could happen?",["American Revolution","French Revolution","Cavite Mutiny","Russian Revolution"],1,""],["According to the slides, 'A Century Hence' was published in:",["Noli Me Tangere","Diariong Tagalog","La Solidaridad","El Renacimiento"],2,""]];
+
+const QUIZ_SIZE = 30;
+
+// [topic, question, points]
+const ESSAYS = [
+ [
+  "M1 · RA 1425",
+  "Explain the main provisions of RA 1425 and how they shape the Rizal course you are taking.",
+  [
+   "Signed June 12, 1956 by Magsaysay; authored by Recto, co-authored by Laurel",
+   "Sec. 1: Rizal courses required in all schools; unexpurgated Noli/Fili as basic texts in college",
+   "Sec. 2: libraries must keep copies; part of required reading",
+   "Sec. 3: Board of National Education translates and distributes free via Purok and Barrio Councils",
+   "Sec. 4: does not repeal Sec. 927 (no religious doctrine in public schools)",
+   "Sec. 5: P300,000 appropriation",
+   "Link to course outcomes: analyzing Noli and Fili, nationalism, love of country",
+   "Positive vs. negative effects (faith vs. nationalism confusion, workload)"
+  ]
+ ],
+ [
+  "M1 · Historical and Legal Basis",
+  "Trace how Filipinos and successive governments honored Rizal from 1898 to 1996.",
+  [
+   "Aguinaldo's Dec. 20, 1898 decree; first Rizal Day Dec. 30, 1898 at Club Filipino",
+   "Americans' recognition to win sympathy; national hero title 1901 under Taft; Act 137 Morong -> Rizal Province",
+   "Act 243 (Luneta statue) and Act 345 (Rizal Day holiday)",
+   "RA 229 (1948), EO 52 (1954), RA 1425 (1956), EO 429 Pro Patria Award (1961), EO 14 (1962)",
+   "Monuments: Daet first, Manila Dec. 30, 1913, Madrid 1996",
+   "Streets: Laong Laan, Dimasalang, Blumentritt, Dapitan, Sisa, Basilio, Simoun",
+   "Rizal Day in 1937 (Tagalog), 1942 (Japanese), 1946, 1950, 1953, 1996 centenary"
+  ]
+ ],
+ [
+  "M2 · Economic-Political Context",
+  "How did economic and political conditions in 19th-century Philippines lead Filipinos to stop supporting Spanish rule?",
+  [
+   "Export economy from 1830; trade grew from P2.8M (1825) to P62M (1895)",
+   "Friar haciendas -> inquilinos -> kasama; rents raised as land value rose",
+   "Upheaval was political/economic, to weaken friar influence (Rizal family rented 390+ ha)",
+   "Filipinos removed from bureaucracy; unqualified, disinterested Spanish officials",
+   "Sources of abuse: positions sold to highest bidder, term at King's desire, distance, corruption, church-state union",
+   "Suez Canal 1869: easy access, more stealing",
+   "Failures: no public works/schools/peace and order, tulisanes, old taxation, protected tariffs",
+   "Even conservative upper class lost motive to keep the regime"
+  ]
+ ],
+ [
+  "M2 · Socio-Cultural Context",
+  "Discuss the social, educational and religious developments that shaped Rizal's nationalism.",
+  [
+   "Feudal master-slave relationship; three classes (Spaniards/Peninsulares/Friars; Natives/Mestizos; Indios)",
+   "Spread of education from about 1860 as key factor; Ilustrados studied in Europe",
+   "Jesuits: Ateneo Municipal 1859, Escuela Normal de Maestros",
+   "Humanistic education (literature, science, philosophy) taught dignity and equality, undermining the regime",
+   "Defects of the educational system, e.g., friar control, prejudice against Filipinos",
+   "Ilustrados anti-friar; Elias quote in Noli; attacking religion used as a shield",
+   "Cavite Mutiny 1872, GOMBURZA, De la Torre vs. Izquierdo",
+   "Five currents: reformist, liberal, anticlerical, modernization, nationalist"
+  ]
+ ],
+ [
+  "M3 · Family & early influences",
+  "How did Rizal's family and early teachers shape his character and perspective in life?",
+  [
+   "Mother Teodora as first teacher; disciplinarian; inspiration for medicine",
+   "Father's wealth and fine library fed his love of reading",
+   "Uncles: Manuel (physical development, nature, sports), Gregorio (love of education, work hard, think independently), Jose (art)",
+   "Leon Monroy (Latin), Justiniano Aquino Cruz and Juancho Carrera in Biñan",
+   "Paciano's role in bringing him to Biñan and Ateneo",
+   "Books like Children's Friend (Foolish Butterfly)"
+  ]
+ ],
+ [
+  "M3 · Ateneo vs. UST",
+  "Compare Rizal's experience at the Ateneo and at the University of Santo Tomas. Why did he excel in one and not the other?",
+  [
+   "Ateneo: Jesuit system, Roman vs Carthaginian empires, became 'emperor', 'pride of the Jesuits', highest honors (March 23, 1877)",
+   "UST under Dominicans, rivals of the Jesuits",
+   "Reasons he didn't enjoy UST: hostile Dominican professors, racial discrimination, method of instruction",
+   "Reasons he performed poorly: medicine not his vocation, discontent with system, distractions of youth (romances)",
+   "Still 2nd best of seven who finished medicine; loyalty to Ateneo activities",
+   "Shift to medicine to cure his mother's blindness; led to decision to go to Europe"
+  ]
+ ],
+ [
+  "M4 · Reasons for going to Europe",
+  "Was Rizal really driven to Europe by discrimination at UST? Defend your answer using the module.",
+  [
+   "Biographers' claim: discrimination, family persecution",
+   "No direct evidence: Curso de Ampliacion granted; 24 students -> 7 reached 4th year, Rizal 2nd",
+   "UST not below standard: museum 5,747 specimens, 12,000 books, 300 instruments, notable graduates",
+   "Real reasons: family means, Europe's science and education, Principalia tradition, propaganda for reforms",
+   "Secret mission: observe European life and prepare to liberate his people"
+  ]
+ ],
+ [
+  "M4 · Europe's influence on the reformist",
+  "How did Rizal's sojourns abroad and 19th-century European ideas transform him into a propagandist for reform?",
+  [
+   "Hornedo's six influences: liberalism, Enlightenment/anti-obscurantism, anti-clericalism & Deism, social reformism, positivism/science, romanticism",
+   "Thinkers: Comte, Darwin, Mill, Thoreau, Voltaire; costumbrismo; Doña Perfecta and Monte Cristo behind his novels",
+   "Masonry, Circulo Hispano Filipino, La Solidaridad, Morayta riot",
+   "Annotation of Morga; historical essays; orthography reform",
+   "Comparisons of US/Japan; Calamba agrarian persecution; El Fili; La Liga Filipina, Borneo plan"
+  ]
+ ],
+ [
+  "M5 · Morga annotations",
+  "Why did Rizal annotate Morga's Sucesos de las Islas Filipinas, and how did his notes correct the colonial view of Filipinos?",
+  [
+   "Noli showed the present, so he had to show the past first",
+   "Morga was the first to write and publish a Philippine history",
+   "Pre-Spanish Filipinos were already civilized (Morga's 8th chapter)",
+   "Filipinos had arms, army/navy, krises, kampilans and Panday Pira",
+   "Spanish rule came through treaties and alliances, not conquest",
+   "He corrected errors and myths, such as the Santo Nino and conversions",
+   "Encomienda/'entrust' really meant to sack",
+   "Goal: awaken consciousness of the past and correct falsehoods"
+  ]
+ ],
+ [
+  "M5 · Noli Me Tangere",
+  "Explain how the characters and cover symbols of Noli Me Tangere represent Philippine society under Spain.",
+  [
+   "Title 'Touch me not' (John 20:17) - need for distance, longing and unfulfilment",
+   "Cover: best of Philippine life at top, worst at bottom (helmet, whip, friar's foot)",
+   "Ibarra = reform; Elias = revolution",
+   "Damaso and Salvi = corrupt friars",
+   "Sisa's family = persecuted Filipino family; Maria Clara and Sisa = the country",
+   "Victorina and Tiago = servility and social climbing",
+   "Characters as a microcosm of society; Rizal criticizes both Spaniards and Filipinos",
+   "Calls for education and self-confidence"
+  ]
+ ],
+ [
+  "M5 · El Filibusterismo",
+  "Using the three faces of evil and Padre Florentino's dialogue with Simoun, explain Rizal's view on whether a noble end justifies evil means.",
+  [
+   "Institutional evil (Cabesang Tales); personal evil (Camorra); evil as means (Simoun)",
+   "Simoun's goal: free his people; means: Satanic Strategy",
+   "Basilio failed to answer (Ch. 33): human dignity, respect, love of enemies, God's will",
+   "Florentino: hate begets monsters; crime begets criminals; only love works",
+   "Redemption needs virtue, sacrifice, love",
+   "The end never justifies evil means; Absolute Love destroys evil",
+   "Challenge to the youth"
+  ]
+ ]
+];
+
+// tabs
+const TABS = {fc:"Flashcards", qz:"Quiz", es:"Essay practice"};
+const tabsEl = document.getElementById("tabs");
+let tab = "fc";
+function showTab(t){ tab=t; for(const k in TABS){ document.getElementById(k).classList.toggle("hidden",k!==t); } [...tabsEl.children].forEach(b=>b.classList.toggle("on",b.dataset.t===t)); }
+for(const k in TABS){ const b=document.createElement("button"); b.textContent=TABS[k]; b.dataset.t=k; b.onclick=()=>showTab(k); tabsEl.appendChild(b); }
+
+// flashcards
+const decksEl=document.getElementById("decks"), cardEl=document.getElementById("card"), countEl=document.getElementById("count");
+let deckName=Object.keys(DECKS)[0], cards=[], i=0, flipped=false;
+function loadDeck(n){ deckName=n; cards=[...DECKS[n]]; i=0; flipped=false; [...decksEl.children].forEach(b=>b.classList.toggle("on",b.textContent===n)); render(); }
+function render(){ const [f,b]=cards[i]; cardEl.innerHTML = flipped ? `<div class="tag">Answer</div><div class="back"></div>` : `<div class="tag">${deckName}</div><div class="front"></div><div class="hint">Answer first, then tap to flip</div>`; cardEl.querySelector(flipped?".back":".front").textContent = flipped?b:f; countEl.textContent=`${i+1} / ${cards.length}`; }
+Object.keys(DECKS).forEach(n=>{ const b=document.createElement("button"); b.textContent=n; b.onclick=()=>loadDeck(n); decksEl.appendChild(b); });
+cardEl.onclick=()=>{flipped=!flipped; render();};
+function step(d){ i=(i+d+cards.length)%cards.length; flipped=false; render(); }
+document.getElementById("prev").onclick=()=>step(-1);
+document.getElementById("next").onclick=()=>step(1);
+document.getElementById("shuffle").onclick=()=>{ for(let k=cards.length-1;k>0;k--){const j=Math.floor(Math.random()*(k+1));[cards[k],cards[j]]=[cards[j],cards[k]];} i=0; flipped=false; render(); };
+document.addEventListener("keydown",e=>{ if(tab!=="fc") return; if(e.key===" "){e.preventDefault(); cardEl.click();} if(e.key==="ArrowRight") step(1); if(e.key==="ArrowLeft") step(-1); });
+
+// quiz
+const qp=document.getElementById("qpanel");
+let order=[], qi=0, score=0, missed=[];
+function shuffled(a){ a=[...a]; for(let k=a.length-1;k>0;k--){const j=Math.floor(Math.random()*(k+1));[a[k],a[j]]=[a[j],a[k]];} return a; }
+function startQuiz(){ order=shuffled(QUIZ.map((_,k)=>k)).slice(0,QUIZ_SIZE); qi=0; score=0; missed=[]; renderQ(); }
+function renderQ(){
+  if(qi>=order.length){
+    qp.innerHTML=`<div class="q">Score: <b>${score} / ${order.length}</b></div>`;
+    if(missed.length){ const ul=document.createElement("ul"); ul.className="check"; missed.forEach(k=>{const li=document.createElement("li"); li.textContent=`${QUIZ[k][0]} → ${QUIZ[k][1][QUIZ[k][2]]}`; ul.appendChild(li);}); qp.appendChild(Object.assign(document.createElement("div"),{className:"why",textContent:"Missed (say each answer out loud once):"})); qp.appendChild(ul); }
+    const b=document.createElement("button"); b.textContent="Retake"; b.style.marginTop="14px"; b.onclick=startQuiz; qp.appendChild(b); return;
+  }
+  const [q,opts,ans,why]=QUIZ[order[qi]];
+  qp.innerHTML=`<div class="tag">Question ${qi+1} / ${order.length} · Score ${score}</div><div class="q"></div><div class="opts"></div><div class="why"></div><div class="row"><span></span><button class="hidden" id="qn">Next &rarr;</button></div>`;
+  qp.querySelector(".q").textContent=q;
+  const oe=qp.querySelector(".opts");
+  const pos=shuffled(opts.map((_,k)=>k)), ansPos=pos.indexOf(ans);
+  pos.forEach((k,p)=>{ const o=opts[k]; const b=document.createElement("button"); b.textContent=o; b.onclick=()=>{
+    if(oe.dataset.done) return; oe.dataset.done=1;
+    if(k===ans) score++; else { b.classList.add("wrong"); missed.push(order[qi]); }
+    oe.children[ansPos].classList.add("right");
+    qp.querySelector(".why").textContent=why;
+    const n=qp.querySelector("#qn"); n.classList.remove("hidden"); n.onclick=()=>{qi++; renderQ();};
+  }; oe.appendChild(b); });
+}
+startQuiz();
+
+// essays
+let ei=0;
+function renderE(){ const [t,q,pts]=ESSAYS[ei]; document.getElementById("etag").textContent=`${t} · ${ei+1} / ${ESSAYS.length}`; document.getElementById("eq").textContent=q; document.getElementById("ea").value=""; document.getElementById("ekey").classList.add("hidden"); const ul=document.getElementById("elist"); ul.innerHTML=""; pts.forEach(p=>{const li=document.createElement("li"); li.textContent=p; ul.appendChild(li);}); }
+document.getElementById("echeck").onclick=()=>document.getElementById("ekey").classList.remove("hidden");
+document.getElementById("eprev").onclick=()=>{ei=(ei-1+ESSAYS.length)%ESSAYS.length; renderE();};
+document.getElementById("enext").onclick=()=>{ei=(ei+1)%ESSAYS.length; renderE();};
+
+loadDeck(deckName); renderE(); showTab("fc");
+</script>
+</body>
+</html>

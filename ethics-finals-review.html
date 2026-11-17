@@ -1,0 +1,382 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ethics Finals Review</title>
+<style>
+  :root { --bg:#f4f5f8; --card:#fff; --ink:#1d2230; --muted:#5f667a; --accent:#3a5bb8; --line:#d6d9e3; --good:#2c7a4b; --bad:#b83a3a; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#13161d; --card:#1d212b; --ink:#e8eaf0; --muted:#9aa1b4; --accent:#8aa6ff; --line:#2f3442; --good:#6fcf97; --bad:#ff8a8a; } }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font-family:system-ui, "Segoe UI", sans-serif; }
+  main { max-width:680px; margin:0 auto; padding:16px; }
+  h1 { font-size:1.2rem; margin:8px 0 4px; }
+  .rule { color:var(--muted); font-size:.9rem; margin:0 0 14px; }
+  .tabs, .decks { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px; }
+  button { font:inherit; border:1px solid var(--line); background:var(--card); color:var(--ink); border-radius:8px; padding:8px 12px; cursor:pointer; }
+  button.on { background:var(--accent); color:var(--bg); border-color:var(--accent); }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:14px; min-height:240px; padding:24px; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; cursor:pointer; user-select:none; }
+  .tag { font-size:.75rem; color:var(--muted); text-transform:uppercase; letter-spacing:.05em; margin-bottom:12px; }
+  .front { font-size:1.3rem; white-space:pre-line; }
+  .back { font-size:1.05rem; white-space:pre-line; line-height:1.5; }
+  .hint { font-size:.85rem; color:var(--muted); margin-top:18px; }
+  .row { display:flex; gap:8px; justify-content:space-between; align-items:center; margin-top:12px; flex-wrap:wrap; }
+  .count { color:var(--muted); font-size:.9rem; }
+  .panel { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:20px; }
+  .q { font-size:1.1rem; margin-bottom:14px; line-height:1.45; }
+  .opts { display:flex; flex-direction:column; gap:8px; }
+  .opts button { text-align:left; }
+  .opts button.right { border-color:var(--good); color:var(--good); font-weight:600; }
+  .opts button.wrong { border-color:var(--bad); color:var(--bad); }
+  .why { margin-top:12px; color:var(--muted); font-size:.95rem; }
+  textarea { width:100%; min-height:180px; font:inherit; padding:10px; border-radius:8px; border:1px solid var(--line); background:var(--bg); color:var(--ink); }
+  ul.check { margin:10px 0 0; padding-left:20px; line-height:1.5; }
+  .hidden { display:none; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Ethics (CS0037) Finals Review: Modules 4 to 6</h1>
+  <p class="rule">Answer out loud or in your head BEFORE you flip. If you get a card wrong, say the answer out loud once, then move on.</p>
+  <div class="tabs" id="tabs"></div>
+
+  <section id="fc">
+    <div class="decks" id="decks"></div>
+    <div class="card" id="card"></div>
+    <div class="row">
+      <button id="prev">&larr; Prev</button>
+      <span class="count" id="count"></span>
+      <button id="next">Next &rarr;</button>
+    </div>
+    <div class="row"><button id="shuffle">Shuffle</button></div>
+  </section>
+
+  <section id="qz" class="hidden">
+    <div class="panel" id="qpanel"></div>
+  </section>
+
+  <section id="es" class="hidden">
+    <p class="rule">If the exam has an essay like SA1, practice here. Write your answer first, then press Check and see which points you hit. Aim for a clear position, 2 or more module terms used correctly, and a concrete example.</p>
+    <div class="panel">
+      <div class="tag" id="etag"></div>
+      <div class="q" id="eq"></div>
+      <textarea id="ea" placeholder="Write your answer here..."></textarea>
+      <div class="row">
+        <button id="eprev">&larr; Prev</button>
+        <button id="echeck">Check</button>
+        <button id="enext">Next &rarr;</button>
+      </div>
+      <div id="ekey" class="hidden"><div class="why">A strong answer mentions:</div><ul class="check" id="elist"></ul></div>
+    </div>
+  </section>
+</main>
+<script>
+// [front, back]
+const DECKS = {
+  "M4: Threat landscape": [
+    ["Cybercrime", "An activity (crime) done using computers and the internet, e.g. stealing a person's identity, illegal imports, or malicious programs."],
+    ["Cybersecurity", "The technologies and processes designed to protect computers, networks and data from unauthorized access and attacks delivered via the internet by cyber criminals."],
+    ["2 categories of cybercrime", "1. Computer as a TARGET: using a computer to attack other computers (hacking, virus/worm attacks, DoS).\n2. Computer as a WEAPON: using a computer to commit real-world crime (e.g. credit card fraud)."],
+    ["Hacking / DoS attack: target or weapon?", "Computer as a TARGET."],
+    ["Credit card fraud: target or weapon?", "Computer as a WEAPON."],
+    ["Why are computer incidents so prevalent? (reasons)", "1. Increasing complexity increases vulnerability\n2. Expanding and changing systems introduce new risks\n3. Increasing prevalence of BYOD policies\n4. Growing reliance on commercial software with known vulnerabilities\n5. Increasing sophistication of those who would do harm"],
+    ["BYOD", "Bring Your Own Device: a business policy that permits, and sometimes encourages, employees to use their own mobile devices."],
+    ["Exploit", "An attack on an information system that takes advantage of a particular system vulnerability. Often due to poor system design or implementation."],
+    ["Patch", "A fix issued by software developers to eliminate a vulnerability once it is discovered."],
+    ["Old stereotype of a computer troublemaker", "An introverted geek working on his or her own, motivated by the desire to gain notoriety. (Attackers today are more sophisticated.)"],
+  ],
+  "M4: Types of exploits": [
+    ["Ransomware", "Malware that stops you from using your computer or accessing your data until you meet certain demands (pay a ransom, send photos to the attacker)."],
+    ["Virus", "Programming code, usually disguised as something else, that causes a computer to behave in an unexpected and usually undesirable manner."],
+    ["Worm", "A harmful program that resides in the active memory of the computer and duplicates itself."],
+    ["Trojan horse", "A seemingly harmless program in which malicious code is hidden."],
+    ["Blended threat", "A sophisticated threat that combines the features of a virus, worm, Trojan horse, and other malicious code into a single payload."],
+    ["Email spam", "Using email systems to send unsolicited email to large numbers of people."],
+    ["CAN-SPAM Act", "Controlling the Assault of Non-Solicited Pornography and Marketing Act. States that it is LEGAL to spam, provided the messages meet a few basic requirements."],
+    ["CAPTCHA", "Completely Automated Public Turing Test to Tell Computers and Humans Apart. Generates and grades tests that humans can pass but all but the most sophisticated programs cannot."],
+    ["Phishing", "Fraudulently using EMAIL to try to get the recipient to reveal personal data."],
+    ["Spear phishing", "Phishing aimed at a CERTAIN ORGANIZATION'S EMPLOYEES."],
+    ["Smishing", "Phishing using TEXTING (SMS)."],
+    ["Vishing", "Like smishing, but victims receive a VOICE-MAIL telling them to call a number or access a website."],
+    ["Cyberespionage", "Deploying malware that secretly steals data from organizations' systems (government agencies, military contractors, political organizations, manufacturing firms)."],
+    ["Cyberterrorism", "Intimidating a government or civilian population by using IT to disable critical national infrastructure."],
+    ["DHS (US)", "Department of Homeland Security: large federal agency (240,000+ employees, ~$65B budget) whose goal is a safer, more secure America, resilient against terrorism and other threats."],
+    ["DND (Philippines)", "Department of National Defense: primary agency safeguarding national sovereignty, territorial integrity, peace and security. Oversees the AFP; key in disaster response, counterterrorism, and national security."],
+  ],
+  "M4: Types of cybersecurity": [
+    ["Network Security", "Protects network traffic by controlling incoming and outgoing connections to keep threats from entering or spreading on the network."],
+    ["Data Loss Prevention (DLP)", "Protects data by focusing on location, classification and monitoring of information at rest, in use and in motion."],
+    ["Cloud Security", "Protects data used in cloud-based services and applications."],
+    ["IDS / IPS", "Intrusion Detection / Intrusion Prevention Systems: identify potentially hostile cyber activity."],
+    ["Identity and Access Management (IAM)", "Uses authentication services to limit and track employee access, protecting internal systems from malicious entities."],
+    ["Encryption (as a type of cybersecurity)", "Encoding data to render it unintelligible. Often used during data transfer to prevent theft in transit."],
+    ["Antivirus / anti-malware", "Scan systems for known threats. Modern ones can detect previously unknown threats based on their behavior."],
+    ["Advantages of cybersecurity (module list)", "Defends from hacks and viruses; helps you browse safe websites; processes all incoming and outgoing data; defends from critical attacks; security developers update their database about once a week."],
+  ],
+  "M4: CIA triad & organization": [
+    ["CIA security triad", "Confidentiality, Integrity, Availability."],
+    ["Confidentiality", "Only individuals with the proper authority can access sensitive data (employee personal data, customer and sales data, new product plans)."],
+    ["Integrity", "Data can only be changed by authorized individuals, so accuracy, consistency and trustworthiness are guaranteed."],
+    ["Availability", "Data can be accessed when and where needed, including during normal and disaster recovery operations."],
+    ["7 parts of implementing CIA at the organization level", "Security strategy, risk assessment, disaster recovery, security policies, security audits, regulatory standards compliance, security dashboard."],
+    ["Security strategy", "A risk-based strategy with active governance to minimize the impact of security incidents and ensure business continuity. Usually begins with a risk assessment."],
+    ["Risk assessment", "Assessing security-related risks to an organization's computers and networks from internal and external threats. Goal: identify which investments of time and resources best protect against the most likely and serious threats."],
+    ["Disaster recovery plan", "A documented process for recovering an organization's business information system assets (hardware, software, data, networks, facilities) in the event of a disaster."],
+    ["Security policy", "Defines an organization's security requirements and the controls and sanctions needed to meet them. Says WHAT to do, not HOW."],
+    ["SANS Institute", "SysAdmin, Audit, Network, Security Institute (www.sans.org). Offers security policy templates."],
+    ["Security audit", "Evaluates whether an organization has a well-considered security policy and whether it is being followed (e.g. are passwords really changed every 30 days?). Also reviews who has access and at what level."],
+    ["Regulatory standards compliance", "Complying with standards defined by EXTERNAL parties, not just your own security program."],
+    ["Security dashboard", "Software that displays all key security indicators (threats, exposures, policy compliance, incident alerts). Purpose: reduce the effort to monitor and identify threats in time to act."],
+  ],
+  "M4: Defenses & incident response": [
+    ["Firewall", "Software, hardware, or both that stands guard between an internal network and the Internet and limits access based on the organization's access policy. The MOST COMMON security precaution."],
+    ["Next-generation firewall (NGFW)", "Detects and blocks sophisticated attacks by filtering traffic based on PACKET CONTENTS."],
+    ["Encryption key", "A value applied (with an algorithm) to plaintext to produce ciphertext that's unreadable without the key."],
+    ["Symmetric vs asymmetric encryption", "Symmetric: the SAME key encrypts and decrypts.\nAsymmetric: ONE key encrypts, a DIFFERENT key decrypts."],
+    ["Proxy server", "An intermediary between your browser and other servers on the Internet. It makes requests for you and passes the response back."],
+    ["Intrusion detection system (IDS)", "Monitors system and network resources and notifies security personnel when it detects traffic trying to get around security measures."],
+    ["Two-factor authentication: the 3 kinds of credentials", "Something you KNOW (PIN, password)\nSomething you HAVE (security card, token)\nSomething you ARE (biometric: fingerprint, retina scan)"],
+    ["User roles and accounts", "Once authenticated, users get the authority to perform their responsibilities and NOTHING MORE."],
+    ["Virus signature", "A specific sequence of bytes that antivirus software scans for, indicating a specific virus."],
+    ["Security education", "Ongoing awareness of security policies so employees and contractors are motivated to follow them."],
+    ["Incident response: the steps in the module", "Incident notification → protection of evidence and activity logs → incident containment → eradication → incident follow-up."],
+    ["Incident notification", "Define who to notify, and who NOT to notify, when a security incident happens."],
+    ["Protection of evidence and activity logs", "Document all details of the incident while resolving it."],
+    ["Incident containment", "Decide whether the attack is dangerous enough to shut down or disconnect critical systems."],
+    ["Eradication", "Before cleaning up: collect and log all possible criminal evidence, and verify backups are current, complete, and malware-free."],
+    ["Incident follow-up", "Determine HOW security was compromised so it does not happen again."],
+  ],
+  "M5: Computer liability & reliability": [
+    ["Computer liability", "The legal responsibility of individuals, organizations or professionals for the consequences of their actions or negligence in using, designing, developing or managing computer systems."],
+    ["What computer liability covers", "Data breaches, IP infringement, privacy violations, software errors, cyberattacks."],
+    ["Who can be liable?", "Multiple parties: software developers, IT companies, employers, even end users, depending on the situation."],
+    ["Legal/ethical basis of computer liability", "Negligence, breach of contract, fraud, or failure to comply with data protection and cybersecurity laws."],
+    ["Hardware reliability features", "Failure usually due to physical deterioration; tends toward a constant value (more than software); follows the 'bathtub principle'; environment matters; some hardware faults are design faults."],
+    ["4 ways of measuring failures against time", "1. Time of failure\n2. Interval between failures\n3. Cumulative failures up to a given time\n4. Failures in a time interval"],
+    ["5 simple ways to keep files safe", "Back up regularly; use an external hard drive; store files in the cloud; control access to your files; encrypt your hard drive."],
+    ["Safety-critical system failures: 2 conclusions from recent data", "1. Failures are increasingly distributed, often nationwide (e.g. credit card authorization).\n2. The source is more rarely hardware and more often system design or end-user interaction (software)."],
+  ],
+  "M5: Barriers in digital communication": [
+    ["The 7 barriers to digital communication", "Physical, Emotional, Identity, Semantic, Accessibility, Attention, Credibility."],
+    ["Physical barriers", "Environmental conditions like time, place and medium."],
+    ["Emotional barriers", "Beliefs, attitudes and values affect how people process information. Digital messages lack tone, facial expressions and body language, so they're easy to misinterpret."],
+    ["Identity barriers", "Lead to miscommunication and misrepresentation of people and their ideas."],
+    ["Semantic barriers", "Different interpretations of words and symbols (different language or dialect, limited proficiency, less knowledge of the issue)."],
+    ["Accessibility barriers", "Communication works only when people of ALL ABILITIES can access and understand it (photos, emoji, videos, PDFs, podcasts...)."],
+    ["Attention barriers", "People miss your message because they're distracted or fatigued by information overload."],
+    ["Credibility barriers", "People can't trust the message, the messenger, or both."],
+  ],
+  "M5: Values in design & what CS people do": [
+    ["5 solutions to software development problems", "Solid requirements, realistic schedules, adequate testing, stick to initial requirements where feasible, communication."],
+    ["Solid requirements", "Clear, complete, detailed, cohesive, attainable, testable, and agreed to by all players."],
+    ["Realistic schedules", "Enough time for planning, design, testing, bug fixing, re-testing, changes and documentation."],
+    ["Adequate testing", "Start testing early, re-test after fixes or changes, plan time for testing and bug fixing."],
+    ["Stick to initial requirements where feasible", "Defend against excessive changes and additions once development has begun, and explain the consequences."],
+    ["Communication (as a solution)", "Walkthroughs and inspections; groupware, wikis, bug-tracking and change-management tools, intranet."],
+    ["What do computer scientists do? (8)", "Develop/simplify algorithms; create new languages; find new methods of working with computers; test new systems and designs; develop models and theories; present findings to the scientific community; improve hardware performance; increase software/hardware efficiency."],
+  ],
+  "M5: Professional responsibility": [
+    ["Responsibilities of computing professionals toward society (list)", "Understand what success means; include users in design and testing; do a thorough job planning, scheduling, writing bids/contracts; design for real users and be inclusive; don't assume existing software is safe (review and test it); be open and honest about capabilities, safety and limitations; require a convincing case for safety; pay attention to defaults; develop communication skills."],
+    ["Clients vs customers", "Professionals have CLIENTS, not customers. A salesclerk satisfies a customer's DESIRES; a professional meets a client's NEEDS (consistent with the welfare of the client and the public)."],
+    ["Therac-25", "Cancer radiation machine made by Atomic Energy of Canada Limited (AECL), controlled by software. 1985–1987: 3 patients died, 3 seriously injured. Used to show 4 kinds of responsibility."],
+    ["4 kinds of responsibility", "Causal, Role, Legal, Moral."],
+    ["Causal responsibility", "Responsibility attributed to causes ('the tornado was responsible'). In Therac-25, the proximate cause was the OPERATOR who started the treatment."],
+    ["Role responsibility", "The person assigned a task or function is responsible for it (the foreman is responsible for disposing toxic waste even if a forklift operator moves the drums)."],
+    ["Legal responsibility", "An individual or organization is liable: charged with a crime, or liable for damages in a civil lawsuit."],
+    ["Moral responsibility vs the other 3", "Causal, role and legal responsibility tend to be EXCLUSIVE (if one person is responsible, another isn't). Moral responsibility is not exclusive: many people can share it. (The slide is cut off here; this is the standard textbook point.)"],
+    ["Responsibility to employers", "The relationship is contractual: work in return for salary and benefits."],
+    ["Collegiality", "The kind of respect professionals should show each other."],
+    ["Peer review", "Evaluation of a professional's work by other members of the same profession, because clients can't adequately judge it. Happens in practice and research."],
+    ["Most important obligation in engineering codes of ethics", "Ensure the safety, health and welfare of the PUBLIC."],
+    ["Responsibility to educate the public", "A COLLECTIVE responsibility of the profession. Examples: advising a church on buying computers; writing a letter to a newspaper editor about proposed Internet legislation."],
+  ],
+  "M6: Software quality & liability": [
+    ["High-quality software systems (3 traits)", "Easy to learn and use (perform quickly and efficiently); meet users' needs; operate safely and reliably so downtime is minimal."],
+    ["Software defect", "Any error that, if not removed, could cause a system to fail to meet its users' needs."],
+    ["Software quality", "The degree to which a software product meets the needs of its users."],
+    ["Quality management", "Defining, measuring and refining the quality of the development process and its products. Objective: help developers deliver high-quality systems that meet users' needs."],
+    ["Primary cause of poor software quality", "Many developers don't know how to design quality in from the start, and some don't take the time to."],
+    ["Business information system", "Interrelated components (hardware, software, databases, networks, people, procedures) that collect and process data and disseminate output."],
+    ["Decision Support System (DSS): 3 uses", "Forecast customer demand; recommend stocks and bonds; schedule shift workers."],
+    ["Product liability", "Liability of manufacturers, sellers, lessors and others for injuries caused by defective products."],
+    ["4 bases of software product liability claims", "Strict liability, negligence, breach of warranty, misrepresentation (sometimes combined)."],
+    ["Strict liability", "The defendant is responsible for injuring another person REGARDLESS of negligence or intent."],
+    ["Negligence (M6)", "Failing to do what a reasonable person would do, or doing what a reasonable person would not do."],
+    ["Warranty", "Assures buyers or lessees that a product meets certain standards of quality."],
+    ["Warranty standards (6)", "Fit for ordinary purpose; adequately contained, packaged and labeled; even kind, quality and quantity within each unit; conform to promises on the label; pass without objection in the trade; fair average (middle range) quality."],
+    ["Breach of warranty", "The product fails to meet the terms of its warranty, so the buyer or lessee can sue."],
+  ],
+  "M6: Development & testing": [
+    ["Software development methodology", "Defines activities in the development process and the individual and group responsibilities for them. Also gives guidelines for managing quality at each stage."],
+    ["Waterfall model", "Sequential, multistage process. The next stage can't begin until the current stage's results are approved or modified."],
+    ["Agile methodology", "Developed in iterations called SPRINTS (1 to 4 weeks). Focuses on delivering quickly and responding to emerging requirements."],
+    ["Quality assurance (QA)", "Methods within the development process designed to guarantee reliable operation of a product."],
+    ["Dynamic testing", "Entering test data into a completed unit and comparing results to expected results."],
+    ["Black-box testing", "The unit is viewed as having expected inputs and outputs, but its INTERNAL WORKINGS ARE UNKNOWN."],
+    ["White-box testing", "Tests the unit while looking at its internal logic/code. (The module slide cuts off after 'expected input and output behaviors'. The usual definition adds: internal workings are known and each path is tested.)"],
+    ["Static testing", "Special programs called static analyzers are run against new code."],
+    ["Integration testing", "After unit testing, units are combined into an integrated subsystem and tested."],
+    ["System testing", "After integration testing, subsystems are combined to test the entire system as one."],
+    ["User acceptance testing", "Independent testing by trained END USERS to make sure the system works as they expect."],
+    ["Testing order", "Unit (dynamic/static) → Integration → System → User acceptance."],
+  ],
+  "M6: Safety, risk & ISO": [
+    ["Safety-critical system", "A system whose failure may cause human injury or death."],
+    ["System safety engineer", "Has explicit responsibility for the system's safety."],
+    ["Hazard log", "Used at each stage of development to assess how detected hazards have been accounted for. The safety engineer's job is to influence the design, not just produce the log."],
+    ["Risk", "The potential of gaining or losing something of value."],
+    ["3 elements that quantify risk", "1. A risk event\n2. The probability of it happening\n3. The impact (positive or negative) on the business outcome"],
+    ["Risk management", "Identifying, monitoring and limiting risks to a level the organization is willing to accept."],
+    ["6 risk strategies", "Acceptance, Avoidance, Mitigation, Redundancy, Transference, Reliability."],
+    ["Acceptance", "Cost of avoiding the risk outweighs the potential loss, so the organization accepts it."],
+    ["Avoidance", "Eliminate the vulnerability that gives rise to the risk."],
+    ["Mitigation", "Reduce the LIKELIHOOD or the IMPACT of the risk."],
+    ["Redundancy", "Multiple interchangeable components performing a single function, to cope with failures."],
+    ["Transference", "Shift the risk, commonly by buying INSURANCE."],
+    ["Reliability (risk strategy)", "A measure of the rate of failure that would make a system unusable over its expected lifetime."],
+    ["ISO", "International Organization for Standardization. Founded 1947; national standards bodies from 161 countries. Issued the 9000 series in 1988."],
+    ["ISO 9001", "Family of standards guiding quality products, services and management. ISO 9001:2008 = standardized requirements for a quality management system. 1M+ organizations in 175+ countries certified."],
+    ["3 requirements for ISO 9001 certification", "1. Have written procedures for all processes\n2. Follow those procedures\n3. Prove to an auditor you did 1 and 2"],
+    ["FMEA", "Failure Mode and Effects Analysis: used to build ISO 9001-compliant systems by evaluating reliability and the effects of system and equipment failures."],
+    ["Failure mode", "How a product or process could fail to perform the functions the customer wants."],
+  ],
+};
+
+// [question, [options], correctIndex, why]
+const QUIZ = [
+  ["Using a computer to commit credit card fraud is an example of the computer as a:", ["Target", "Weapon", "Victim", "Tool of espionage"], 1, "Target = attacking other computers (hacking, DoS). Weapon = real-world crime."],
+  ["A DoS attack is an example of the computer as a:", ["Weapon", "Target", "Shield", "Witness"], 1, ""],
+  ["A policy that lets employees use their own phones and laptops for work is:", ["BYOD", "DLP", "IAM", "NGFW"], 0, ""],
+  ["An attack that takes advantage of a particular system vulnerability is a(n):", ["Patch", "Exploit", "Audit", "Firewall"], 1, "A patch is the FIX."],
+  ["Malware that blocks access to your data until you meet demands:", ["Worm", "Trojan horse", "Ransomware", "Spam"], 2, ""],
+  ["A harmful program that resides in active memory and duplicates itself:", ["Virus", "Worm", "Trojan horse", "Blended threat"], 1, ""],
+  ["A seemingly harmless program with hidden malicious code:", ["Worm", "Trojan horse", "Virus", "CAPTCHA"], 1, ""],
+  ["A threat combining virus, worm, Trojan horse and other code into one payload:", ["Ransomware", "Blended threat", "Cyberespionage", "Spear phishing"], 1, ""],
+  ["According to the module, the CAN-SPAM Act says spam is:", ["Always illegal", "Legal, provided the messages meet a few basic requirements", "Legal only for government", "Illegal outside the US"], 1, ""],
+  ["Fraudulent emails sent to a certain organization's employees:", ["Phishing", "Spear phishing", "Smishing", "Vishing"], 1, ""],
+  ["Phishing done through text messages:", ["Smishing", "Vishing", "Spear phishing", "Spam"], 0, ""],
+  ["Victims get a voice-mail telling them to call a number:", ["Smishing", "Vishing", "Phishing", "Cyberterrorism"], 1, ""],
+  ["Malware that secretly steals data from government agencies and military contractors:", ["Cyberterrorism", "Cyberespionage", "Ransomware", "Spam"], 1, ""],
+  ["Using IT to disable critical national infrastructure to intimidate a population:", ["Cyberespionage", "Cyberterrorism", "Vishing", "Hacking"], 1, ""],
+  ["The Philippine agency that oversees the AFP and handles national security:", ["DHS", "DICT", "DND", "NBI"], 2, "DHS is the US agency."],
+  ["Which protects data at rest, in use and in motion?", ["IAM", "DLP", "IDS", "Cloud Security"], 1, "Data Loss Prevention."],
+  ["Which uses authentication services to limit and track employee access?", ["IAM", "DLP", "Encryption", "Antivirus"], 0, ""],
+  ["Ensuring data can only be changed by authorized individuals is:", ["Confidentiality", "Integrity", "Availability", "Authentication"], 1, ""],
+  ["Ensuring data can be accessed when needed, even during disaster recovery:", ["Confidentiality", "Integrity", "Availability", "Compliance"], 2, ""],
+  ["Ensuring only people with proper authority can access sensitive data:", ["Confidentiality", "Integrity", "Availability", "Redundancy"], 0, ""],
+  ["A security strategy typically BEGINS with:", ["A security audit", "A risk assessment", "Buying a firewall", "A dashboard"], 1, ""],
+  ["A security policy defines:", ["How to do each task step by step", "What needs to be done, but not how", "Only the sanctions", "Only the firewall rules"], 1, "The 'how' goes in separate procedure documents."],
+  ["Checking whether a password-change policy is actually being followed is a:", ["Risk assessment", "Security audit", "Disaster recovery plan", "Security dashboard"], 1, ""],
+  ["The MOST COMMON security precaution taken by businesses:", ["Antivirus", "Corporate firewall", "Encryption", "Biometrics"], 1, ""],
+  ["A firewall that filters traffic based on packet contents:", ["Proxy server", "NGFW", "IDS", "VPN"], 1, "Next-generation firewall."],
+  ["Symmetric encryption uses:", ["Two different keys", "The same key to encrypt and decrypt", "No key", "A biometric key"], 1, ""],
+  ["A fingerprint is which type of credential?", ["Something you know", "Something you have", "Something you are", "Something you do"], 2, ""],
+  ["A security token is which type of credential?", ["Something you know", "Something you have", "Something you are", "Something you share"], 1, ""],
+  ["The specific byte sequence antivirus software scans for:", ["Hash key", "Virus signature", "Patch", "Payload"], 1, ""],
+  ["Before eradication, the IT security group must:", ["Notify the media", "Collect and log criminal evidence and verify backups", "Reinstall every system", "Fire the responsible employee"], 1, ""],
+  ["Determining HOW security was compromised so it won't happen again is:", ["Containment", "Eradication", "Incident follow-up", "Notification"], 2, ""],
+  ["Hardware reliability usually follows the:", ["Waterfall principle", "Bathtub principle", "CIA principle", "Pareto principle"], 1, ""],
+  ["Which is NOT one of the 4 ways of measuring failures against time?", ["Time of failure", "Interval between failures", "Cost per failure", "Failures in a time interval"], 2, ""],
+  ["Digital messages lacking tone and facial expressions lead to which barrier?", ["Physical", "Emotional", "Semantic", "Attention"], 1, ""],
+  ["Different interpretations of words and symbols is a(n) ___ barrier:", ["Semantic", "Identity", "Credibility", "Physical"], 0, ""],
+  ["People can't trust the message or the messenger:", ["Attention barrier", "Credibility barrier", "Identity barrier", "Accessibility barrier"], 1, ""],
+  ["Information overload causes which barrier?", ["Accessibility", "Attention", "Emotional", "Physical"], 1, ""],
+  ["Recent data says safety-critical failures now come mostly from:", ["Physical hardware faults", "System design or end-user interaction (software)", "Power outages", "Natural disasters"], 1, ""],
+  ["'Clear, complete, detailed, cohesive, attainable, testable' describes:", ["Realistic schedules", "Solid requirements", "Adequate testing", "Communication"], 1, ""],
+  ["A professional, unlike a salesclerk, should try to meet the client's:", ["Desires", "Needs", "Budget", "Deadlines"], 1, ""],
+  ["The Therac-25 was a:", ["Military drone", "Cancer radiation treatment machine", "Airline autopilot", "Bank ATM system"], 1, "Made by AECL; 3 deaths, 3 serious injuries (1985–1987)."],
+  ["In the Therac-25 case, the proximate CAUSE of each accident was:", ["The programmer", "AECL", "The operator who started the treatment", "The hospital"], 2, "That's causal responsibility."],
+  ["A foreman is responsible for toxic waste even if a forklift operator moves it. This is:", ["Causal", "Role", "Legal", "Moral"], 1, ""],
+  ["Which kind of responsibility is NOT exclusive (can be shared by many)?", ["Causal", "Role", "Legal", "Moral"], 3, ""],
+  ["The respect professionals should show each other is called:", ["Peer review", "Collegiality", "Loyalty", "Due care"], 1, ""],
+  ["Engineering codes say the engineer's MOST important obligation is to:", ["The employer", "The client", "The safety, health and welfare of the public", "Other engineers"], 2, ""],
+  ["The degree to which software meets the needs of its users:", ["Software defect", "Software quality", "Quality assurance", "Reliability"], 1, ""],
+  ["A DSS can be used to:", ["Encrypt data", "Schedule shift workers", "Block spam", "Replace a firewall"], 1, "Also: forecast demand, recommend stocks and bonds."],
+  ["Held responsible for injury regardless of negligence or intent:", ["Negligence", "Strict liability", "Breach of warranty", "Misrepresentation"], 1, ""],
+  ["Which is NOT a basis of software product liability claims?", ["Strict liability", "Negligence", "Breach of warranty", "Copyright"], 3, "The 4: strict liability, negligence, breach of warranty, misrepresentation."],
+  ["Development where the next stage can't begin until the current one is approved:", ["Agile", "Waterfall", "Sprint", "Scrum"], 1, ""],
+  ["Agile iterations (sprints) usually last:", ["1 day", "1 to 4 weeks", "3 to 6 months", "1 year"], 1, ""],
+  ["Testing where internal workings are unknown:", ["White-box", "Black-box", "Static", "Integration"], 1, ""],
+  ["Running static analyzers against new code is:", ["Dynamic testing", "Static testing", "System testing", "User acceptance testing"], 1, ""],
+  ["Testing by trained end users to make sure the system works as they expect:", ["System testing", "Integration testing", "User acceptance testing", "Unit testing"], 2, ""],
+  ["A system whose failure may cause injury or death:", ["Business information system", "Safety-critical system", "DSS", "ERP"], 1, ""],
+  ["Buying insurance is which risk strategy?", ["Avoidance", "Mitigation", "Transference", "Acceptance"], 2, ""],
+  ["Reducing either the likelihood or the impact of a risk:", ["Mitigation", "Avoidance", "Redundancy", "Acceptance"], 0, ""],
+  ["Multiple interchangeable components performing one function:", ["Reliability", "Redundancy", "Transference", "Mitigation"], 1, ""],
+  ["Cost of avoiding the risk outweighs the potential loss, so the organization:", ["Avoids it", "Accepts it", "Transfers it", "Mitigates it"], 1, ""],
+  ["ISO was founded in:", ["1947", "1988", "2008", "1974"], 0, "The 9000 series came out in 1988."],
+  ["Which is NOT a requirement for ISO 9001 certification?", ["Written procedures for all processes", "Follow those procedures", "Prove it to an auditor", "Use agile development"], 3, ""],
+  ["The technique that evaluates reliability and the effects of failures for ISO 9001 systems:", ["FMEA", "DSS", "CAPTCHA", "DLP"], 0, "Failure Mode and Effects Analysis."],
+];
+
+const QUIZ_SIZE = 30;
+
+// [topic, question, points a strong answer mentions]
+const ESSAYS = [
+  ["M4 · CIA triad", "A hospital's patient records system is hit by ransomware. Explain which parts of the CIA triad are affected and what the hospital should do, step by step, in its incident response.", ["Availability is hit directly (records can't be accessed); confidentiality too if data was stolen; integrity if data was altered", "Incident notification: who to notify and who not to", "Protect evidence and activity logs; document everything", "Containment: decide whether to disconnect critical systems", "Eradication: collect evidence first, verify backups are clean", "Follow-up: find how security was compromised so it doesn't happen again", "Prevention link: disaster recovery plan, backups, security education"]],
+  ["M4 · Threats", "Why are computer incidents so prevalent today? Give the reasons from the module and one real-life example for each.", ["Increasing complexity increases vulnerability", "Expanding and changing systems introduce new risks", "BYOD policies", "Reliance on commercial software with known vulnerabilities (exploits, patches)", "Increasing sophistication of attackers", "A concrete example per reason"]],
+  ["M4 · Defense", "You're the new IT head of a small company with no security program. Using the module, describe how you would implement CIA at the organization level.", ["Start with a risk-based security strategy and risk assessment", "Disaster recovery plan", "Security policy (what, not how; SANS templates)", "Security audits", "Regulatory standards compliance", "Security dashboard", "Concrete controls: firewall, encryption, 2FA, user roles, antivirus, security education"]],
+  ["M5 · Responsibility", "Using the Therac-25 case, explain the four kinds of responsibility. Who do you think was morally responsible, and why?", ["Causal: the operator was the proximate cause", "Role: the person assigned a task is responsible for it", "Legal: liability, criminal or civil", "Moral: not exclusive, many can share it", "A clear position on who was morally responsible (e.g. developers, AECL, testers) with reasons", "Link to responsibilities: don't assume software is safe, require a convincing case for safety"]],
+  ["M5 · Professional duties", "What responsibilities do computing professionals have toward society, employers and other professionals? Give an example from your own projects or work.", ["Society: safety, health and welfare of the public; include users; be honest about limitations; pay attention to defaults", "Employers: contractual relationship", "Other professionals: collegiality, peer review", "Clients vs customers: meet needs, not just desires", "Duty to educate the public (collective)", "A personal example (thesis, student assistant work, hackathon)"]],
+  ["M5 · Communication", "Pick three of the seven barriers to digital communication and explain how each could cause a problem in a software team working online. How would you reduce each?", ["Names and defines 3 barriers correctly", "A realistic team example for each", "A concrete fix for each (e.g. clear wording for semantic, video calls for emotional, accessible formats for accessibility)"]],
+  ["M6 · Liability", "A bug in banking software causes customers to lose money. Explain the four bases a customer could use to sue, and which one you think fits best.", ["Strict liability: regardless of negligence or intent", "Negligence: failing to do what a reasonable person would do", "Breach of warranty: product failed to meet warranty terms", "Misrepresentation", "A position on which fits best, with a reason", "How the company could have prevented it: QA, testing, quality management"]],
+  ["M6 · Development", "Compare waterfall and agile development. Which would you choose for a safety-critical system, and how would you manage its risks?", ["Waterfall: sequential, next stage waits for approval", "Agile: sprints of 1 to 4 weeks, responds to changing requirements", "A clear choice with a reason", "Safety engineer and hazard log", "Testing levels: unit, integration, system, user acceptance", "Risk strategies: acceptance, avoidance, mitigation, redundancy, transference, reliability"]],
+];
+
+// tabs
+const TABS = {fc:"Flashcards", qz:"Quiz", es:"Essay practice"};
+const tabsEl = document.getElementById("tabs");
+let tab = "fc";
+function showTab(t){ tab=t; for(const k in TABS){ document.getElementById(k).classList.toggle("hidden",k!==t); } [...tabsEl.children].forEach(b=>b.classList.toggle("on",b.dataset.t===t)); }
+for(const k in TABS){ const b=document.createElement("button"); b.textContent=TABS[k]; b.dataset.t=k; b.onclick=()=>showTab(k); tabsEl.appendChild(b); }
+
+// flashcards
+const decksEl=document.getElementById("decks"), cardEl=document.getElementById("card"), countEl=document.getElementById("count");
+let deckName=Object.keys(DECKS)[0], cards=[], i=0, flipped=false;
+function loadDeck(n){ deckName=n; cards=[...DECKS[n]]; i=0; flipped=false; [...decksEl.children].forEach(b=>b.classList.toggle("on",b.textContent===n)); render(); }
+function render(){ const [f,b]=cards[i]; cardEl.innerHTML = flipped ? `<div class="tag">Answer</div><div class="back"></div>` : `<div class="tag">${deckName}</div><div class="front"></div><div class="hint">Answer first, then tap to flip</div>`; cardEl.querySelector(flipped?".back":".front").textContent = flipped?b:f; countEl.textContent=`${i+1} / ${cards.length}`; }
+Object.keys(DECKS).forEach(n=>{ const b=document.createElement("button"); b.textContent=n; b.onclick=()=>loadDeck(n); decksEl.appendChild(b); });
+cardEl.onclick=()=>{flipped=!flipped; render();};
+function step(d){ i=(i+d+cards.length)%cards.length; flipped=false; render(); }
+document.getElementById("prev").onclick=()=>step(-1);
+document.getElementById("next").onclick=()=>step(1);
+document.getElementById("shuffle").onclick=()=>{ for(let k=cards.length-1;k>0;k--){const j=Math.floor(Math.random()*(k+1));[cards[k],cards[j]]=[cards[j],cards[k]];} i=0; flipped=false; render(); };
+document.addEventListener("keydown",e=>{ if(tab!=="fc") return; if(e.key===" "){e.preventDefault(); cardEl.click();} if(e.key==="ArrowRight") step(1); if(e.key==="ArrowLeft") step(-1); });
+
+// quiz
+const qp=document.getElementById("qpanel");
+let order=[], qi=0, score=0, missed=[];
+function shuffled(a){ a=[...a]; for(let k=a.length-1;k>0;k--){const j=Math.floor(Math.random()*(k+1));[a[k],a[j]]=[a[j],a[k]];} return a; }
+function startQuiz(){ order=shuffled(QUIZ.map((_,k)=>k)).slice(0,QUIZ_SIZE); qi=0; score=0; missed=[]; renderQ(); }
+function renderQ(){
+  if(qi>=order.length){
+    qp.innerHTML=`<div class="q">Score: <b>${score} / ${order.length}</b></div>`;
+    if(missed.length){ const ul=document.createElement("ul"); ul.className="check"; missed.forEach(k=>{const li=document.createElement("li"); li.textContent=`${QUIZ[k][0]} → ${QUIZ[k][1][QUIZ[k][2]]}`; ul.appendChild(li);}); qp.appendChild(Object.assign(document.createElement("div"),{className:"why",textContent:"Missed (say each answer out loud once):"})); qp.appendChild(ul); }
+    const b=document.createElement("button"); b.textContent="Retake"; b.style.marginTop="14px"; b.onclick=startQuiz; qp.appendChild(b); return;
+  }
+  const [q,opts,ans,why]=QUIZ[order[qi]];
+  qp.innerHTML=`<div class="tag">Question ${qi+1} / ${order.length} · Score ${score}</div><div class="q"></div><div class="opts"></div><div class="why"></div><div class="row"><span></span><button class="hidden" id="qn">Next &rarr;</button></div>`;
+  qp.querySelector(".q").textContent=q;
+  const oe=qp.querySelector(".opts");
+  const pos=shuffled(opts.map((_,k)=>k)), ansPos=pos.indexOf(ans);
+  pos.forEach((k,p)=>{ const o=opts[k]; const b=document.createElement("button"); b.textContent=o; b.onclick=()=>{
+    if(oe.dataset.done) return; oe.dataset.done=1;
+    if(k===ans) score++; else { b.classList.add("wrong"); missed.push(order[qi]); }
+    oe.children[ansPos].classList.add("right");
+    qp.querySelector(".why").textContent=why;
+    const n=qp.querySelector("#qn"); n.classList.remove("hidden"); n.onclick=()=>{qi++; renderQ();};
+  }; oe.appendChild(b); });
+}
+startQuiz();
+
+// essays
+let ei=0;
+function renderE(){ const [t,q,pts]=ESSAYS[ei]; document.getElementById("etag").textContent=`${t} · ${ei+1} / ${ESSAYS.length}`; document.getElementById("eq").textContent=q; document.getElementById("ea").value=""; document.getElementById("ekey").classList.add("hidden"); const ul=document.getElementById("elist"); ul.innerHTML=""; pts.forEach(p=>{const li=document.createElement("li"); li.textContent=p; ul.appendChild(li);}); }
+document.getElementById("echeck").onclick=()=>document.getElementById("ekey").classList.remove("hidden");
+document.getElementById("eprev").onclick=()=>{ei=(ei-1+ESSAYS.length)%ESSAYS.length; renderE();};
+document.getElementById("enext").onclick=()=>{ei=(ei+1)%ESSAYS.length; renderE();};
+
+loadDeck(deckName); renderE(); showTab("fc");
+</script>
+</body>
+</html>

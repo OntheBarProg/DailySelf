@@ -1,0 +1,3205 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mandarin Finals Flashcards</title>
+<style>
+  :root { --bg:#f4f6f3; --card:#fff; --ink:#1d2a22; --muted:#5f6f64; --accent:#2c6e49; --line:#d5ddd6; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#141a16; --card:#1f2721; --ink:#e8efe9; --muted:#9aab9f; --accent:#6fcf97; --line:#2f3a32; } }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font-family:system-ui, "Segoe UI", sans-serif; }
+  main { max-width:640px; margin:0 auto; padding:16px; }
+  h1 { font-size:1.2rem; margin:8px 0 4px; }
+  .rule { color:var(--muted); font-size:.9rem; margin:0 0 14px; }
+  .decks { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px; }
+  button { font:inherit; border:1px solid var(--line); background:var(--card); color:var(--ink); border-radius:8px; padding:8px 12px; cursor:pointer; }
+  button.on { background:var(--accent); color:var(--bg); border-color:var(--accent); }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:14px; min-height:260px; padding:24px; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; cursor:pointer; user-select:none; }
+  .tag { font-size:.75rem; color:var(--muted); text-transform:uppercase; letter-spacing:.05em; margin-bottom:12px; }
+  .front { white-space:pre-line;  font-size:1.5rem; }
+  .hz { font-size:2.2rem; margin-bottom:6px; }
+  .py { font-size:1.6rem; color:var(--accent); font-weight:600; }
+  .note { font-size:.95rem; color:var(--muted); margin-top:12px; white-space:pre-line; }
+  .hint { font-size:.85rem; color:var(--muted); margin-top:18px; }
+  .row { display:flex; gap:8px; justify-content:space-between; align-items:center; margin-top:12px; flex-wrap:wrap; }
+  .count { color:var(--muted); font-size:.9rem; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Mandarin Finals Flashcards: M6 to M10 + Pronouns & Greetings</h1>
+  <p class="rule">Say it OUT LOUD before you flip. Tap the card or press Space to flip, and use the arrow keys to move between cards.</p>
+  <div class="decks" id="decks"></div>
+  <div class="card" id="card"></div>
+  <div class="row">
+    <button id="prev">&larr; Prev</button>
+    <span class="count" id="count"></span>
+    <button id="next">Next &rarr;</button>
+  </div>
+  <div class="row">
+    <button id="shuffle">Shuffle</button>
+    <button id="reverse">Show pinyin first: off</button>
+    <button id="speak">Hear it</button>
+  </div>
+</main>
+<script>
+// [english, hanzi, pinyin, note?]
+const DECKS = {
+ "M6: Tone review & 20 Essential Pairs": [
+  [
+   "What does the 1st tone sound like? (contour)",
+   "妈",
+   "mā",
+   "High and level (pitch 5-5), like the stressed \"MAY\" in \"MAYbe\"."
+  ],
+  [
+   "What does the 2nd tone sound like? (contour)",
+   "麻",
+   "má",
+   "Rising (pitch 3 to 5), like asking \"What?\"."
+  ],
+  [
+   "What does the 3rd tone sound like? (contour)",
+   "马",
+   "mǎ",
+   "Low (pitch around 1), like a hesitant \"Uh...\"."
+  ],
+  [
+   "What does the 4th tone sound like? (contour)",
+   "骂",
+   "mà",
+   "Sharp fall (pitch 5 to 1), like a firm \"No!\"."
+  ],
+  [
+   "keep working hard; keep it up",
+   "继续努力",
+   "jìxù nǔlì",
+   "Motivational slide in M6."
+  ],
+  [
+   "today (1+1)",
+   "今天",
+   "jīn tiān",
+   "Tone pair 1+1."
+  ],
+  [
+   "China (1+2)",
+   "中国",
+   "Zhōng guó",
+   "Tone pair 1+2."
+  ],
+  [
+   "ice water / cold water (1+3)",
+   "冰水",
+   "bīng shuǐ",
+   "Tone pair 1+3. The table says \"ice water\"; the row slide says \"cold water\"."
+  ],
+  [
+   "to know (1+4)",
+   "知道",
+   "zhī dào",
+   "Tone pair 1+4."
+  ],
+  [
+   "really (1+5)",
+   "真的",
+   "zhēn de",
+   "Tone pair 1+neutral (the table writes neutral as 5)."
+  ],
+  [
+   "tomorrow (2+1)",
+   "明天",
+   "míng tiān",
+   "Tone pair 2+1."
+  ],
+  [
+   "next year (2+2)",
+   "明年",
+   "míng nián",
+   "Tone pair 2+2."
+  ],
+  [
+   "beer (2+3)",
+   "啤酒",
+   "pí jiǔ",
+   "Tone pair 2+3."
+  ],
+  [
+   "easy (2+4)",
+   "容易",
+   "róng yì",
+   "Tone pair 2+4."
+  ],
+  [
+   "what (2+5)",
+   "什么",
+   "shén me",
+   "Tone pair 2+neutral."
+  ],
+  [
+   "to like (3+1)",
+   "喜欢",
+   "xǐ huān",
+   "Tone pair 3+1. Slide writes xǐ huān; in everyday speech it is often xǐhuan (neutral)."
+  ],
+  [
+   "to get up (3+2)",
+   "起床",
+   "qǐ chuáng",
+   "Tone pair 3+2."
+  ],
+  [
+   "hello (3+3)",
+   "你好",
+   "nǐ hǎo",
+   "Tone pair 3+3. Third-tone sandhi: when two 3rd tones meet, the first one is said as 2nd tone (ní hǎo)."
+  ],
+  [
+   "fried rice (3+4)",
+   "炒饭",
+   "chǎo fàn",
+   "Tone pair 3+4."
+  ],
+  [
+   "my / mine (3+5)",
+   "我的",
+   "wǒ de",
+   "Tone pair 3+neutral."
+  ],
+  [
+   "bread (4+1)",
+   "面包",
+   "miàn bāo",
+   "Tone pair 4+1."
+  ],
+  [
+   "question (4+2)",
+   "问题",
+   "wèn tí",
+   "Tone pair 4+2."
+  ],
+  [
+   "here (4+3)",
+   "这里",
+   "zhè lǐ",
+   "Tone pair 4+3."
+  ],
+  [
+   "bye (4+4)",
+   "再见",
+   "zài jiàn",
+   "Tone pair 4+4."
+  ],
+  [
+   "thanks (4+5)",
+   "谢谢",
+   "xiè xie",
+   "Tone pair 4+neutral."
+  ]
+ ],
+ "M6: Drills - 1st tone first": [
+  [
+   "coffee (1+1)",
+   "咖啡",
+   "kā fēi",
+   "Drill: 1st + 1st."
+  ],
+  [
+   "banana (1+1)",
+   "香蕉",
+   "xiāng jiāo",
+   "Drill: 1st + 1st."
+  ],
+  [
+   "ref / refrigerator (1+1)",
+   "冰箱",
+   "bīng xiāng",
+   "Drill: 1st + 1st."
+  ],
+  [
+   "Chinese language (1+2)",
+   "中文",
+   "Zhōng wén",
+   "Drill: 1st + 2nd."
+  ],
+  [
+   "welcome (1+2)",
+   "欢迎",
+   "huān yíng",
+   "Drill: 1st + 2nd."
+  ],
+  [
+   "very (1+2)",
+   "非常",
+   "fēi cháng",
+   "Drill: 1st + 2nd."
+  ],
+  [
+   "of course (1+2)",
+   "当然",
+   "dāng rán",
+   "Drill: 1st + 2nd."
+  ],
+  [
+   "future (1+2)",
+   "将来",
+   "jiāng lái",
+   "Drill: 1st + 2nd."
+  ],
+  [
+   "health; body (1+3)",
+   "身体",
+   "shēn tǐ",
+   "Drill: 1st + 3rd."
+  ],
+  [
+   "book (1+3)",
+   "书本",
+   "shū běn",
+   "Drill: 1st + 3rd."
+  ],
+  [
+   "blackboard (1+3)",
+   "黑板",
+   "hēi bǎn",
+   "Drill: 1st + 3rd."
+  ],
+  [
+   "manager (1+3)",
+   "经理",
+   "jīng lǐ",
+   "Drill: 1st + 3rd."
+  ],
+  [
+   "airport (1+3)",
+   "机场",
+   "jī chǎng",
+   "Drill: 1st + 3rd."
+  ],
+  [
+   "birthday (1+4)",
+   "生日",
+   "shēng rì",
+   "Drill: 1st + 4th."
+  ],
+  [
+   "market (1+4)",
+   "超市",
+   "chāo shì",
+   "Drill: 1st + 4th. Literally \"supermarket\"."
+  ],
+  [
+   "believe (1+4)",
+   "相信",
+   "xiāng xìn",
+   "Drill: 1st + 4th."
+  ],
+  [
+   "egg (1+4)",
+   "鸡蛋",
+   "jī dàn",
+   "Drill: 1st + 4th."
+  ],
+  [
+   "happy (1+4)",
+   "高兴",
+   "gāo xìng",
+   "Drill: 1st + 4th."
+  ],
+  [
+   "go out (1+neutral)",
+   "出去",
+   "chū qu",
+   "Drill: 1st + neutral."
+  ],
+  [
+   "glass; cup (1+neutral)",
+   "杯子",
+   "bēi zi",
+   "Drill: 1st + neutral."
+  ],
+  [
+   "news (1+neutral)",
+   "消息",
+   "xiāo xi",
+   "Drill: 1st + neutral."
+  ],
+  [
+   "Mr.; sir (1+neutral)",
+   "先生",
+   "xiān sheng",
+   "Drill: 1st + neutral."
+  ],
+  [
+   "to rest (1+neutral)",
+   "休息",
+   "xiū xi",
+   "Drill: 1st + neutral."
+  ]
+ ],
+ "M6: Drills - 2nd tone first": [
+  [
+   "student (2+1)",
+   "学生",
+   "xué shēng",
+   "Drill: 2nd + 1st."
+  ],
+  [
+   "thirteen (2+1)",
+   "十三",
+   "shí sān",
+   "Drill: 2nd + 1st."
+  ],
+  [
+   "yesterday (2+1)",
+   "昨天",
+   "zuó tiān",
+   "Drill: 2nd + 1st."
+  ],
+  [
+   "classmate (2+2)",
+   "同学",
+   "tóng xué",
+   "Drill: 2nd + 2nd."
+  ],
+  [
+   "basketball (2+2)",
+   "篮球",
+   "lán qiú",
+   "Drill: 2nd + 2nd."
+  ],
+  [
+   "loose change (2+2)",
+   "零钱",
+   "líng qián",
+   "Drill: 2nd + 2nd."
+  ],
+  [
+   "apple (2+3)",
+   "苹果",
+   "píng guǒ",
+   "Drill: 2nd + 3rd."
+  ],
+  [
+   "milk (2+3)",
+   "牛奶",
+   "niú nǎi",
+   "Drill: 2nd + 3rd."
+  ],
+  [
+   "not have (2+3)",
+   "没有",
+   "méi yǒu",
+   "Drill: 2nd + 3rd."
+  ],
+  [
+   "not want (2+4)",
+   "不要",
+   "bú yào",
+   "Drill: 2nd + 4th. 不 bù changes to bú before a 4th tone."
+  ],
+  [
+   "school (2+4)",
+   "学校",
+   "xué xiào",
+   "Drill: 2nd + 4th."
+  ],
+  [
+   "sixteen (2+4)",
+   "十六",
+   "shí liù",
+   "Drill: 2nd + 4th."
+  ],
+  [
+   "friend (2+neutral)",
+   "朋友",
+   "péng you",
+   "Drill: 2nd + neutral."
+  ],
+  [
+   "grapes (2+neutral)",
+   "葡萄",
+   "pú tao",
+   "Drill: 2nd + neutral."
+  ],
+  [
+   "name (2+neutral)",
+   "名字",
+   "míng zi",
+   "Drill: 2nd + neutral."
+  ]
+ ],
+ "M6: Drills - 3rd tone first": [
+  [
+   "delicious (3+1)",
+   "好吃",
+   "hǎo chī",
+   "Drill: 3rd + 1st."
+  ],
+  [
+   "please say (3+1)",
+   "请说",
+   "qǐng shuō",
+   "Drill: 3rd + 1st."
+  ],
+  [
+   "good morning (3+1)",
+   "早安",
+   "zǎo ān",
+   "Drill: 3rd + 1st."
+  ],
+  [
+   "teacher (3+1)",
+   "老师",
+   "lǎo shī",
+   "Drill: 3rd + 1st."
+  ],
+  [
+   "very red (3+2)",
+   "很红",
+   "hěn hóng",
+   "Drill: 3rd + 2nd."
+  ],
+  [
+   "very busy (3+2)",
+   "很忙",
+   "hěn máng",
+   "Drill: 3rd + 2nd."
+  ],
+  [
+   "French fries (3+2)",
+   "薯条",
+   "shǔ tiáo",
+   "Drill: 3rd + 2nd."
+  ],
+  [
+   "I buy (3+3)",
+   "我买",
+   "wǒ mǎi",
+   "Drill: 3rd + 3rd. Sandhi: first 3rd tone is said as 2nd (wó mǎi)."
+  ],
+  [
+   "possible; can (3+3)",
+   "可以",
+   "kě yǐ",
+   "Drill: 3rd + 3rd. Sandhi: said as ké yǐ."
+  ],
+  [
+   "wristwatch (3+3)",
+   "手表",
+   "shǒu biǎo",
+   "Drill: 3rd + 3rd. Sandhi: said as shóu biǎo."
+  ],
+  [
+   "very fat (3+4)",
+   "很胖",
+   "hěn pàng",
+   "Drill: 3rd + 4th."
+  ],
+  [
+   "please look (3+4)",
+   "请看",
+   "qǐng kàn",
+   "Drill: 3rd + 4th."
+  ],
+  [
+   "cola (3+4)",
+   "可乐",
+   "kě lè",
+   "Drill: 3rd + 4th."
+  ],
+  [
+   "your; yours (3+neutral)",
+   "你的",
+   "nǐ de",
+   "Drill: 3rd + neutral."
+  ],
+  [
+   "you (plural) (3+neutral)",
+   "你们",
+   "nǐ men",
+   "Drill: 3rd + neutral."
+  ],
+  [
+   "we (3+neutral)",
+   "我们",
+   "wǒ men",
+   "Drill: 3rd + neutral."
+  ]
+ ],
+ "M6: Drills - 4th tone first": [
+  [
+   "car (4+1)",
+   "汽车",
+   "qì chē",
+   "Drill: 4th + 1st."
+  ],
+  [
+   "fast food (4+1)",
+   "快餐",
+   "kuài cān",
+   "Drill: 4th + 1st."
+  ],
+  [
+   "camera (4+4+1)",
+   "照相机",
+   "zhào xiàng jī",
+   "Drill: 4th + 1st slide (3 syllables: zhào xiàng jī)."
+  ],
+  [
+   "forty (4+2)",
+   "四十",
+   "sì shí",
+   "Drill: 4th + 2nd."
+  ],
+  [
+   "last year (4+2)",
+   "去年",
+   "qù nián",
+   "Drill: 4th + 2nd."
+  ],
+  [
+   "university (4+2)",
+   "大学",
+   "dà xué",
+   "Drill: 4th + 2nd."
+  ],
+  [
+   "hamburger (4+3)",
+   "汉堡",
+   "hàn bǎo",
+   "Drill: 4th + 3rd."
+  ],
+  [
+   "not good (4+3)",
+   "不好",
+   "bù hǎo",
+   "Drill: 4th + 3rd. 不 keeps its 4th tone before 1st, 2nd and 3rd tones."
+  ],
+  [
+   "not understand (4+3)",
+   "不懂",
+   "bù dǒng",
+   "Drill: 4th + 3rd."
+  ],
+  [
+   "goodbye (4+4)",
+   "再见",
+   "zài jiàn",
+   "Drill: 4th + 4th."
+  ],
+  [
+   "sleep (4+4)",
+   "睡觉",
+   "shuì jiào",
+   "Drill: 4th + 4th."
+  ],
+  [
+   "phone (4+4)",
+   "电话",
+   "diàn huà",
+   "Drill: 4th + 4th."
+  ],
+  [
+   "moon (4+neutral)",
+   "月亮",
+   "yuè liang",
+   "Drill: 4th + neutral."
+  ],
+  [
+   "father (4+neutral)",
+   "爸爸",
+   "bà ba",
+   "Drill: 4th + neutral."
+  ],
+  [
+   "this (4+neutral)",
+   "这个",
+   "zhè ge",
+   "Drill: 4th + neutral."
+  ]
+ ],
+ "M7: Negation with bù (不)": [
+  [
+   "How do you negate ordinary and adjectival verbs?",
+   "我不是老师。",
+   "Wǒ bú shì lǎoshī.",
+   "Put the adverb 不 bù BEFORE the verb: Subject + bù + Verb + (Object)."
+  ],
+  [
+   "is / are / am",
+   "是",
+   "shì",
+   "Ordinary verb / be-verb. Wǒ shì xuéshēng = I = student."
+  ],
+  [
+   "is not / are not / am not",
+   "不是",
+   "búshì",
+   "bù + shì. 不 becomes bú before a 4th tone like shì."
+  ],
+  [
+   "Why is 不是 said búshì and not bùshì?",
+   "不是",
+   "bú shì",
+   "Tone change: 不 bù becomes bú when followed by a 4th-tone syllable."
+  ],
+  [
+   "You are a teacher.",
+   "你是老师。",
+   "Nǐ shì lǎoshī.",
+   "Subject + ordinary verb + object."
+  ],
+  [
+   "I am not a mouse.",
+   "我不是老鼠。",
+   "Wǒ bú shì lǎoshǔ.",
+   "Subject + bú + shì + object. Compare lǎoshī (teacher) vs lǎoshǔ (mouse)."
+  ],
+  [
+   "I am a student.",
+   "我是学生。",
+   "Wǒ shì xuéshēng.",
+   "I = student."
+  ],
+  [
+   "I am not a student.",
+   "我不是学生。",
+   "Wǒ búshì xuéshēng.",
+   "I ≠ student."
+  ],
+  [
+   "I'm not Anna.",
+   "我不是Anna。",
+   "Wǒ bú shì Anna.",
+   "Example of bú shì."
+  ],
+  [
+   "You are not a doctor.",
+   "你不是医生。",
+   "Nǐ bú shì yī shēng.",
+   "Example of bú shì."
+  ],
+  [
+   "not busy (bù + adjective)",
+   "不忙",
+   "bù máng",
+   "bù + adjective."
+  ],
+  [
+   "(to) not eat (bù + verb)",
+   "不吃",
+   "bù chī",
+   "bù + verb."
+  ],
+  [
+   "What are the sentence patterns with bù?",
+   "不是 / 不忙 / 不吃",
+   "bù + ordinary verb / bù + adjective / bù + verb",
+   "bú + shì = is/are/am not (ordinary/be-verb); bù + máng = not busy (adj.); bù + chī = not eat (verb)."
+  ],
+  [
+   "Negate with bù: \"Tā shì jīnglì.\" (He/She is a manager.)",
+   "他不是经理。",
+   "Tā bú shì jīnglǐ.",
+   "Practice item 1. Slide writes jīnglì; standard is jīnglǐ (M6 also has jīng lǐ)."
+  ],
+  [
+   "Negate with bù: \"Wǒ shì Màikè.\" (I am Mike.)",
+   "我不是迈克。",
+   "Wǒ bú shì Màikè.",
+   "Practice item 2. Màikè = Mike."
+  ],
+  [
+   "Negate with bù: \"Nǐ shì zǒngtǒng.\" (You are the president.)",
+   "你不是总统。",
+   "Nǐ bú shì zǒngtǒng.",
+   "Practice item 3. zǒngtǒng = president."
+  ]
+ ],
+ "M7: Adverbs hěn (很) and yě (也)": [
+  [
+   "very (adverb of degree)",
+   "很",
+   "hěn",
+   "Used before adjectival verbs: Subject + hěn + adjective."
+  ],
+  [
+   "Where does hěn go in a sentence?",
+   "你很忙。",
+   "Nǐ hěn máng.",
+   "Subject + hěn (adverb of degree) + adjectival verb. = You are (very) busy. No 是 shì is needed before adjectives."
+  ],
+  [
+   "very good",
+   "很好",
+   "hěn hǎo",
+   "hěn + adjective."
+  ],
+  [
+   "very busy",
+   "很忙",
+   "hěn máng",
+   "hěn + adjective."
+  ],
+  [
+   "very handsome",
+   "很帅",
+   "hěn shuài",
+   "hěn + adjective."
+  ],
+  [
+   "very hungry",
+   "很饿",
+   "hěn è",
+   "hěn + adjective."
+  ],
+  [
+   "also",
+   "也",
+   "yě",
+   "Goes after the subject, before the verb/adjective (and before bù/hěn)."
+  ],
+  [
+   "also is / also am (yě + be-verb)",
+   "也是",
+   "yě shì",
+   "yě + ordinary verb/be-verb."
+  ],
+  [
+   "also is not (yě + bù + be-verb)",
+   "也不是",
+   "yě bùshì",
+   "yě + bù + ordinary verb/be-verb. Spoken as yě búshì (bù becomes bú before 4th tone)."
+  ],
+  [
+   "also good (yě + adjective)",
+   "也好",
+   "yě hǎo",
+   "yě + adjective."
+  ],
+  [
+   "also very busy (yě + hěn + adj.)",
+   "也很忙",
+   "yě hěn máng",
+   "yě + hěn + adjective."
+  ],
+  [
+   "also eat (yě + verb)",
+   "也吃",
+   "yě chī",
+   "yě + verb."
+  ],
+  [
+   "What is the word order with yě, bù and hěn?",
+   "你也不是学生。",
+   "Nǐ yě bú shì xué shēng.",
+   "Subject + yě + bù/hěn + verb/adjective. yě always comes first."
+  ]
+ ],
+ "M7: Practice drill sentences": [
+  [
+   "I am a doctor.",
+   "我是医生。",
+   "Wǒ shì yīshēng.",
+   "Subject + shì + noun."
+  ],
+  [
+   "He/She is not a doctor.",
+   "他不是医生。",
+   "Tā bú shì yīshēng.",
+   "Tā = he (他) or she (她)."
+  ],
+  [
+   "I am Chinese.",
+   "我是中国人。",
+   "Wǒ shì Zhōngguó rén.",
+   "Zhōngguó rén = Chinese person."
+  ],
+  [
+   "You are not Chinese.",
+   "你不是中国人。",
+   "Nǐ bú shì Zhōngguó rén.",
+   "bú shì = is not."
+  ],
+  [
+   "You are Filipino.",
+   "你是菲律宾人。",
+   "Nǐ shì Fēilǜbīn rén.",
+   "Fēilǜbīn = Philippines."
+  ],
+  [
+   "He/She is also Filipino.",
+   "他也是菲律宾人。",
+   "Tā yě shì Fēilǜbīn rén.",
+   "yě goes before shì."
+  ],
+  [
+   "You are also a student.",
+   "你也是学生。",
+   "Nǐ yě shì xué shēng.",
+   "yě + shì."
+  ],
+  [
+   "You are also not a student.",
+   "你也不是学生。",
+   "Nǐ yě bú shì xué shēng.",
+   "yě + bú + shì."
+  ],
+  [
+   "You are very handsome.",
+   "你很帅。",
+   "Nǐ hěn shuài.",
+   "hěn + adjective."
+  ],
+  [
+   "I am very hungry.",
+   "我很饿。",
+   "Wǒ hěn è.",
+   "hěn + adjective."
+  ],
+  [
+   "I don't drink coffee.",
+   "我不喝咖啡。",
+   "Wǒ bù hē kā fēi.",
+   "bù + verb (hē = drink)."
+  ],
+  [
+   "You don't drink tea.",
+   "你不喝茶。",
+   "Nǐ bù hē chá.",
+   "bù + verb."
+  ],
+  [
+   "He/She doesn't drink cold water.",
+   "他不喝冰水。",
+   "Tā bù hē bīng shuǐ.",
+   "bīng shuǐ = cold/ice water."
+  ],
+  [
+   "Miss Zhang doesn't eat hamburgers.",
+   "张小姐不吃汉堡。",
+   "Zhāng xiǎo jiě bù chī hàn bǎo.",
+   "xiǎojiě = Miss; surname comes first."
+  ],
+  [
+   "I don't eat French fries.",
+   "我不吃薯条。",
+   "Wǒ bù chī shǔ tiáo.",
+   "bù + verb (chī = eat)."
+  ],
+  [
+   "Mike doesn't eat fish.",
+   "Mike不吃鱼。",
+   "Mike bù chī yú.",
+   "yú = fish."
+  ]
+ ],
+ "M8: Question Particle Ma": [
+  [
+   "question particle (yes-no questions)",
+   "吗",
+   "ma",
+   "Found at the end of a statement; indicates a yes-no question only"
+  ],
+  [
+   "How do you turn a statement into a yes-no question?",
+   "你好吗？",
+   "Nǐ hǎo ma?",
+   "Sentence pattern: Statement + ma? (Nǐ hǎo. -> Nǐ hǎo ma?)"
+  ],
+  [
+   "You are well/good.",
+   "你好。",
+   "Nǐ hǎo.",
+   "Subject + Adjective"
+  ],
+  [
+   "Are you well/good?",
+   "你好吗？",
+   "Nǐ hǎo ma?",
+   "Subject + Adjective + ma?"
+  ],
+  [
+   "You are busy.",
+   "你忙。",
+   "Nǐ máng.",
+   "Subject + Adjective"
+  ],
+  [
+   "Are you busy?",
+   "你忙吗？",
+   "Nǐ máng ma?",
+   "Subject + Adjective + ma?"
+  ],
+  [
+   "My mother is very hungry.",
+   "我妈妈很饿。",
+   "Wǒ māma hěn è.",
+   "Subject + Adjective"
+  ],
+  [
+   "Is my mother hungry?",
+   "我妈妈很饿吗？",
+   "Wǒ māma hěn è ma?",
+   "Subject + Adjective + ma?"
+  ],
+  [
+   "You are a teacher.",
+   "你是老师。",
+   "Nǐ shì lǎo shī.",
+   "Subject + Verb + Object"
+  ],
+  [
+   "Are you a teacher?",
+   "你是老师吗？",
+   "Nǐ shì lǎo shī ma?",
+   "Subject + Verb + Object + ma?"
+  ],
+  [
+   "I am a manager.",
+   "我是经理。",
+   "Wǒ shì jīnglǐ.",
+   "Subject + Verb + Object"
+  ],
+  [
+   "Am I a manager?",
+   "我是经理吗？",
+   "Wǒ shì jīnglǐ ma?",
+   "Subject + Verb + Object + ma?"
+  ],
+  [
+   "Your father is American.",
+   "你爸爸是美国人。",
+   "Nǐ bàba shì Měiguó rén.",
+   "Subject + Verb + Object"
+  ],
+  [
+   "Is your father American?",
+   "你爸爸是美国人吗？",
+   "Nǐ bàba shì Měiguó rén ma?",
+   "Subject + Verb + Object + ma?"
+  ],
+  [
+   "You like me.",
+   "你喜欢我。",
+   "Nǐ xǐhuān wǒ.",
+   ""
+  ],
+  [
+   "Do you like me?",
+   "你喜欢我吗？",
+   "Nǐ xǐhuān wǒ ma?",
+   ""
+  ],
+  [
+   "I hate you.",
+   "我恨你。",
+   "Wǒ hèn nǐ.",
+   ""
+  ],
+  [
+   "Do I hate you?",
+   "我恨你吗？",
+   "Wǒ hèn nǐ ma?",
+   ""
+  ],
+  [
+   "He drinks tea.",
+   "他喝茶。",
+   "Tā hē chá.",
+   ""
+  ],
+  [
+   "Does he drink tea?",
+   "他喝茶吗？",
+   "Tā hē chá ma?",
+   ""
+  ],
+  [
+   "Angel goes to McDonald's.",
+   "Angel 去麦当劳。",
+   "Angel qù Màidāngláo.",
+   ""
+  ],
+  [
+   "Does Angel go to McDonald's?",
+   "Angel 去麦当劳吗？",
+   "Angel qù Màidāngláo ma?",
+   ""
+  ],
+  [
+   "Practice: He is a manager. -> question",
+   "他是经理吗？",
+   "Tā shì jīnglǐ ma?",
+   "Slide writes jīnglì; standard is jīnglǐ (as on the earlier slide)"
+  ],
+  [
+   "Practice: Mike is a student. -> question",
+   "麦克是学生吗？",
+   "Màikè shì xuéshēng ma?",
+   ""
+  ],
+  [
+   "Practice: You are the president. -> question",
+   "你是总统吗？",
+   "Nǐ shì zǒngtǒng ma?",
+   "zǒngtǒng = president"
+  ],
+  [
+   "Do all questions end with ma?",
+   "那是什么？",
+   "Nà shì shén me?",
+   "NO! Only yes/no questions. Don't add ma to a sentence that is already a question (one with a question word like shén me / shéi)."
+  ],
+  [
+   "What is that? (correct form, no ma)",
+   "那是什么？",
+   "Nà shì shén me?",
+   "WRONG: Nà shì shén me ma?"
+  ],
+  [
+   "Who is that? (correct form, no ma)",
+   "那是谁？",
+   "Nà shì shéi?",
+   "WRONG: Nà shì shéi ma?"
+  ]
+ ],
+ "M8: Possessives and de": [
+  [
+   "How do you make a simple possessive with a pronoun?",
+   "我妈妈",
+   "wǒ māma",
+   "Pronoun as possessive + Noun (no de needed for close relations/body parts): wǒ māma = my mom"
+  ],
+  [
+   "my mom",
+   "我妈妈",
+   "wǒ māma",
+   ""
+  ],
+  [
+   "your dad",
+   "你爸爸",
+   "nǐ bàba",
+   ""
+  ],
+  [
+   "my stomach",
+   "我肚子",
+   "wǒ dùzi",
+   ""
+  ],
+  [
+   "your eyes",
+   "你眼睛",
+   "nǐ yán jīng",
+   "Slide writes yán jīng; standard is yǎnjing"
+  ],
+  [
+   "my wife",
+   "我夫人",
+   "wǒ fūren",
+   ""
+  ],
+  [
+   "your (older) sister",
+   "你姐姐",
+   "nǐ jiě jie",
+   ""
+  ],
+  [
+   "my mouth",
+   "我嘴巴",
+   "wǒ zuǐ ba",
+   ""
+  ],
+  [
+   "your ear",
+   "你耳朵",
+   "nǐ ěr duō",
+   "Slide writes ěr duō; standard is ěrduo"
+  ],
+  [
+   "possessive marker",
+   "的",
+   "de",
+   "Functions just like 's in English"
+  ],
+  [
+   "How do you show possession with de?",
+   "我的书",
+   "wǒ de shū",
+   "Pattern: N/Pn + de + N/Pn = possessor (owner) + de + possession"
+  ],
+  [
+   "my book",
+   "我的书",
+   "Wǒ de shū",
+   ""
+  ],
+  [
+   "How do you make a personal pronoun plural?",
+   "我们",
+   "wǒ men",
+   "Pronoun (wǒ / nǐ / tā) + men (plural form)"
+  ],
+  [
+   "we / us",
+   "我们",
+   "wǒ men",
+   ""
+  ],
+  [
+   "you (plural)",
+   "你们",
+   "nǐ men",
+   ""
+  ],
+  [
+   "they / them",
+   "他们",
+   "tā men",
+   ""
+  ],
+  [
+   "Teacher Zhang",
+   "张老师",
+   "Zhāng lǎo shī",
+   "Shown as a possessor that can take de: Zhāng lǎo shī de ..."
+  ],
+  [
+   "my father",
+   "我的爸爸 / 我爸爸",
+   "wǒ de bàba / wǒ bàba",
+   "de can be dropped for close relations"
+  ],
+  [
+   "your (plural) grandmother",
+   "你们的奶奶 / 你们奶奶",
+   "nǐ men de nǎi nai / nǐ men nǎi nai",
+   ""
+  ],
+  [
+   "his/her book",
+   "他的书",
+   "tā de shū",
+   ""
+  ],
+  [
+   "their doctor",
+   "他们的医生",
+   "tā mēn de yī shēng",
+   "Slide writes tā mēn; standard is tāmen (neutral-tone men)"
+  ]
+ ],
+ "M8: Dou and Ye": [
+  [
+   "both / all (adverb)",
+   "都",
+   "dōu",
+   "Indicates something is common"
+  ],
+  [
+   "What does dōu mean and where does it go?",
+   "我们都是学生。",
+   "Wǒ men dōu shì xué shēng.",
+   "dōu = both/all; placed before the verb/adjective: dōu + ordinary verb, dōu + adjective, dōu + yě, dōu + hěn"
+  ],
+  [
+   "also (adverb)",
+   "也",
+   "yě",
+   "Best translated as 'also' because of similar grammar"
+  ],
+  [
+   "Where does yě go in a sentence?",
+   "我也是。",
+   "Wǒ yě shì.",
+   "yě goes before the verb: yě + to-be verb (yě shì = also am/is/are)"
+  ],
+  [
+   "Mike: I like to drink milk tea.",
+   "我喜欢喝奶茶。",
+   "Wǒ xǐ huān hē nǎi chá.",
+   ""
+  ],
+  [
+   "Abigail: I also like drinking milk tea.",
+   "我也喜欢喝奶茶。",
+   "Wǒ yě xǐ huān hē nǎi chá.",
+   ""
+  ],
+  [
+   "Mike & Abigail: We both like to drink milk tea.",
+   "我们都喜欢喝奶茶。",
+   "Wǒ men dōu xǐ huān hē nǎi chá.",
+   "dōu + verb"
+  ],
+  [
+   "We are all students.",
+   "我们都是学生。",
+   "Wǒ men dōu shì xué shēng.",
+   ""
+  ],
+  [
+   "They are all teachers.",
+   "他们都是老师。",
+   "Tā men dōu shì lǎo shī.",
+   ""
+  ],
+  [
+   "You all like me.",
+   "你们都喜欢我。",
+   "Nǐ men dōu xǐ huān wǒ.",
+   ""
+  ],
+  [
+   "dōu + shì (all are)",
+   "都是",
+   "dōu shì",
+   "dōu + verb"
+  ],
+  [
+   "dōu + búshì (all are not)",
+   "都不是",
+   "dōu búshì",
+   ""
+  ],
+  [
+   "dōu + yě + shì (all also are)",
+   "都也是",
+   "dōu yě shì",
+   "As listed on slide; in standard Mandarin the order is 也都是 (yě dōu shì)"
+  ],
+  [
+   "dōu + hěn + hǎo (all very good; hǎo = adj.)",
+   "都很好",
+   "dōu hěn hǎo",
+   "dōu + hěn + adjective"
+  ],
+  [
+   "dōu + yě + hǎo",
+   "都也好",
+   "dōu yě hǎo",
+   "As listed on slide; standard order is 也都好 (yě dōu hǎo)"
+  ],
+  [
+   "dōu + bù hǎo (all not good)",
+   "都不好",
+   "dōu bù hǎo",
+   ""
+  ],
+  [
+   "dōu + chī (all eat; chī = verb)",
+   "都吃",
+   "dōu chī",
+   ""
+  ],
+  [
+   "yě shì (yě + ordinary verb/be-verb)",
+   "也是",
+   "yě shì",
+   "also am/is/are"
+  ],
+  [
+   "yě bùshì (yě + bù + ordinary verb/be-verb)",
+   "也不是",
+   "yě bùshì",
+   "Slide writes bùshì; with tone sandhi it is pronounced búshì"
+  ],
+  [
+   "yě hǎo (yě + adjective)",
+   "也好",
+   "yě hǎo",
+   ""
+  ],
+  [
+   "yě hěn máng (yě + hěn + adj.)",
+   "也很忙",
+   "yě hěn máng",
+   "also very busy"
+  ],
+  [
+   "yě chī (yě + verb)",
+   "也吃",
+   "yě chī",
+   "also eat"
+  ],
+  [
+   "Me too. (lit. I also am)",
+   "我也是。",
+   "Wǒ yě shì.",
+   ""
+  ],
+  [
+   "Are you also Filipino?",
+   "你也是菲律宾人吗？",
+   "Nǐ yě shì Fēilǜbīn rén ma?",
+   ""
+  ],
+  [
+   "Obama is American.",
+   "Obama 是美国人。",
+   "Obama shì Měi guó rén.",
+   ""
+  ],
+  [
+   "Michelle is also American.",
+   "Michelle 也是美国人。",
+   "Michelle yě shì Měi guó rén.",
+   ""
+  ]
+ ],
+ "M8: Names and Nationality Vocabulary": [
+  [
+   "May I ask",
+   "请问",
+   "qǐng wèn",
+   "Polite way to begin a question"
+  ],
+  [
+   "honorable surname",
+   "贵姓",
+   "guì xìng",
+   ""
+  ],
+  [
+   "what",
+   "什么",
+   "shén me",
+   ""
+  ],
+  [
+   "called; to call",
+   "叫",
+   "jiào",
+   ""
+  ],
+  [
+   "name; first name",
+   "名字",
+   "míng zi",
+   ""
+  ],
+  [
+   "person",
+   "人",
+   "rén",
+   ""
+  ],
+  [
+   "who",
+   "谁",
+   "shéi",
+   ""
+  ],
+  [
+   "to be acquainted with; to know (a person)",
+   "认识",
+   "rèn shì",
+   ""
+  ],
+  [
+   "which",
+   "哪",
+   "nǎ",
+   ""
+  ],
+  [
+   "country",
+   "国",
+   "guó",
+   ""
+  ],
+  [
+   "America",
+   "美国",
+   "Měiguó",
+   ""
+  ],
+  [
+   "American",
+   "美国人",
+   "Měiguó rén",
+   "country + rén = nationality"
+  ],
+  [
+   "Korea",
+   "韩国",
+   "Hánguó",
+   ""
+  ],
+  [
+   "Korean",
+   "韩国人",
+   "Hánguó rén",
+   ""
+  ],
+  [
+   "China",
+   "中国",
+   "Zhōngguó",
+   ""
+  ],
+  [
+   "Chinese (person)",
+   "中国人",
+   "Zhōngguó rén",
+   ""
+  ],
+  [
+   "Britain",
+   "英国",
+   "Yīngguó",
+   ""
+  ],
+  [
+   "British",
+   "英国人",
+   "Yīngguó rén",
+   ""
+  ],
+  [
+   "Philippines",
+   "菲律宾",
+   "Fēilǜbīn",
+   ""
+  ],
+  [
+   "Filipino",
+   "菲律宾人",
+   "Fēilǜbīn rén",
+   ""
+  ]
+ ],
+ "M8: Conversations 6 and 7": [
+  [
+   "May I ask, what's your honorable last name?",
+   "请问，你贵姓？",
+   "Qǐng wèn, nǐ guì xìng?",
+   "Polite way to ask a surname"
+  ],
+  [
+   "What's your surname?",
+   "你姓什么？",
+   "Nǐ xìng shén me?",
+   ""
+  ],
+  [
+   "My surname is Chen.",
+   "我姓陈。",
+   "Wǒ xìng Chén.",
+   ""
+  ],
+  [
+   "May I ask, what is your name?",
+   "请问，你叫什么名字？",
+   "Qǐng wèn, nǐ jiào shén me míng zi?",
+   ""
+  ],
+  [
+   "I am called David. / I'm David.",
+   "我叫大卫。",
+   "Wǒ jiào Dà wèi.",
+   ""
+  ],
+  [
+   "What's your nationality?",
+   "你是哪国人？",
+   "Nǐ shì nǎ guó rén?",
+   ""
+  ],
+  [
+   "I am Filipino. How about you?",
+   "我是菲律宾人。你呢？",
+   "Wǒ shì Fēilǜbīn rén. Nǐ ne?",
+   "ne = 'how about...?'"
+  ],
+  [
+   "I am also Filipino.",
+   "我也是菲律宾人。",
+   "Wǒ yě shì Fēilǜbīn rén.",
+   ""
+  ],
+  [
+   "Is our teacher Chinese?",
+   "我们老师是中国人吗？",
+   "Wǒ mēn lǎo shī shì Zhōngguó rén ma?",
+   "Slide writes Wǒ mēn; standard is wǒmen (neutral-tone men)"
+  ],
+  [
+   "She is not Chinese. She is American.",
+   "他不是中国人。他是美国人。",
+   "Tā bú shì Zhōngguó rén. Tā shì Měiguó rén.",
+   "Slide uses 他 although translated 'she' (她)"
+  ],
+  [
+   "Who is she/he?",
+   "他是谁？",
+   "Tā shì shéi?",
+   ""
+  ],
+  [
+   "He is Aldrin.",
+   "他是 Aldrin。",
+   "Tā shì Aldrin.",
+   ""
+  ],
+  [
+   "Do you know him?",
+   "你认识他吗？",
+   "Nǐ rèn shì tā ma?",
+   ""
+  ],
+  [
+   "Right.",
+   "对。",
+   "Duì.",
+   ""
+  ],
+  [
+   "Is he a student?",
+   "他是学生吗？",
+   "Tā shì xué shēng ma?",
+   ""
+  ],
+  [
+   "He is a student.",
+   "他是学生。",
+   "Tā shì xué shēng.",
+   ""
+  ],
+  [
+   "Is he Chinese?",
+   "他是中国人吗？",
+   "Tā shì Zhōngguó rén ma?",
+   ""
+  ],
+  [
+   "No, he is Korean.",
+   "不是，他是韩国人。",
+   "Bú shì, tā shì Hánguó rén.",
+   ""
+  ]
+ ],
+ "M9: Numbers 1–10 & lucky numbers": [
+  [
+   "one",
+   "一",
+   "yī",
+   ""
+  ],
+  [
+   "two",
+   "二",
+   "èr",
+   ""
+  ],
+  [
+   "three",
+   "三",
+   "sān",
+   ""
+  ],
+  [
+   "four (unlucky number)",
+   "四",
+   "sì",
+   "Unlucky: sì sounds like 死 sǐ 'death'."
+  ],
+  [
+   "five",
+   "五",
+   "wǔ",
+   ""
+  ],
+  [
+   "six",
+   "六",
+   "liù",
+   ""
+  ],
+  [
+   "seven",
+   "七",
+   "qī",
+   ""
+  ],
+  [
+   "eight (lucky number)",
+   "八",
+   "bā",
+   "Lucky: bā sounds like 发 fā 'to prosper'."
+  ],
+  [
+   "nine",
+   "九",
+   "jiǔ",
+   ""
+  ],
+  [
+   "ten",
+   "十",
+   "shí",
+   ""
+  ],
+  [
+   "Which number is lucky in Chinese culture?",
+   "八",
+   "bā",
+   "Trivia 6: 8 (bā) is the lucky number."
+  ],
+  [
+   "Which number is unlucky in Chinese culture?",
+   "四",
+   "sì",
+   "Trivia 6: 4 (sì) is the unlucky number."
+  ]
+ ],
+ "M9: Numbers 11–100": [
+  [
+   "How do you count after shí (11–19)?",
+   "十一",
+   "shí yī",
+   "Rule: shí + digit = 10 + digit (shí yī = 10 + 1 = 11)."
+  ],
+  [
+   "How do you say tens (20, 30...)?",
+   "二十",
+   "èr shí",
+   "Rule: digit + shí = digit × 10 (èr shí = 2 × 10 = 20)."
+  ],
+  [
+   "How do you say 21–99?",
+   "二十一",
+   "èr shí yī",
+   "Rule: digit + shí + digit = (digit × 10) + digit (èr shí yī = 2 × 10 + 1 = 21)."
+  ],
+  [
+   "12",
+   "十二",
+   "shí èr",
+   "10 + 2"
+  ],
+  [
+   "13",
+   "十三",
+   "shí sān",
+   "10 + 3"
+  ],
+  [
+   "17",
+   "十七",
+   "shí qī",
+   "10 + 7"
+  ],
+  [
+   "25",
+   "二十五",
+   "èr shí wǔ",
+   "(2 × 10) + 5"
+  ],
+  [
+   "30",
+   "三十",
+   "sān shí",
+   "3 × 10"
+  ],
+  [
+   "38",
+   "三十八",
+   "sān shí bā",
+   "(3 × 10) + 8"
+  ],
+  [
+   "40",
+   "四十",
+   "sì shí",
+   "4 × 10"
+  ],
+  [
+   "46",
+   "四十六",
+   "sì shí liù",
+   "(4 × 10) + 6"
+  ],
+  [
+   "72",
+   "七十二",
+   "qī shí èr",
+   "(7 × 10) + 2"
+  ],
+  [
+   "80",
+   "八十",
+   "bā shí",
+   "8 × 10"
+  ],
+  [
+   "100",
+   "一百",
+   "yī bǎi",
+   "1 × 100"
+  ],
+  [
+   "18 (practice)",
+   "十八",
+   "shí bā",
+   "Practice item: slide shows the numeral only."
+  ],
+  [
+   "24 (practice)",
+   "二十四",
+   "èr shí sì",
+   "Practice item: slide shows the numeral only."
+  ],
+  [
+   "39 (practice)",
+   "三十九",
+   "sān shí jiǔ",
+   "Practice item: slide shows the numeral only."
+  ],
+  [
+   "41 (practice)",
+   "四十一",
+   "sì shí yī",
+   "Practice item: slide shows the numeral only."
+  ],
+  [
+   "52 (practice)",
+   "五十二",
+   "wǔ shí èr",
+   "Practice item: slide shows the numeral only."
+  ],
+  [
+   "76 (practice)",
+   "七十六",
+   "qī shí liù",
+   "Practice item: slide shows the numeral only."
+  ],
+  [
+   "88 (practice)",
+   "八十八",
+   "bā shí bā",
+   "Practice item: slide shows the numeral only."
+  ],
+  [
+   "93 (practice)",
+   "九十三",
+   "jiǔ shí sān",
+   "Practice item: slide shows the numeral only."
+  ],
+  [
+   "119 (practice)",
+   "一百一十九",
+   "yī bǎi yī shí jiǔ",
+   "Practice item: slide shows the numeral only. Over 100, say the 1 in 'yī shí'."
+  ],
+  [
+   "143 (practice)",
+   "一百四十三",
+   "yī bǎi sì shí sān",
+   "Practice item: slide shows the numeral only."
+  ],
+  [
+   "191 (practice)",
+   "一百九十一",
+   "yī bǎi jiǔ shí yī",
+   "Practice item: slide shows the numeral only."
+  ]
+ ],
+ "M9: Age & cellphone number": [
+  [
+   "How old are you? (to someone younger than 16)",
+   "你几岁?",
+   "Nǐ jǐ suì?",
+   "Use for children under 16."
+  ],
+  [
+   "how many (question word for numbers)",
+   "几",
+   "jǐ",
+   "jǐ is the question word for numbers, usually small ones."
+  ],
+  [
+   "How old are you? (to someone older than 16)",
+   "你多大?",
+   "Nǐ duō dà?",
+   "Use for people over 16."
+  ],
+  [
+   "how old",
+   "多大",
+   "duō dà",
+   ""
+  ],
+  [
+   "I am 15 years old.",
+   "我十五岁。",
+   "Wǒ shíwǔ suì.",
+   "Answer: Wǒ + number + suì."
+  ],
+  [
+   "I'm 20 years old. And you?",
+   "我二十岁。你呢?",
+   "Wǒ èr shí suì. Nǐ ne?",
+   "Conversation 8. 'Nǐ ne?' = 'And you?'"
+  ],
+  [
+   "I'm 21 years old.",
+   "我二十一岁。",
+   "Wǒ èr shí yī suì.",
+   "Conversation 8"
+  ],
+  [
+   "cellphone",
+   "手机",
+   "shǒu jī",
+   ""
+  ],
+  [
+   "number",
+   "号码",
+   "hào mǎ",
+   ""
+  ],
+  [
+   "how much / how many",
+   "多少",
+   "duō shǎo",
+   "Usually said with a neutral tone: duōshao."
+  ],
+  [
+   "What is your cellphone number?",
+   "你的手机号码是多少?",
+   "Nǐ de shǒu jī hào mǎ shì duō shǎo?",
+   "Conversation 8"
+  ],
+  [
+   "My cellphone number is ___.",
+   "我的手机号码是___。",
+   "Wǒ de shǒujī hàomǎ shì ___.",
+   "Answer pattern: say the digits one by one."
+  ],
+  [
+   "My cellphone number is 09298554762.",
+   "我的手机号码是09298554762。",
+   "Wǒ de shǒu jī hào mǎ shì 09298554762.",
+   "Digits: líng jiǔ èr jiǔ bā wǔ wǔ sì qī liù èr."
+  ]
+ ],
+ "M9: Zodiac & trivia": [
+  [
+   "the twelve zodiac signs",
+   "十二生肖",
+   "Shí èr shēng xiào",
+   "Trivia 7"
+  ],
+  [
+   "rat / mouse (zodiac)",
+   "鼠",
+   "shǔ",
+   ""
+  ],
+  [
+   "ox (zodiac)",
+   "牛",
+   "niú",
+   ""
+  ],
+  [
+   "tiger (zodiac)",
+   "虎",
+   "hǔ",
+   ""
+  ],
+  [
+   "rabbit (zodiac)",
+   "兔",
+   "tù",
+   ""
+  ],
+  [
+   "dragon (zodiac)",
+   "龙",
+   "lóng",
+   "Slide shows the traditional character 龍."
+  ],
+  [
+   "snake (zodiac)",
+   "蛇",
+   "shé",
+   ""
+  ],
+  [
+   "horse (zodiac)",
+   "马",
+   "mǎ",
+   "Slide shows the traditional character 馬."
+  ],
+  [
+   "sheep / goat (zodiac)",
+   "羊",
+   "yáng",
+   ""
+  ],
+  [
+   "monkey (zodiac)",
+   "猴",
+   "hóu",
+   ""
+  ],
+  [
+   "rooster / chicken (zodiac)",
+   "鸡",
+   "jī",
+   "Slide shows the traditional character 雞."
+  ],
+  [
+   "dog (zodiac)",
+   "狗",
+   "gǒu",
+   ""
+  ],
+  [
+   "pig (zodiac)",
+   "猪",
+   "zhū",
+   "Slide shows the traditional character 豬."
+  ],
+  [
+   "friend (Trivia 8: the song 'Péng You' by Emil Chau)",
+   "朋友",
+   "péng you",
+   "Slide title writes Péng You; the lyrics slides spell it péng yǒu. Standard is péngyou."
+  ]
+ ],
+ "M9: This/that (zhè shì, nà shì, zhège)": [
+  [
+   "How do you say 'This is + noun'?",
+   "这是苹果。",
+   "Zhè shì píngguǒ.",
+   "Pattern: Zhè + shì + noun (This is ...). The slide writes 'Zhè + shì + píngguǒ.'"
+  ],
+  [
+   "How do you say 'That is + noun'?",
+   "那是蛋糕。",
+   "Nà shì dàngāo.",
+   "Pattern: Nà + shì + noun (That is ...)."
+  ],
+  [
+   "This is (a) book.",
+   "这是书。",
+   "Zhè shì shū.",
+   ""
+  ],
+  [
+   "How do you ask 'Is this/that a ...?'",
+   "这是书吗?",
+   "Zhè shì shū ma?",
+   "Pattern: Zhèshì / Nàshì + noun + ma?"
+  ],
+  [
+   "Is that a cake?",
+   "那是蛋糕吗?",
+   "Nà shì dàngāo ma?",
+   ""
+  ],
+  [
+   "How do you say 'this + noun' (this person, this house)?",
+   "这个人。",
+   "Zhè gè rén.",
+   "Pattern: zhè + measure word (m.w.) + noun; gè is the general measure word."
+  ],
+  [
+   "this house",
+   "这个房子",
+   "Zhè gè fáng zi.",
+   ""
+  ],
+  [
+   "this thing",
+   "这个东西",
+   "Zhè gè dōng xī.",
+   "Slide writes dōng xī; standard is dōngxi (neutral tone)."
+  ],
+  [
+   "I want this computer.",
+   "我要这个电脑。",
+   "Wǒ yào zhège diàn nǎo.",
+   ""
+  ],
+  [
+   "I like that drink.",
+   "我喜欢那个饮料。",
+   "Wǒ xǐhuān nàgè yǐnliào.",
+   ""
+  ],
+  [
+   "apple",
+   "苹果",
+   "píngguǒ",
+   ""
+  ],
+  [
+   "book",
+   "书",
+   "shū",
+   ""
+  ],
+  [
+   "cake",
+   "蛋糕",
+   "dàngāo",
+   ""
+  ],
+  [
+   "person",
+   "人",
+   "rén",
+   ""
+  ],
+  [
+   "house",
+   "房子",
+   "fáng zi",
+   ""
+  ],
+  [
+   "thing",
+   "东西",
+   "dōng xī",
+   "Slide writes dōng xī; standard is dōngxi."
+  ],
+  [
+   "computer",
+   "电脑",
+   "diàn nǎo",
+   ""
+  ],
+  [
+   "drink / beverage",
+   "饮料",
+   "yǐnliào",
+   ""
+  ],
+  [
+   "want",
+   "要",
+   "yào",
+   ""
+  ],
+  [
+   "don't want",
+   "不要",
+   "bù yào",
+   "Slide writes bù yào; spoken as bú yào (bù becomes bú before a 4th tone)."
+  ],
+  [
+   "like",
+   "喜欢",
+   "xǐhuān",
+   "Often said with a neutral tone: xǐhuan."
+  ],
+  [
+   "don't like",
+   "不喜欢",
+   "bù xǐhuān",
+   ""
+  ]
+ ],
+ "M10: Birthday & days of the week": [
+  [
+   "Happy birthday! (Wishing you a happy birthday!)",
+   "祝你生日快乐!",
+   "Zhù nǐ shēng rì kuài lè!",
+   "Trivia 9: also the title of the Chinese birthday song."
+  ],
+  [
+   "birthday",
+   "生日",
+   "shēngrì",
+   ""
+  ],
+  [
+   "birthday noodles / longevity noodles",
+   "长寿面",
+   "chángshòumiàn",
+   "Not on the slide (picture only). Standard form."
+  ],
+  [
+   "longevity buns (peach-shaped)",
+   "寿桃",
+   "shòutáo",
+   "Not on the slide (picture only). Standard form."
+  ],
+  [
+   "red eggs (birthday)",
+   "红鸡蛋",
+   "hóng jīdàn",
+   "Not on the slide (picture only). Standard form."
+  ],
+  [
+   "dumplings",
+   "饺子",
+   "jiǎozi",
+   "Not on the slide (picture only). Standard form."
+  ],
+  [
+   "week",
+   "星期",
+   "xīng qī",
+   ""
+  ],
+  [
+   "Monday",
+   "星期一",
+   "Xīng qī yī",
+   ""
+  ],
+  [
+   "Tuesday",
+   "星期二",
+   "Xīng qī èr",
+   ""
+  ],
+  [
+   "Wednesday",
+   "星期三",
+   "Xīng qī sān",
+   ""
+  ],
+  [
+   "Thursday",
+   "星期四",
+   "Xīng qī sì",
+   ""
+  ],
+  [
+   "Friday",
+   "星期五",
+   "Xīng qī wǔ",
+   ""
+  ],
+  [
+   "Saturday",
+   "星期六",
+   "Xīng qī liù",
+   ""
+  ],
+  [
+   "Sunday",
+   "星期日 / 星期天",
+   "Xīng qī rì / Xīng qī tiān",
+   "Both forms are correct."
+  ],
+  [
+   "How do you name the days of the week?",
+   "星期一",
+   "Xīng qī yī",
+   "Rule: xīngqī + number 1–6 = Monday–Saturday; Sunday = xīngqī rì / tiān."
+  ],
+  [
+   "today",
+   "今天",
+   "Jīntiān",
+   ""
+  ],
+  [
+   "tomorrow",
+   "明天",
+   "míngtiān",
+   ""
+  ],
+  [
+   "yesterday",
+   "昨天",
+   "zuótiān",
+   ""
+  ],
+  [
+   "What day is it today?",
+   "今天是星期几?",
+   "Jīntiān shì xīngqí jǐ?",
+   "Slide writes xīngqí; standard is xīngqī."
+  ],
+  [
+   "Today is Thursday.",
+   "今天是星期四。",
+   "Jīntiān shì xīngqísì.",
+   "Slide writes xīngqísì; standard is xīngqī sì."
+  ]
+ ],
+ "M10: Months & dates": [
+  [
+   "month",
+   "月",
+   "Yuè",
+   ""
+  ],
+  [
+   "How do you name the months?",
+   "一月",
+   "yī yuè",
+   "Rule: number 1–12 + yuè = January–December."
+  ],
+  [
+   "January",
+   "一月",
+   "yī yuè",
+   ""
+  ],
+  [
+   "February",
+   "二月",
+   "èr yuè",
+   ""
+  ],
+  [
+   "March",
+   "三月",
+   "sān yuè",
+   ""
+  ],
+  [
+   "April",
+   "四月",
+   "sì yuè",
+   ""
+  ],
+  [
+   "May",
+   "五月",
+   "wǔ yuè",
+   ""
+  ],
+  [
+   "June",
+   "六月",
+   "liù yuè",
+   ""
+  ],
+  [
+   "July",
+   "七月",
+   "qī yuè",
+   ""
+  ],
+  [
+   "August",
+   "八月",
+   "bā yuè",
+   ""
+  ],
+  [
+   "September",
+   "九月",
+   "jiǔ yuè",
+   ""
+  ],
+  [
+   "October",
+   "十月",
+   "shí yuè",
+   ""
+  ],
+  [
+   "November",
+   "十一月",
+   "shí yī yuè",
+   ""
+  ],
+  [
+   "December",
+   "十二月",
+   "shí èr yuè",
+   ""
+  ],
+  [
+   "day of the month (date)",
+   "号",
+   "hào",
+   ""
+  ],
+  [
+   "When is your birthday? (What month, what day?)",
+   "你的生日是几月几号?",
+   "Nǐ de shēngrì shì jǐ yuè jǐ hào?",
+   "Pattern: jǐ yuè jǐ hào = what month, what day."
+  ],
+  [
+   "My birthday is August 28.",
+   "我的生日是八月二十八。",
+   "Wǒ de shēngrì shì bā yuè èrshíbā.",
+   "Date order: month + day (+ hào)."
+  ],
+  [
+   "When is your mother's birthday?",
+   "你妈妈的生日是几月几号?",
+   "Nǐ māmā de shēngrì shì jǐ yuè jǐ hào?",
+   "Slide writes māmā; standard is māma."
+  ],
+  [
+   "My mother's birthday is November 11.",
+   "我妈妈的生日是十一月十一。",
+   "Wǒ māmā de shēngrì shì shíyī yuè shíyī.",
+   ""
+  ],
+  [
+   "May I ask, when is your birthday?",
+   "请问,你的生日是几月几号?",
+   "Qǐngwèn, nǐ de shēngrì shì jǐ yuè jǐ hào?",
+   "Practice dialogue"
+  ],
+  [
+   "My birthday is ___ (month) ___ (day). And you?",
+   "我的生日是___月___号。你呢?",
+   "Wǒ de shēngrì shì ___ yuè ___ hào. Nǐ ne?",
+   "Practice dialogue"
+  ],
+  [
+   "I am ___ years old. And you?",
+   "我___岁。你呢?",
+   "Wǒ ___ suì. Nǐ ne?",
+   "Practice dialogue (after 'Nǐ duōdà?')"
+  ]
+ ],
+ "M10: Family members": [
+  [
+   "This is my family.",
+   "这是我的家庭。",
+   "Zhè shì wǒ de jiātíng.",
+   ""
+  ],
+  [
+   "family",
+   "家庭",
+   "jiātíng",
+   ""
+  ],
+  [
+   "grandfather (father's father)",
+   "爷爷",
+   "yéyé",
+   "Slide writes yéyé; standard is yéye."
+  ],
+  [
+   "grandmother (father's mother)",
+   "奶奶",
+   "nǎinai",
+   ""
+  ],
+  [
+   "father / dad",
+   "爸爸",
+   "bàba",
+   ""
+  ],
+  [
+   "mother / mom",
+   "妈妈",
+   "māma",
+   ""
+  ],
+  [
+   "older brother",
+   "哥哥",
+   "gēge",
+   ""
+  ],
+  [
+   "older sister",
+   "姐姐",
+   "jiějiě",
+   "Slide writes jiějiě; standard is jiějie."
+  ],
+  [
+   "younger brother",
+   "弟弟",
+   "dìdi",
+   ""
+  ],
+  [
+   "younger sister",
+   "妹妹",
+   "mèimei",
+   ""
+  ],
+  [
+   "measure word for people (family members)",
+   "口",
+   "kǒu",
+   ""
+  ],
+  [
+   "and",
+   "和",
+   "hé",
+   ""
+  ],
+  [
+   "to study",
+   "读书",
+   "dúshū",
+   ""
+  ],
+  [
+   "How many people are there in your family?",
+   "请问你家有几口人?",
+   "Qǐng wèn nǐ jiā yǒu jǐ kǒu rén?",
+   "Conversation 12. Pattern: jiā yǒu jǐ kǒu rén?"
+  ],
+  [
+   "We are five in the family: father, mother, older brother, younger brother, and me.",
+   "我家有五口人。有爸爸、妈妈、哥哥、弟弟和我。",
+   "Wǒ jiā yǒu wǔ kǒu rén. Yǒu bàba, māmā, gēgē, dìdì hé wǒ.",
+   "Conversation 12"
+  ]
+ ],
+ "M10: Have / not have / in addition": [
+  [
+   "to have",
+   "有",
+   "yǒu",
+   ""
+  ],
+  [
+   "not have",
+   "没有",
+   "méiyǒu",
+   "Negate yǒu with méi, never with bù."
+  ],
+  [
+   "in addition / also have",
+   "还有",
+   "hái yǒu",
+   ""
+  ],
+  [
+   "How do you ask 'Do you have ...?' with yǒu méiyǒu?",
+   "你有没有奶奶?",
+   "Nǐ yǒu méiyǒu nǎinai?",
+   "Pattern: subject + yǒu méiyǒu + noun? = Do you have (or not have) ...? (Conversation 12)"
+  ],
+  [
+   "I have a grandma and a grandpa.",
+   "我有奶奶和爷爷。",
+   "Wǒ yǒu nǎinai hé yéyé.",
+   "Conversation 12"
+  ],
+  [
+   "May I ask, do you have an older brother?",
+   "请问你有哥哥吗?",
+   "Qǐng wèn nǐ yǒu gēgē ma?",
+   "Conversation 13"
+  ],
+  [
+   "I don't have an older brother. How about you?",
+   "我没有哥哥。你呢?",
+   "Wǒ méi yǒu gēgē. Nǐne?",
+   "Conversation 13"
+  ],
+  [
+   "I also have no older brother.",
+   "我也没有哥哥。",
+   "Wǒ yě méiyǒu gēgē.",
+   "Conversation 13. yě = also"
+  ],
+  [
+   "Can méiyǒu be used with a number + measure word?",
+   "我没有姐姐。",
+   "Wǒ méiyǒu jiě jie.",
+   "Tip: méiyǒu is usually not used with measure words. Wrong: Wǒ méiyǒu sān gè jiějiě. Right: Wǒ méiyǒu jiějie."
+  ],
+  [
+   "Do you have an older sister?",
+   "你有姐姐吗?",
+   "Nǐ yǒu jiějiě ma?",
+   "Practice"
+  ],
+  [
+   "I don't have an older sister.",
+   "我没有姐姐。",
+   "Wǒ méiyǒu jiě jie.",
+   "Practice"
+  ],
+  [
+   "How do you say 'I have X and in addition Y'?",
+   "我有姐姐还有妹妹。",
+   "Wǒ yǒu jiějie hái yǒu mèimei.",
+   "Pattern: yǒu A hái yǒu B = I have an older sister and also a younger sister."
+  ],
+  [
+   "He has a pen, and also a book.",
+   "他有笔,还有书。",
+   "Tā yǒu bǐ, hái yǒu shū.",
+   "hái yǒu = in addition (has)"
+  ]
+ ],
+ "Pronouns & greetings: Pronouns": [
+  [
+   "I / me",
+   "我",
+   "wǒ",
+   ""
+  ],
+  [
+   "you",
+   "你",
+   "nǐ",
+   ""
+  ],
+  [
+   "you (polite)",
+   "您",
+   "nín",
+   "Polite form of nǐ."
+  ],
+  [
+   "she",
+   "她",
+   "tā",
+   ""
+  ],
+  [
+   "he",
+   "他",
+   "tā",
+   ""
+  ],
+  [
+   "it",
+   "它",
+   "tā",
+   ""
+  ],
+  [
+   "my / mine",
+   "我的",
+   "Wǒde",
+   ""
+  ],
+  [
+   "your / yours",
+   "你的",
+   "Nǐde",
+   ""
+  ],
+  [
+   "her / hers",
+   "她的",
+   "Tāde",
+   ""
+  ],
+  [
+   "his",
+   "他的",
+   "Tāde",
+   ""
+  ],
+  [
+   "its",
+   "他的",
+   "Tāde",
+   "Slide writes 他的; standard is 它的."
+  ],
+  [
+   "we / us",
+   "我们",
+   "Wǒmen",
+   ""
+  ],
+  [
+   "you (plural, you all)",
+   "你们",
+   "Nǐmen",
+   ""
+  ],
+  [
+   "they (females)",
+   "她们",
+   "Tāmen",
+   ""
+  ],
+  [
+   "they (males / mixed)",
+   "他们",
+   "Tāmen",
+   ""
+  ],
+  [
+   "they (things / animals)",
+   "它们",
+   "Tāmen",
+   ""
+  ],
+  [
+   "our / ours",
+   "我们的",
+   "wǒmen de",
+   ""
+  ],
+  [
+   "your / yours (plural)",
+   "你们的",
+   "nǐmen de",
+   ""
+  ],
+  [
+   "their / theirs (females)",
+   "她们的",
+   "Tāmen de",
+   ""
+  ],
+  [
+   "their / theirs (males / mixed)",
+   "他们的",
+   "tāmen de",
+   ""
+  ],
+  [
+   "their / theirs (things / animals)",
+   "它们的",
+   "tāmen de",
+   ""
+  ],
+  [
+   "How do you make a pronoun possessive or plural?",
+   "我们的",
+   "wǒmen de",
+   "Rule: pronoun + de = possessive (wǒ de = my); pronoun + men = plural (wǒmen = we); both: wǒmen de = our."
+  ],
+  [
+   "this",
+   "这",
+   "zhè",
+   "Demonstrative pronoun"
+  ],
+  [
+   "that",
+   "那",
+   "nà",
+   "Demonstrative pronoun"
+  ],
+  [
+   "these",
+   "这些",
+   "zhè xiē",
+   ""
+  ],
+  [
+   "those",
+   "那些",
+   "nà xiē",
+   ""
+  ],
+  [
+   "am / is / are / was / were (linking verb)",
+   "是",
+   "shì",
+   ""
+  ],
+  [
+   "am not / is not / are not / was not / were not",
+   "不是",
+   "bú shì",
+   "bù becomes bú before a 4th tone."
+  ]
+ ],
+ "Pronouns & greetings: Greetings": [
+  [
+   "How are you?",
+   "你好吗?",
+   "Nǐ hǎo ma?",
+   "Dialogue 1 (woman)"
+  ],
+  [
+   "I'm very well, and you?",
+   "我很好,你呢?",
+   "Wǒ hěn hǎo, nǐ ne?",
+   "Dialogue 1 (man)"
+  ],
+  [
+   "I'm also very well.",
+   "我也很好。",
+   "Wǒ yě hěn hǎo.",
+   "Dialogue 1 (woman)"
+  ],
+  [
+   "Hello everyone!",
+   "大家好",
+   "Dàjiā hǎo",
+   ""
+  ],
+  [
+   "Morning! (short)",
+   "早",
+   "Zǎo",
+   ""
+  ],
+  [
+   "Good morning",
+   "早上好",
+   "Zǎoshang hǎo",
+   ""
+  ],
+  [
+   "Good morning",
+   "早安",
+   "Zǎo ān",
+   ""
+  ],
+  [
+   "Good afternoon",
+   "下午好",
+   "Xiàwǔ hǎo",
+   ""
+  ],
+  [
+   "Good afternoon",
+   "午安",
+   "wǔ ān",
+   ""
+  ],
+  [
+   "Good evening",
+   "晚上好",
+   "Wǎnshàng hǎo",
+   "Slide writes Wǎnshàng; standard is wǎnshang."
+  ],
+  [
+   "Good evening (slide)",
+   "晚安",
+   "Wǎn ān",
+   "The slide says 'Good evening'; 晚安 is more often used for 'good night'."
+  ],
+  [
+   "goodbye",
+   "再见",
+   "zàijiàn",
+   ""
+  ],
+  [
+   "See you tomorrow!",
+   "明天见!",
+   "Míng tian jiàn!",
+   "Slide writes 'Míng tian jiàn' (tian without a tone mark); standard is Míngtiān jiàn."
+  ],
+  [
+   "See you next week",
+   "下星期见",
+   "xiàxíngqíjiàn",
+   "Slide writes xiàxíngqíjiàn; standard is xià xīngqī jiàn."
+  ],
+  [
+   "thanks",
+   "谢谢",
+   "xièxiè",
+   "Slide writes xièxiè; standard is xièxie."
+  ],
+  [
+   "you're welcome",
+   "不客气",
+   "bùkèqì",
+   "Slide swaps the pinyin: it puts 'bùyòngxiè' next to 不客气. Standard is bú kèqi."
+  ],
+  [
+   "you're welcome (lit. no need to thank)",
+   "不用谢",
+   "bùyòngxiè",
+   "Slide swaps the pinyin: it puts 'bùkèqì' next to 不用谢. Standard is bú yòng xiè."
+  ],
+  [
+   "I am sorry",
+   "对不起",
+   "duìbùqǐ",
+   "Standard is duìbuqǐ (neutral bu)."
+  ],
+  [
+   "It's alright (never mind)",
+   "没关系",
+   "méiguānxì",
+   "Standard is méi guānxi."
+  ],
+  [
+   "No problem",
+   "没问题",
+   "méiwentí",
+   "Slide writes méiwentí (wen without a tone mark); standard is méi wèntí."
+  ],
+  [
+   "take care",
+   "小心",
+   "xiǎoxīn",
+   "Literally 'be careful'."
+  ],
+  [
+   "Where are you going?",
+   "去哪儿?",
+   "Qù nǎ er",
+   "Slide writes 'Qù nǎ er'; standard is Qù nǎr?"
+  ],
+  [
+   "Have you eaten? (common greeting)",
+   "你吃了吗?",
+   "Nǐ chī le ma",
+   ""
+  ]
+ ],
+ "Pronouns & greetings: Classroom expressions": [
+  [
+   "Hello!",
+   "你好!",
+   "Nǐ hǎo!",
+   ""
+  ],
+  [
+   "Hello, everybody!",
+   "大家好!",
+   "Dà jiā hǎo!",
+   ""
+  ],
+  [
+   "Teacher, hello.",
+   "老师好。",
+   "Lǎoshī hǎo.",
+   ""
+  ],
+  [
+   "Teacher, good afternoon.",
+   "老师午安。",
+   "Lǎoshī wǔ ān.",
+   ""
+  ],
+  [
+   "Please listen.",
+   "请听。",
+   "Qǐng tīng.",
+   ""
+  ],
+  [
+   "Please say.",
+   "请说。",
+   "Qǐng shuō.",
+   ""
+  ],
+  [
+   "Please look.",
+   "请看。",
+   "Qǐng kàn.",
+   ""
+  ],
+  [
+   "Welcome!",
+   "欢迎!",
+   "Huān yǐng!",
+   "Slide writes Huān yǐng; standard is huānyíng."
+  ],
+  [
+   "Say it again.",
+   "再说一遍。",
+   "Zài shuō yí biàn.",
+   ""
+  ],
+  [
+   "Everyone pay attention.",
+   "大家注意。",
+   "Dà jiā zhù yi.",
+   "Slide writes 'zhù yi'; standard is zhùyì."
+  ],
+  [
+   "Very good.",
+   "非常好。",
+   "Fēi cháng hǎo.",
+   ""
+  ],
+  [
+   "Please read after me.",
+   "请跟我读。",
+   "Qǐng gēn wǒ dǔ.",
+   "Slide writes dǔ; standard is dú."
+  ],
+  [
+   "Good morning. (classroom)",
+   "早安。",
+   "Zǎo ān.",
+   ""
+  ],
+  [
+   "Good afternoon. (classroom)",
+   "午安。",
+   "Wǔ ān.",
+   ""
+  ]
+ ],
+ "Pronouns & greetings: Practice sentences": [
+  [
+   "You are my teacher.",
+   "你是我的老师。",
+   "Nǐ shì wǒ de lǎo shī.",
+   ""
+  ],
+  [
+   "He/She is not a mouse.",
+   "他不是老鼠。",
+   "Tā bù shì lǎo shǔ",
+   "Tā could be 他 or 她. Spoken as bú shì (bù becomes bú before a 4th tone)."
+  ],
+  [
+   "You (all) drink coffee.",
+   "你们喝咖啡。",
+   "Nǐmen hē kāfēi.",
+   ""
+  ],
+  [
+   "I eat fried rice.",
+   "我吃炒饭。",
+   "Wǒ chī chǎo fàn.",
+   ""
+  ],
+  [
+   "Our teacher is Teacher Huang.",
+   "我们的老师是黄老师。",
+   "Wǒmen de lǎo shī shì Huáng lǎo shī",
+   "Huáng is a surname (most likely 黄)."
+  ],
+  [
+   "I like to eat bread.",
+   "我喜欢吃面包。",
+   "Wǒ xǐ huān chī miàn bāo.",
+   ""
+  ],
+  [
+   "I am a student.",
+   "我是学生。",
+   "Wǒ shì xué shēng.",
+   ""
+  ],
+  [
+   "They are Chinese (people).",
+   "他们是中国人。",
+   "Tāmen shì Zhōng guó rén",
+   ""
+  ],
+  [
+   "Tomorrow is your birthday.",
+   "明天是你的生日。",
+   "Míng tiān shì nǐ de sheng rì.",
+   "Slide writes 'sheng' without a tone mark; standard is shēngrì."
+  ],
+  [
+   "This is Far Eastern University.",
+   "这是远东大学。",
+   "Zhè shì Yuán Dōng dà xué.",
+   "Slide writes Yuán; standard is Yuǎndōng Dàxué."
+  ],
+  [
+   "Fried rice is delicious.",
+   "炒饭好吃。",
+   "Chao fan hǎo chī",
+   "Fill in the tones: chǎofàn hǎochī."
+  ],
+  [
+   "I don't want to drink beer.",
+   "我不要喝啤酒。",
+   "Wǒ bú yào hē pi jiu",
+   "Fill in the tones: píjiǔ."
+  ],
+  [
+   "You (all) have a question / problem.",
+   "你们有问题。",
+   "Nǐ men yǒu wen ti",
+   "Fill in the tones: wèntí."
+  ],
+  [
+   "Chinese (language) is easy.",
+   "中文是容易。",
+   "Zhōng wén shì rong yi",
+   "Fill in the tones: róngyì. Natural Chinese is 中文很容易 (Zhōngwén hěn róngyì)."
+  ],
+  [
+   "This is mine.",
+   "这是我的。",
+   "Zhè shì wo de",
+   "Fill in the tones: wǒ de."
+  ]
+ ],
+ "Pronouns & greetings: Tone practice words": [
+  [
+   "hello",
+   "你好",
+   "ni hao",
+   "Slide shows no tones (practice). Standard: nǐ hǎo."
+  ],
+  [
+   "to know",
+   "知道",
+   "Zhi dao",
+   "Slide shows no tones (practice). Standard: zhīdào."
+  ],
+  [
+   "goodbye",
+   "再见",
+   "Zai jian",
+   "Slide shows no tones (practice). Standard: zàijiàn."
+  ],
+  [
+   "tomorrow",
+   "明天",
+   "Ming tian",
+   "Slide shows no tones (practice). Standard: míngtiān."
+  ],
+  [
+   "ice water",
+   "冰水",
+   "Bing shui",
+   "Slide shows no tones (practice). Standard: bīngshuǐ."
+  ],
+  [
+   "easy",
+   "容易",
+   "rong yi",
+   "Slide shows no tones (practice). Standard: róngyì."
+  ],
+  [
+   "beer",
+   "啤酒",
+   "pi jiu",
+   "Slide shows no tones (practice). Standard: píjiǔ."
+  ],
+  [
+   "China",
+   "中国",
+   "Zhong guo",
+   "Slide shows no tones (practice). Standard: Zhōngguó."
+  ],
+  [
+   "today",
+   "今天",
+   "jin tian",
+   "Slide shows no tones (practice). Standard: jīntiān."
+  ],
+  [
+   "bread",
+   "面包",
+   "mian bao",
+   "Slide shows no tones (practice). Standard: miànbāo."
+  ],
+  [
+   "really / true",
+   "真的",
+   "Zhen de",
+   "Slide shows no tones (practice). Standard: zhēn de."
+  ],
+  [
+   "question / problem",
+   "问题",
+   "Wen ti",
+   "Slide shows no tones (practice). Standard: wèntí."
+  ],
+  [
+   "to like",
+   "喜欢",
+   "Xi huan",
+   "Slide shows no tones (practice). Standard: xǐhuan."
+  ],
+  [
+   "here",
+   "这里",
+   "Zhe li",
+   "Slide shows no tones (practice). Standard: zhèlǐ."
+  ],
+  [
+   "to get up (out of bed)",
+   "起床",
+   "Qi chuang",
+   "Slide shows no tones (practice). Standard: qǐchuáng."
+  ],
+  [
+   "fried rice",
+   "炒饭",
+   "chao fan",
+   "Slide shows no tones (practice). Standard: chǎofàn."
+  ],
+  [
+   "thank you",
+   "谢谢",
+   "xie xie",
+   "Slide shows no tones (practice). Standard: xièxie."
+  ],
+  [
+   "next year",
+   "明年",
+   "ming nian",
+   "Slide shows no tones (practice). Standard: míngnián."
+  ],
+  [
+   "my / mine",
+   "我的",
+   "wo de",
+   "Slide shows no tones (practice). Standard: wǒ de."
+  ],
+  [
+   "what",
+   "什么",
+   "shen me",
+   "Slide shows no tones (practice). Standard: shénme."
+  ]
+ ]
+};
+
+let deckName = Object.keys(DECKS)[0], order = [], i = 0, flipped = false, reverse = false;
+const $ = id => document.getElementById(id);
+
+function load(name) {
+  deckName = name; order = DECKS[name].map((_, k) => k); i = 0; flipped = false;
+  document.querySelectorAll("#decks button").forEach(b => b.classList.toggle("on", b.textContent === name));
+  render();
+}
+function esc(s) { return s.replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c])); }
+function render() {
+  const [en, hz, py, note] = DECKS[deckName][order[i]];
+  const isFacts = !hz;
+  const showMandarin = reverse && !isFacts ? !flipped : flipped;
+  let html;
+  if (!showMandarin) {
+    html = `<div class="tag">${isFacts ? "Answer out loud" : "Say it in Mandarin"}</div><div class="front">${esc(en)}</div>`;
+  } else {
+    html = (hz ? `<div class="hz">${esc(hz)}</div>` : "") + `<div class="py">${esc(py)}</div>`;
+    if (reverse && !isFacts && !flipped) html = `<div class="tag">Read it aloud. What does it mean?</div>` + html;
+    else if (!isFacts || note) html += (reverse && !isFacts ? `<div class="note">${esc(en)}</div>` : "") + (note ? `<div class="note">${esc(note)}</div>` : "");
+  }
+  html += `<div class="hint">${flipped ? "" : "Say it first, then tap to flip"}</div>`;
+  $("card").innerHTML = html;
+  $("count").textContent = `${i + 1} / ${order.length}`;
+}
+function move(d) { i = (i + d + order.length) % order.length; flipped = false; render(); }
+
+Object.keys(DECKS).forEach(name => {
+  const b = document.createElement("button"); b.textContent = name; b.onclick = () => load(name); $("decks").appendChild(b);
+});
+$("card").onclick = () => { flipped = !flipped; render(); };
+$("prev").onclick = () => move(-1);
+$("next").onclick = () => move(1);
+$("shuffle").onclick = () => { for (let k = order.length - 1; k > 0; k--) { const j = Math.floor(Math.random() * (k + 1)); [order[k], order[j]] = [order[j], order[k]]; } i = 0; flipped = false; render(); };
+$("reverse").onclick = () => { reverse = !reverse; $("reverse").textContent = `Show pinyin first: ${reverse ? "on" : "off"}`; flipped = false; render(); };
+$("speak").onclick = () => {
+  const [, hz] = DECKS[deckName][order[i]];
+  if (!hz || !("speechSynthesis" in window)) return;
+  const u = new SpeechSynthesisUtterance(hz.replace(/___/g, ""));
+  u.lang = "zh-CN"; u.rate = 0.8;
+  const v = speechSynthesis.getVoices().find(v => v.lang.startsWith("zh"));
+  if (!v) { alert("No Chinese voice installed on this device. Windows: Settings > Time & language > Speech > Add voices > Chinese (Simplified)."); return; }
+  u.voice = v; speechSynthesis.cancel(); speechSynthesis.speak(u);
+};
+document.addEventListener("keydown", e => {
+  if (e.key === " ") { e.preventDefault(); flipped = !flipped; render(); }
+  if (e.key === "ArrowRight") move(1);
+  if (e.key === "ArrowLeft") move(-1);
+});
+load(deckName);
+</script>
+</body>
+</html>

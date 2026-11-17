@@ -1,0 +1,2879 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>InfoSec Finals Review</title>
+<style>
+  :root { --bg:#f4f5f8; --card:#fff; --ink:#1d2230; --muted:#5f667a; --accent:#3a5bb8; --line:#d6d9e3; --good:#2c7a4b; --bad:#b83a3a; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#13161d; --card:#1d212b; --ink:#e8eaf0; --muted:#9aa1b4; --accent:#8aa6ff; --line:#2f3442; --good:#6fcf97; --bad:#ff8a8a; } }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font-family:system-ui, "Segoe UI", sans-serif; }
+  main { max-width:680px; margin:0 auto; padding:16px; }
+  h1 { font-size:1.2rem; margin:8px 0 4px; }
+  .rule { color:var(--muted); font-size:.9rem; margin:0 0 14px; }
+  .tabs, .decks { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px; }
+  button { font:inherit; border:1px solid var(--line); background:var(--card); color:var(--ink); border-radius:8px; padding:8px 12px; cursor:pointer; }
+  button.on { background:var(--accent); color:var(--bg); border-color:var(--accent); }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:14px; min-height:240px; padding:24px; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; cursor:pointer; user-select:none; }
+  .tag { font-size:.75rem; color:var(--muted); text-transform:uppercase; letter-spacing:.05em; margin-bottom:12px; }
+  .front { font-size:1.3rem; white-space:pre-line; }
+  .back { font-size:1.05rem; white-space:pre-line; line-height:1.5; }
+  .hint { font-size:.85rem; color:var(--muted); margin-top:18px; }
+  .row { display:flex; gap:8px; justify-content:space-between; align-items:center; margin-top:12px; flex-wrap:wrap; }
+  .count { color:var(--muted); font-size:.9rem; }
+  .panel { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:20px; }
+  .q { font-size:1.1rem; margin-bottom:14px; line-height:1.45; }
+  .opts { display:flex; flex-direction:column; gap:8px; }
+  .opts button { text-align:left; }
+  .opts button.right { border-color:var(--good); color:var(--good); font-weight:600; }
+  .opts button.wrong { border-color:var(--bad); color:var(--bad); }
+  .why { margin-top:12px; color:var(--muted); font-size:.95rem; }
+  textarea { width:100%; min-height:180px; font:inherit; padding:10px; border-radius:8px; border:1px solid var(--line); background:var(--bg); color:var(--ink); }
+  ul.check { margin:10px 0 0; padding-left:20px; line-height:1.5; }
+  .hidden { display:none; }
+</style>
+</head>
+<body>
+<main>
+  <h1>InfoSec (IT201) Finals Review: Modules 2 to 9</h1>
+  <p class="rule">Answer out loud or in your head BEFORE you flip. If you get a card wrong, say the answer out loud once, then move on.</p>
+  <div class="tabs" id="tabs"></div>
+
+  <section id="fc">
+    <div class="decks" id="decks"></div>
+    <div class="card" id="card"></div>
+    <div class="row">
+      <button id="prev">&larr; Prev</button>
+      <span class="count" id="count"></span>
+      <button id="next">Next &rarr;</button>
+    </div>
+    <div class="row"><button id="shuffle">Shuffle</button></div>
+  </section>
+
+  <section id="qz" class="hidden">
+    <div class="panel" id="qpanel"></div>
+  </section>
+
+  <section id="es" class="hidden">
+    <p class="rule">If the exam has an essay part, practice here. Write your answer first, then press Check and see which points you hit. Aim for correct module terms, a clear explanation, and a concrete example.</p>
+    <div class="panel">
+      <div class="tag" id="etag"></div>
+      <div class="q" id="eq"></div>
+      <textarea id="ea" placeholder="Write your answer here..."></textarea>
+      <div class="row">
+        <button id="eprev">&larr; Prev</button>
+        <button id="echeck">Check</button>
+        <button id="enext">Next &rarr;</button>
+      </div>
+      <div id="ekey" class="hidden"><div class="why">A strong answer mentions:</div><ul class="check" id="elist"></ul></div>
+    </div>
+  </section>
+</main>
+<script>
+// [front, back]
+const DECKS = {
+ "M2: Cybersecurity World & Criminals": [
+  [
+   "Responsibility of businesses that harness the power of data",
+   "To protect this data from misuse and unauthorized access."
+  ],
+  [
+   "Examples of organizations that provide important services using data (Cybersecurity Domains)",
+   "Google, LinkedIn, Amazon."
+  ],
+  [
+   "What does the growth in data collection and analytics pose?",
+   "Great risks to individuals and modern life if precautions are not taken to protect sensitive data from criminals or others who intend harm."
+  ],
+  [
+   "GIS",
+   "Geospatial Information Systems - a new technology that depends on collecting and analyzing tremendous amounts of data."
+  ],
+  [
+   "IoE",
+   "Internet of Everything - a new technology that depends on collecting and analyzing tremendous amounts of data."
+  ],
+  [
+   "Benefits of the growing collection of data",
+   "It can help people save energy, improve efficiencies, and reduce safety risks."
+  ],
+  [
+   "Hackers",
+   "Criminals who break into computers or networks to gain access for various reasons."
+  ],
+  [
+   "The 3 types of hackers (by hat color)",
+   "White hat, Gray hat, Black hat."
+  ],
+  [
+   "White hat attackers",
+   "Break into networks or computer systems to discover weaknesses in order to improve the security of these systems."
+  ],
+  [
+   "Gray hat attackers",
+   "Somewhere between white and black hat; may find a vulnerability and report it to the owners if that action coincides with their agenda."
+  ],
+  [
+   "Black hat attackers",
+   "Unethical criminals who violate computer and network security for personal gain, or for malicious reasons such as attacking networks."
+  ],
+  [
+   "The 5 forms of criminals (by motive)",
+   "Script Kiddies, Vulnerability Brokers, Hacktivists, Cyber Criminals, State Sponsored Hackers."
+  ],
+  [
+   "Script Kiddies",
+   "Teenagers or hobbyists mostly limited to pranks and vandalism; little or no skill; often use existing tools or instructions found on the Internet."
+  ],
+  [
+   "Vulnerability Brokers",
+   "Grey hat hackers who attempt to discover exploits and report them to vendors, sometimes for prizes or rewards."
+  ],
+  [
+   "Hacktivists",
+   "Grey hat hackers who rally and protest against political and social ideas by posting articles, videos, leaking sensitive information, and performing DDoS attacks."
+  ],
+  [
+   "DDoS",
+   "Distributed denial of service - an attack hacktivists perform against organizations or governments."
+  ],
+  [
+   "Cyber Criminals",
+   "Black hat hackers, self-employed or working for large cybercrime organizations; responsible for stealing billions of dollars each year from consumers and businesses."
+  ],
+  [
+   "State Sponsored Hackers",
+   "White hat or black hat (depending on perspective) hackers who steal government secrets, gather intelligence, and sabotage networks. Targets: foreign governments, terrorist groups, and corporations."
+  ],
+  [
+   "How many countries participate in state-sponsored hacking?",
+   "Most countries in the world participate to some degree."
+  ]
+ ],
+ "M2: Thwarting Cybercrime & Threat Arenas": [
+  [
+   "The 5 coordinated actions (tools) for thwarting cybercrime",
+   "Vulnerability Database, Early Warning Systems, Share Cyber Intelligence, ISM Standards, New Laws."
+  ],
+  [
+   "Vulnerability Database example",
+   "The National Common Vulnerabilities and Exposures (CVE) database - a publicly available database of all known vulnerabilities."
+  ],
+  [
+   "CVE",
+   "Common Vulnerabilities and Exposures."
+  ],
+  [
+   "Early Warning Systems example",
+   "The Honeynet project, which provides a HoneyMap displaying real-time visualization of attacks."
+  ],
+  [
+   "HoneyMap",
+   "Provided by the Honeynet project; displays real-time visualization of attacks."
+  ],
+  [
+   "Share Cyber Intelligence example",
+   "InfraGard - a partnership with the private sector dedicated to sharing information and intelligence to prevent hostile cyberattacks."
+  ],
+  [
+   "ISM Standards example",
+   "The ISO 27000 standards - provide a framework for implementing cybersecurity measures within an organization."
+  ],
+  [
+   "New Laws - which group tracks cybersecurity laws?",
+   "ISACA."
+  ],
+  [
+   "Examples of cybersecurity laws (New Laws)",
+   "Cybersecurity Act, Federal Exchange Data Breach Notification Act, Data Accountability and Trust Act."
+  ],
+  [
+   "Cybersecurity threat",
+   "The possibility that a harmful event, such as an attack, will occur."
+  ],
+  [
+   "Cyber vulnerability",
+   "A weakness that makes a target susceptible to an attack."
+  ],
+  [
+   "4 sources of data from established organizations (Threat Arenas)",
+   "Personal Information, Medical Records, Education Records, Employment and Financial Records."
+  ],
+  [
+   "Network services that are prime targets for cyber criminals",
+   "DNS, HTTP, and Online Databases."
+  ],
+  [
+   "Packet sniffers",
+   "Tools that capture data streams by monitoring and recording all information coming across a network."
+  ],
+  [
+   "Rogue devices example",
+   "Unsecured Wi-Fi access points."
+  ],
+  [
+   "Packet forgery (packet injection)",
+   "Interferes with an established network communication by constructing packets to appear as if they are part of a communication."
+  ],
+  [
+   "4 domains in the threat arena",
+   "Manufacturing, Energy Production and Distribution, Communication, Transportation systems."
+  ],
+  [
+   "Manufacturing domain includes",
+   "Industry Controls, Automation, SCADA."
+  ],
+  [
+   "Energy Production and Distribution domain includes",
+   "Electrical Distribution and Smart Grid, Oil and Gas."
+  ],
+  [
+   "Communication domain includes",
+   "Phone, Email, Messaging."
+  ],
+  [
+   "Transportation systems domain includes",
+   "Air Travel, Rail, Over the Road."
+  ],
+  [
+   "Personal level responsibility",
+   "Safeguard his or her identity, data, and computing devices."
+  ],
+  [
+   "Corporate level responsibility",
+   "Employees protect the organization's reputation, data, and customers."
+  ],
+  [
+   "State level - what is at stake?",
+   "National security and the citizens' safety and well-being."
+  ],
+  [
+   "NSA",
+   "National Security Agency - responsible for intelligence collection and surveillance activities in the U.S."
+  ],
+  [
+   "Conflict in protecting people's way of life",
+   "It often conflicts with their right to privacy."
+  ]
+ ],
+ "M2: How Threats Spread & Complexity": [
+  [
+   "2 origins of attacks",
+   "Internal (from within the organization) and External (from outside)."
+  ],
+  [
+   "Examples of internal users",
+   "An employee or contract partner."
+  ],
+  [
+   "Why can internal threats cause greater damage than external threats?",
+   "Internal users have direct access to the building and its infrastructure devices, and knowledge of the corporate network, resources, confidential data, security countermeasures, policies, and higher administrative privileges."
+  ],
+  [
+   "External security threats",
+   "Amateurs or skilled attackers exploit vulnerabilities in networked devices, or use social engineering (trickery), to gain access to internal resources."
+  ],
+  [
+   "BYOD",
+   "Bring Your Own Device - a growing trend of using personal mobile devices to access enterprise information."
+  ],
+  [
+   "Threat posed by mobile devices",
+   "The inability to centrally manage and update mobile devices on the organization's network."
+  ],
+  [
+   "IoT",
+   "Internet of Things - the collection of technologies that enable the connection of various devices to the Internet."
+  ],
+  [
+   "Examples of IoT devices",
+   "Appliances, locks, motors, and entertainment devices."
+  ],
+  [
+   "What led to the exponential growth of data?",
+   "IoT connections, plus expanded storage capacity and storage services offered through the Cloud and virtualization."
+  ],
+  [
+   "Big data",
+   "Data sets that are large and complex, making traditional data processing applications inadequate."
+  ],
+  [
+   "The 3 dimensions of big data",
+   "Volume (amount of data), Velocity (speed of data), Variety (range of data types and sources)."
+  ],
+  [
+   "Velocity (big data)",
+   "The speed of data."
+  ],
+  [
+   "Variety (big data)",
+   "The range of data types and sources."
+  ],
+  [
+   "APT",
+   "Advanced persistent threat - a continuous computer hack that occurs under the radar against a specific object, usually for business or political motives."
+  ],
+  [
+   "Algorithm attacks",
+   "Track system self-reporting data (like energy use) to select targets or trigger false alerts; exploit designs meant to improve energy savings, decrease failures, and improve efficiencies."
+  ],
+  [
+   "Intelligent selection of victims",
+   "Sophisticated attacks only launch if the attacker can match the signatures of the targeted victim (instead of picking low hanging fruit)."
+  ],
+  [
+   "Federated identity management",
+   "Multiple enterprises let their users use the same identification credentials to access the networks of all enterprises in the group."
+  ],
+  [
+   "Most common way to protect federated identity",
+   "Tie login ability to an authorized device."
+  ],
+  [
+   "TDoS",
+   "Telephone denial of service - uses phone calls against a target telephone network, tying up the system and preventing legitimate calls."
+  ],
+  [
+   "Why are next generation 911 call centers vulnerable?",
+   "They use Voice-over-IP (VoIP) systems rather than traditional landlines."
+  ],
+  [
+   "Heightened recognition of cyber threats",
+   "Cyberattacks now head the list of greatest threats to national and economic security in most countries."
+  ]
+ ],
+ "M2: Creating More Experts": [
+  [
+   "NIST",
+   "National Institute of Standards and Technologies - created the Workforce Framework for cybersecurity in the U.S."
+  ],
+  [
+   "Purpose of the NIST Workforce Framework",
+   "Enables companies to identify the major types of responsibilities, job titles, and workforce skills needed."
+  ],
+  [
+   "The 7 categories of cybersecurity work",
+   "Operate and Maintain, Protect and Defend, Investigate, Collect and Operate, Analyze, Oversight and Development, Securely Provision."
+  ],
+  [
+   "Operate and Maintain",
+   "Providing support, administration, and maintenance required to ensure IT system performance and security."
+  ],
+  [
+   "Protect and Defend",
+   "Identification, analysis, and mitigation of threats to internal systems and networks."
+  ],
+  [
+   "Investigate",
+   "Investigation of cyber events and/or cyber crimes involving IT resources."
+  ],
+  [
+   "Collect and Operate",
+   "Specialized denial and deception operations and the collection of cybersecurity information."
+  ],
+  [
+   "Analyze",
+   "Highly specialized review and evaluation of incoming cybersecurity information to determine if it is useful for intelligence."
+  ],
+  [
+   "Oversight and Development",
+   "Leadership, management, and direction to conduct cybersecurity work effectively."
+  ],
+  [
+   "Securely Provision",
+   "Conceptualizing, designing, and building secure IT systems."
+  ],
+  [
+   "What defines common types of cybersecurity work within each category?",
+   "Specialty areas."
+  ],
+  [
+   "Why must cybersecurity specialists have hacker skills?",
+   "They must have the same skills as hackers, especially black hat hackers, in order to protect against attacks."
+  ],
+  [
+   "A great way to build cybersecurity knowledge, skills and abilities",
+   "Student skills competitions."
+  ],
+  [
+   "CompTIA Security+",
+   "Certifies the competency of IT administrators in information assurance."
+  ],
+  [
+   "CEH",
+   "EC-Council Certified Ethical Hacker - intermediate-level; holders possess skills and knowledge for various hacking practices."
+  ],
+  [
+   "GSEC",
+   "SANS GIAC Security Essentials - a good entry-level credential; understanding of security terminology/concepts and hands-on skills."
+  ],
+  [
+   "CISSP",
+   "(ISC)^2 Certified Information Systems Security Professional - vendor-neutral, for those with a great deal of technical and managerial experience; approved by U.S. DoD."
+  ],
+  [
+   "CISM",
+   "ISACA Certified Information Security Manager - for those managing, developing and overseeing enterprise information security systems or developing best security practices."
+  ],
+  [
+   "Company sponsored certifications",
+   "Measure knowledge and competency in installing, configuring, and maintaining vendor products (e.g., Cisco, Microsoft)."
+  ],
+  [
+   "CCNA Security",
+   "Validates knowledge and skills required to secure Cisco networks."
+  ],
+  [
+   "4 tips for becoming a cybersecurity specialist",
+   "Study, Pursue Certifications, Pursue Internships, Join Professional Organizations."
+  ]
+ ],
+ "M3: The Cube & CIA Triad": [
+  [
+   "Another name for the Cybersecurity Cube",
+   "The McCumber Cube."
+  ],
+  [
+   "The 3 dimensions of the cybersecurity cube",
+   "Principles of Security (CIA), States of Data, Cybersecurity Safeguards."
+  ],
+  [
+   "First dimension of the cube",
+   "The goals to protect the cyber world - the foundational principles: confidentiality, integrity, availability."
+  ],
+  [
+   "CIA",
+   "Confidentiality, Integrity, Availability."
+  ],
+  [
+   "Second dimension of the cube",
+   "The problems of protecting all of the states of data."
+  ],
+  [
+   "The 3 states of data",
+   "Data at rest (storage), Data in transit, Data in process."
+  ],
+  [
+   "Third dimension of the cube",
+   "Cybersecurity Safeguards - the types of powers used to protect the cyber world."
+  ],
+  [
+   "The 3 types of safeguards (powers)",
+   "Technologies, Policies and Practices, People."
+  ],
+  [
+   "Technologies (safeguard)",
+   "Devices and products available to protect information systems and fend off cyber criminals."
+  ],
+  [
+   "Policies and Practices (safeguard)",
+   "Procedures and guidelines that enable citizens of the cyber world to stay safe and follow good practices."
+  ],
+  [
+   "People (safeguard)",
+   "Aware and knowledgeable about their world and the dangers that threaten it."
+  ],
+  [
+   "Confidentiality",
+   "Prevents the disclosure of information to unauthorized people, resources and processes."
+  ],
+  [
+   "Another term for confidentiality",
+   "Privacy."
+  ],
+  [
+   "Methods used to ensure confidentiality",
+   "Data encryption, authentication, and access control."
+  ],
+  [
+   "Sensitive information",
+   "Data protected from unauthorized access to safeguard an individual or an organization."
+  ],
+  [
+   "AAA",
+   "Authentication, Authorization and Accounting."
+  ],
+  [
+   "Authentication",
+   "Verifies the identity of a user to prevent unauthorized access (e.g., username or I.D.)."
+  ],
+  [
+   "Authorization",
+   "Determines which resources users can access, the operations they can perform, and when they have access."
+  ],
+  [
+   "Accounting",
+   "Keeps track of what users do: what they access, how long, and any changes made."
+  ],
+  [
+   "Privacy (vs confidentiality)",
+   "The appropriate use of data; data should only be used for its intended purpose."
+  ],
+  [
+   "Confidential information status",
+   "Non-public status; maintaining confidentiality is more of an ethical duty."
+  ],
+  [
+   "Integrity",
+   "The accuracy, consistency, and trustworthiness of data during its entire life cycle."
+  ],
+  [
+   "Another term for integrity",
+   "Quality."
+  ],
+  [
+   "Methods used to ensure integrity",
+   "Hashing, data validation checks, data consistency checks, and access controls."
+  ],
+  [
+   "Integrity check",
+   "Measures the consistency of a collection of data; uses a hash function to take a snapshot of data at an instant in time."
+  ],
+  [
+   "Availability",
+   "The need to maintain availability of information systems and services at all times."
+  ],
+  [
+   "3 design principles of high availability systems",
+   "Eliminate single points of failure, provide for reliable crossover, detect failures as they occur."
+  ],
+  [
+   "7 ways organizations ensure availability",
+   "Equipment maintenance, OS and system updates, Test backups, Plan for disasters, Implement new technologies, Monitor unusual activity, Test to verify availability."
+  ]
+ ],
+ "M3: States of Data": [
+  [
+   "Data at rest",
+   "Stored data; a storage device retains the data when no user or process is using it."
+  ],
+  [
+   "2 locations of storage devices",
+   "Local (on a computing device) or centralized (on the network)."
+  ],
+  [
+   "DAS",
+   "Direct-attached storage - storage connected to a computer (e.g., hard drive, USB flash drive)."
+  ],
+  [
+   "RAID",
+   "Redundant array of independent disks - multiple hard drives combined so the OS sees them as a single disk; improved performance and fault tolerance."
+  ],
+  [
+   "NAS",
+   "Network attached storage - storage connected to a network for centralized storage/retrieval by authorized users; flexible and scalable."
+  ],
+  [
+   "SAN",
+   "Storage area network - network-based storage system using high-speed interfaces to connect multiple servers to a centralized disk storage repository."
+  ],
+  [
+   "Data in transit",
+   "Data transmission - sending information from one device to another."
+  ],
+  [
+   "3 methods of transmitting data",
+   "Sneaker net, Wired networks, Wireless networks."
+  ],
+  [
+   "Sneaker net",
+   "Uses removable media to physically move data from one computer to another."
+  ],
+  [
+   "Wired networks",
+   "Use cables to transmit data."
+  ],
+  [
+   "Wireless networks",
+   "Use the airwaves to transmit data."
+  ],
+  [
+   "3 greatest challenges in protecting data in transit",
+   "Protecting data confidentiality, integrity, and availability."
+  ],
+  [
+   "Data in transit - confidentiality threat",
+   "Cyber criminals can capture, save and steal data in transit."
+  ],
+  [
+   "Data in transit - integrity threat",
+   "Cyber criminals can intercept and alter data in transit."
+  ],
+  [
+   "Data in transit - availability threat",
+   "Cyber criminals can use rogue or unauthorized devices to interrupt data availability."
+  ],
+  [
+   "Data in process",
+   "Data during initial input, modification, computation, or output."
+  ],
+  [
+   "Where does protection of data integrity start?",
+   "With the initial input of data."
+  ],
+  [
+   "Methods to collect data",
+   "Manual data entry, scanning forms, file uploads, data collected from sensors."
+  ],
+  [
+   "Data modification",
+   "Any changes to original data: users manually modifying, programs processing/changing, equipment failing."
+  ],
+  [
+   "Examples of data modification processes",
+   "Encoding/decoding, compression/decompression, encryption/decryption."
+  ],
+  [
+   "What results in data corruption?",
+   "Malicious code."
+  ]
+ ],
+ "M3: Countermeasures & ISO Framework": [
+  [
+   "4 categories of technology safeguards",
+   "Software-based, Hardware-based, Network-based, Cloud-based."
+  ],
+  [
+   "Software-based safeguards",
+   "Programs and services that protect operating systems, databases, and other services on workstations, portable devices, and servers."
+  ],
+  [
+   "Hardware-based safeguards (examples)",
+   "Firewall appliances, IDS, IPS, and content filtering systems."
+  ],
+  [
+   "IDS / IPS",
+   "Intrusion Detection System / Intrusion Prevention System."
+  ],
+  [
+   "VPN",
+   "Virtual Private Network - secure virtual network over the public network; security lies in encryption of packet content between endpoints."
+  ],
+  [
+   "NAC",
+   "Network access control - requires a set of checks (e.g., up-to-date antivirus, OS updates) before a device connects to a network."
+  ],
+  [
+   "Wireless access point security",
+   "Implementation of authentication and encryption."
+  ],
+  [
+   "Cloud-based technologies",
+   "Shift the technology component from the organization to the cloud provider."
+  ],
+  [
+   "SaaS",
+   "Software as a Service - access to application software and databases; provider manages infrastructure; data stored on provider's servers."
+  ],
+  [
+   "IaaS",
+   "Infrastructure as a Service - virtualized computing resources over the Internet; provider hosts hardware, software, servers, storage."
+  ],
+  [
+   "Virtual security appliances",
+   "Run inside a virtual environment with a pre-packaged, hardened OS on virtualized hardware."
+  ],
+  [
+   "4 ways to implement a formal security training program",
+   "Part of onboarding; tie to job requirements or performance evaluations; in-person training sessions; online courses."
+  ],
+  [
+   "Why should security awareness be ongoing?",
+   "New threats and techniques are always on the horizon."
+  ],
+  [
+   "Security policy",
+   "A set of security objectives for a company, including rules of behavior for users and administrators and system requirements."
+  ],
+  [
+   "Standards",
+   "Help IT staff maintain consistency in operating the network; provide the technologies specific users or programs need."
+  ],
+  [
+   "Guidelines",
+   "Suggestions on how to do things more efficiently and securely; more flexible than standards, not usually mandatory."
+  ],
+  [
+   "Procedures",
+   "Longer and more detailed than standards and guidelines; step-by-step instructions and graphics."
+  ],
+  [
+   "ISO / IEC",
+   "International Organization for Standardization / International Electrotechnical Commission - developed a framework to guide information security management."
+  ],
+  [
+   "The ISO cybersecurity model is to cybersecurity professionals what ___ is to network engineers",
+   "The OSI networking model."
+  ],
+  [
+   "ISO/IEC 27000 publication and revision years",
+   "Published in 2005, revised in 2013."
+  ],
+  [
+   "Are ISO 27000 standards mandatory?",
+   "No, but most countries use them as a de facto framework."
+  ],
+  [
+   "ISO 27001 control objectives",
+   "Serve as a checklist; relate to policies, procedures and guidelines determined by upper management."
+  ],
+  [
+   "ISO 27002 controls",
+   "Provide technical direction."
+  ],
+  [
+   "Who is responsible for data in transmission?",
+   "The network security group."
+  ],
+  [
+   "Who is responsible for data during processing?",
+   "Programmers and data entry people."
+  ],
+  [
+   "Who is responsible for stored data?",
+   "The hardware and server support specialists."
+  ],
+  [
+   "Who implements equipment to fulfill policy directives?",
+   "IT professionals (not upper management)."
+  ],
+  [
+   "ISMS",
+   "Information security management system."
+  ],
+  [
+   "How many domains does the ISO model have (per chapter summary)?",
+   "Twelve domains."
+  ]
+ ],
+ "M4: Malware Types": [
+  [
+   "How do cyber criminals target users' end devices?",
+   "Through the installation of malware."
+  ],
+  [
+   "Types of malware covered in Module 4 (first slides)",
+   "Virus\nWorm\nTrojan horse\nLogic bomb\nRansomware\nBackdoors and rootkits"
+  ],
+  [
+   "Virus",
+   "Malicious executable code attached to another executable file, such as a legitimate program. Most require end-user initiation and can activate at a specific time or date."
+  ],
+  [
+   "Do most viruses require end-user initiation?",
+   "Yes. Most viruses require end-user initiation, and can activate at a specific time or date."
+  ],
+  [
+   "Worm",
+   "Malicious code that replicates by independently exploiting vulnerabilities in networks. Worms usually slow down networks."
+  ],
+  [
+   "Virus vs. worm",
+   "A virus requires a host program to run; worms can run by themselves. Other than the initial infection, worms no longer require user participation."
+  ],
+  [
+   "Trojan horse",
+   "Malware that carries out malicious operations under the guise of a desired operation, such as playing an online game. It exploits the privileges of the user that runs it."
+  ],
+  [
+   "How does a Trojan horse differ from a virus?",
+   "The Trojan binds itself to non-executable files, such as image files, audio files, or games."
+  ],
+  [
+   "Logic bomb",
+   "A malicious program that uses a trigger to awaken the malicious code. It remains inactive until the trigger event happens, then implements code that causes harm to a computer."
+  ],
+  [
+   "Examples of logic bomb triggers",
+   "Dates, times, other programs running, or the deletion of a user account."
+  ],
+  [
+   "Ransomware",
+   "Holds a computer system, or the data it contains, captive until the target makes a payment."
+  ],
+  [
+   "How does ransomware usually work?",
+   "By encrypting data in the computer with a key unknown to the user."
+  ],
+  [
+   "Backdoor",
+   "Program or code introduced by a criminal who has compromised a system. It bypasses the normal authentication used to access a system."
+  ],
+  [
+   "Rootkit",
+   "Modifies the operating system to create a backdoor. Attackers then use the backdoor to access the computer remotely."
+  ],
+  [
+   "What does a backdoor bypass?",
+   "The normal authentication used to access a system."
+  ],
+  [
+   "Which malware stays inactive until a trigger event happens?",
+   "Logic bomb"
+  ],
+  [
+   "Which malware can run by itself without a host program?",
+   "Worm"
+  ]
+ ],
+ "M4: Email & Browser Attacks": [
+  [
+   "Why has email become a major vulnerability?",
+   "Email is a universal service used by billions worldwide; as one of the most popular services, it has become a major vulnerability to users and organizations."
+  ],
+  [
+   "Spam",
+   "Also known as junk mail; unsolicited email. In most cases a method of advertising, but it can send harmful links, malware, or deceptive content."
+  ],
+  [
+   "Spyware",
+   "Software that enables a criminal to obtain information about a user's computer activities."
+  ],
+  [
+   "What does spyware often include?",
+   "Activity trackers, keystroke collection, and data capture. It often modifies security settings to overcome security measures."
+  ],
+  [
+   "Adware",
+   "Typically displays annoying pop-ups to generate revenue for its authors. It may track websites visited and send pop-up advertising pertinent to those sites."
+  ],
+  [
+   "Scareware",
+   "Persuades the user to take a specific action based on fear. It forges popup windows that resemble operating system dialogue windows."
+  ],
+  [
+   "Phishing",
+   "A form of fraud. Criminals use email, instant messaging, or other social media to gather information such as login credentials or account information by masquerading as a reputable entity or person."
+  ],
+  [
+   "Intent of a phishing message",
+   "To trick the recipient into installing malware on his or her device or into sharing personal or financial information."
+  ],
+  [
+   "Spear phishing",
+   "A highly targeted phishing attack that sends customized emails to a specific person."
+  ],
+  [
+   "Vishing",
+   "Phishing using voice communication technology. Criminals can spoof calls from legitimate sources using VoIP; victims may also receive a recorded message that appears legitimate."
+  ],
+  [
+   "VoIP",
+   "Voice over IP (used by criminals to spoof calls in vishing)"
+  ],
+  [
+   "Pharming",
+   "The impersonation of a legitimate website in an effort to deceive users into entering their credentials."
+  ],
+  [
+   "Whaling",
+   "A phishing attack that targets high profile targets within an organization, such as senior executives."
+  ],
+  [
+   "Plugins (example)",
+   "The Flash and Shockwave plugins from Adobe enable graphic and cartoon animations that enhance a web page. Plugins display content developed using the appropriate software."
+  ],
+  [
+   "SEO",
+   "Search Engine Optimization: a set of techniques used to improve a website's ranking by a search engine."
+  ],
+  [
+   "SEO poisoning",
+   "Uses SEO to make a malicious website appear higher in search results."
+  ],
+  [
+   "Browser hijacker",
+   "Malware that alters a computer's browser settings to redirect the user to websites paid for by the cyber criminals' customers."
+  ],
+  [
+   "How does a browser hijacker usually install?",
+   "Without the user's permission, usually as part of a drive-by download."
+  ]
+ ],
+ "M4: Social Engineering & Deception": [
+  [
+   "Social engineering",
+   "A completely nontechnical means for a criminal to gather information on a target; an attack that attempts to manipulate individuals into performing actions or divulging confidential information."
+  ],
+  [
+   "What do social engineers rely on?",
+   "People's willingness to be helpful; they also prey on people's weaknesses."
+  ],
+  [
+   "Types of social engineering / deception covered",
+   "Pretexting\nSomething for Something (Quid pro quo)\nShoulder surfing and dumpster diving\nImpersonation and hoaxes\nPiggybacking and tailgating\nOnline, email, and web-based trickery"
+  ],
+  [
+   "Pretexting",
+   "An attacker calls an individual and lies to them in an attempt to gain access to privileged data."
+  ],
+  [
+   "Pretexting example",
+   "An attacker pretends to need personal or financial data in order to confirm the identity of the recipient."
+  ],
+  [
+   "Quid pro quo (Something for Something)",
+   "An attacker requests personal information from a party in exchange for something, like a gift."
+  ],
+  [
+   "Shoulder surfing and dumpster diving",
+   "Picking up PINs, access codes, or credit card numbers."
+  ],
+  [
+   "How can an attacker shoulder surf?",
+   "By being in close proximity to the victim, or by using binoculars or closed circuit cameras."
+  ],
+  [
+   "Impersonation",
+   "The action of pretending to be someone else."
+  ],
+  [
+   "Impersonation example from the module",
+   "A phone scam targeting taxpayers: a criminal posing as an IRS employee told victims they owed money to the IRS."
+  ],
+  [
+   "Piggybacking",
+   "When a criminal tags along with an authorized person to gain entry into a secure location or restricted area."
+  ],
+  [
+   "Another term for piggybacking",
+   "Tailgating"
+  ],
+  [
+   "Online, email, and web-based trickery",
+   "Forwarding hoax emails, jokes, funny movies, and non-work-related emails at work may violate the company's acceptable use policy and result in disciplinary actions."
+  ],
+  [
+   "Is social engineering technical or nontechnical?",
+   "Completely nontechnical."
+  ]
+ ],
+ "M4: Network & Wireless Attacks": [
+  [
+   "Denial-of-Service (DoS)",
+   "A type of network attack that results in some sort of interruption of network services to users, devices, or applications."
+  ],
+  [
+   "Why are DoS attacks a major risk?",
+   "They can easily interrupt communication and cause significant loss of time and money, and are relatively simple to conduct, even by an unskilled attacker."
+  ],
+  [
+   "Sniffing",
+   "Similar to eavesdropping: attackers examine all network traffic as it passes through their NIC, whether or not it is addressed to them. Done with software, hardware, or both."
+  ],
+  [
+   "Spoofing",
+   "An impersonation attack that takes advantage of a trusted relationship between two systems."
+  ],
+  [
+   "Man-in-the-middle (MitM)",
+   "A criminal intercepts communications between computers to steal information crossing the network; can manipulate messages and relay false information between hosts. Allows control over a device without the user's knowledge."
+  ],
+  [
+   "Zero-day attack",
+   "An attack that tries to exploit software vulnerabilities that are unknown or undisclosed by the software vendor. Also called a zero-day threat."
+  ],
+  [
+   "Zero hour",
+   "The moment when someone discovers the exploit."
+  ],
+  [
+   "Keyboard logging",
+   "A software program that records or logs the keystrokes of the user. Can be implemented through software or hardware physically attached to a computer; the log file can be emailed to the criminal."
+  ],
+  [
+   "Grayware",
+   "Applications that behave in an annoying or undesirable manner. May not have recognizable malware but may still pose a risk; a growing problem in mobile security."
+  ],
+  [
+   "SMiShing",
+   "SMS phishing: uses Short Message Service (SMS) to send fake text messages that trick the user into visiting a website or calling a phone number."
+  ],
+  [
+   "Rogue access point",
+   "A wireless access point installed on a secure network without explicit authorization."
+  ],
+  [
+   "Wireless signals are susceptible to...",
+   "Electromagnetic interference (EMI), radio-frequency interference (RFI), lightning strikes, noise from fluorescent lights, and deliberate jamming."
+  ],
+  [
+   "RF jamming",
+   "Disrupts the transmission of a radio or satellite station so that the signal does not reach the receiving station."
+  ],
+  [
+   "Bluejacking",
+   "Sending unauthorized messages to another Bluetooth device."
+  ],
+  [
+   "Bluesnarfing",
+   "When the attacker copies the victim's information (e.g., emails and contact lists) from his device."
+  ],
+  [
+   "WEP",
+   "Wired Equivalent Privacy: a security protocol that attempted to give a WLAN the same level of security as a wired LAN, using encryption. Uses a key for encryption, with no provision for key management."
+  ],
+  [
+   "Problem with WEP key management",
+   "There is no provision for key management, so the number of people sharing the key will continually grow."
+  ],
+  [
+   "WPA / WPA2",
+   "Wi-Fi Protected Access; improved protocols to replace WEP. WPA2 does not have the same encryption problems because an attacker cannot recover the key by observing traffic."
+  ],
+  [
+   "Why is WPA2 still susceptible to attack?",
+   "Criminals can analyze packets between the access point and a legitimate user, using a packet sniffer and then running attacks offline on the passphrase."
+  ],
+  [
+   "Steps to defend against wireless and mobile attacks",
+   "Change default configuration settings (use authentication and encryption)\nPlace access points outside the firewall or in a DMZ\nUse WLAN tools such as NetStumbler to find rogue APs\nDevelop a guest policy\nUse a remote access VPN for employees' WLAN access"
+  ],
+  [
+   "NetStumbler",
+   "A WLAN tool that may discover rogue access points or unauthorized workstations."
+  ],
+  [
+   "DMZ",
+   "Demilitarized zone: contains other untrusted devices such as email and web servers; access points can be placed within it."
+  ]
+ ],
+ "M4: Application Attacks": [
+  [
+   "Cross-site scripting (XSS)",
+   "A web application vulnerability that allows criminals to inject scripts (client-side) into web pages viewed by users. The criminal exploits the website rather than targeting the victim directly."
+  ],
+  [
+   "Three participants in XSS",
+   "The criminal, the victim, and the website."
+  ],
+  [
+   "Code injection attacks",
+   "XML and SQL injection attacks exploit weaknesses in the program such as not validating database queries properly."
+  ],
+  [
+   "Buffer overflow",
+   "Occurs when data goes beyond the limits of a buffer (memory area allocated to an application). Can lead to a system crash, data compromise, or escalation of privileges."
+  ],
+  [
+   "Remote code execution",
+   "Allows a cybercriminal to execute malicious code and take control of a system with the privileges of the user running the application; can execute any command on a target machine."
+  ],
+  [
+   "ActiveX controls",
+   "Pieces of software installed by users to provide extended capabilities (plugin to Internet Explorer). Third-party ones may be malicious: monitor browsing, install malware, or log keystrokes."
+  ],
+  [
+   "JVM",
+   "Java Virtual Machine: the interpreter Java operates through. It sandboxes (isolates) untrusted code from the rest of the OS, but vulnerabilities can let code go around the sandbox."
+  ],
+  [
+   "First line of defense against application attacks",
+   "Write solid code. Treat (validate) all input from outside a function as hostile."
+  ],
+  [
+   "Other defenses against application attacks",
+   "Keep all software, including OS and applications, up to date; do not ignore update prompts; if a program does not update automatically, select the manual update option."
+  ]
+ ],
+ "M5: Cryptography Basics": [
+  [
+   "Cryptology",
+   "The science of making and breaking secret codes."
+  ],
+  [
+   "Cryptography",
+   "A way to store and transmit data so only the intended recipient can read or process it."
+  ],
+  [
+   "What does modern cryptography use?",
+   "Computationally secure algorithms so cyber criminals cannot easily compromise protected information."
+  ],
+  [
+   "Where did the history of cryptography start?",
+   "In diplomatic circles thousands of years ago (messengers from a king's court carried encrypted messages); later military commanders used it too."
+  ],
+  [
+   "Cipher",
+   "A specific algorithm used to encrypt and decrypt messages; a series of well-defined steps used to encrypt and decrypt messages."
+  ],
+  [
+   "Methods of creating ciphertext",
+   "Transposition\nSubstitution\nOne-time pad"
+  ],
+  [
+   "Two classes of encryption algorithms",
+   "Symmetric\nAsymmetric"
+  ],
+  [
+   "Symmetric algorithms",
+   "Use the same pre-shared key (secret key pair) to encrypt and decrypt data. Both sender and receiver know the key before communication begins."
+  ],
+  [
+   "Another name for symmetric encryption",
+   "Private-key encryption"
+  ],
+  [
+   "Asymmetric algorithms",
+   "Use one key to encrypt and a different key to decrypt. One key is public and the other is private."
+  ],
+  [
+   "Another name for asymmetric encryption",
+   "Public-key encryption"
+  ],
+  [
+   "In public-key encryption, how is a message sent securely?",
+   "Anyone encrypts it with the receiver's public key; only the receiver can decrypt it with his private key. No pre-shared key is needed."
+  ],
+  [
+   "Drawbacks of asymmetric algorithms",
+   "More complex, resource intensive, and slower to execute."
+  ],
+  [
+   "Symmetric vs asymmetric: which is more efficient and handles more data?",
+   "Symmetric. However, its key management is more problematic and harder to manage."
+  ],
+  [
+   "What is asymmetric cryptography better at?",
+   "Protecting the confidentiality of small amounts of data, e.g., electronic key exchange, rather than encrypting large blocks of data."
+  ],
+  [
+   "Can a criminal calculate the asymmetric decryption key from the encryption key?",
+   "Not in any reasonable amount of time (and vice versa)."
+  ]
+ ],
+ "M5: Encryption Algorithms & Uses": [
+  [
+   "Symmetric encryption standards covered",
+   "3DES (Triple DES)\nIDEA\nAES"
+  ],
+  [
+   "DES",
+   "Digital Encryption Standard: a symmetric block cipher with 64-bit block size that uses a 56-bit key."
+  ],
+  [
+   "3DES (Triple DES)",
+   "Encrypts data three times and uses a different key for at least one of the three passes; cumulative key size of 112-168 bits."
+  ],
+  [
+   "IDEA",
+   "International Data Encryption Algorithm: 64-bit blocks and 128-bit keys; eight rounds of transformations on each of the 16 blocks from dividing each 64-bit block."
+  ],
+  [
+   "What did IDEA replace, and what uses it now?",
+   "It replaced DES; PGP (Pretty Good Privacy) now uses it."
+  ],
+  [
+   "AES",
+   "Advanced Encryption Standard: fixed block size of 128 bits, key size of 128, 192, or 256 bits."
+  ],
+  [
+   "Who approved AES and when?",
+   "NIST (National Institute of Standards and Technology), December 2001. The U.S. government uses AES to protect classified information."
+  ],
+  [
+   "Asymmetric algorithms covered",
+   "RSA\nDiffie-Hellman\nElGamal\nElliptic Curve Cryptography (ECC)"
+  ],
+  [
+   "RSA",
+   "Rivest-Shamir-Adleman: uses the product of two very large prime numbers with an equal length of between 100 and 200 digits. Browsers use RSA to establish a secure connection."
+  ],
+  [
+   "Diffie-Hellman",
+   "Provides an electronic exchange method to share the secret key. Used by SSL, TLS, SSH, and IPsec."
+  ],
+  [
+   "ElGamal",
+   "Uses the U.S. government standard for digital signatures; free to use because no one holds the patent."
+  ],
+  [
+   "ECC",
+   "Elliptic Curve Cryptography: uses elliptic curves in the algorithm. The U.S. NSA uses ECC for digital signature generation and key exchange."
+  ],
+  [
+   "One-time password-generating token",
+   "A hardware device that uses cryptography to generate a one-time password."
+  ],
+  [
+   "One-time password",
+   "An automatically generated numeric or alphanumeric string that authenticates a user for one transaction of one session only; changes every 30 seconds or so."
+  ],
+  [
+   "Which algorithm does the electronic payment industry use?",
+   "3DES"
+  ],
+  [
+   "Which algorithm do operating systems use to protect user files and system data with passwords?",
+   "DES"
+  ],
+  [
+   "Which algorithm do most encrypting file systems, such as NTFS, use?",
+   "AES"
+  ],
+  [
+   "Four protocols that use asymmetric key algorithms",
+   "IKE (Internet Key Exchange)\nSSL (Secure Socket Layer)\nSSH (Secure Shell)\nPGP (Pretty Good Privacy)"
+  ],
+  [
+   "IKE",
+   "Internet Key Exchange: a fundamental component of IPsec VPNs."
+  ],
+  [
+   "SSL",
+   "Secure Socket Layer: a means of implementing cryptography into a web browser."
+  ],
+  [
+   "SSH",
+   "Secure Shell: a protocol that provides a secure remote access connection to network devices."
+  ],
+  [
+   "PGP",
+   "Pretty Good Privacy: a computer program that provides cryptographic privacy and authentication to increase the security of email communications."
+  ],
+  [
+   "VPN",
+   "A private network that uses a public network, usually the Internet, to create a secure communication channel (e.g., connecting two remote offices)."
+  ],
+  [
+   "IPsec",
+   "A suite of protocols developed to achieve secure services over networks; used by VPNs."
+  ],
+  [
+   "IPsec services",
+   "Authentication, integrity, access control, and confidentiality."
+  ],
+  [
+   "Why is data in use a concern?",
+   "When in use, data no longer has any protection because the user needs to open and change it. System memory holds it and may contain sensitive data such as the encryption key."
+  ],
+  [
+   "If criminals compromise data in use...",
+   "They will have access to data at rest and data in motion."
+  ]
+ ],
+ "M5: Access Control": [
+  [
+   "Three types of access control",
+   "Physical\nLogical\nAdministrative"
+  ],
+  [
+   "Physical access controls",
+   "Actual barriers deployed to prevent direct contact with systems; determine who, where, and when someone can enter (or exit)."
+  ],
+  [
+   "Logical access controls",
+   "Hardware and software solutions used to manage access to resources and systems (tools and protocols for identification, authentication, authorization, and accountability)."
+  ],
+  [
+   "Administrative access controls",
+   "Policies and procedures defined by organizations to control unauthorized access; focus on personnel and business practices."
+  ],
+  [
+   "Four access control strategies",
+   "Mandatory (MAC)\nDiscretionary (DAC)\nRole-based (RBAC)\nRule-based"
+  ],
+  [
+   "MAC",
+   "Mandatory access control: restricts actions a subject can perform on an object. An authorization rule enforces whether a subject can access the object."
+  ],
+  [
+   "Subject vs object (MAC)",
+   "Subject: a user or a process.\nObject: a file, a port, or an input/output device."
+  ],
+  [
+   "DAC",
+   "Discretionary access control: object access is granted or restricted by the object's owner, who can pass on permissions to another subject."
+  ],
+  [
+   "RBAC",
+   "Role-based access control: based on the role (job function) of the subject; users acquire permissions through their role. Can work with DAC or MAC."
+  ],
+  [
+   "Rule-based access control",
+   "Uses access control lists (ACLs) containing a series of rules to determine whether to grant access."
+  ],
+  [
+   "Rule-based access control example",
+   "No employee may have access to the payroll file after hours or on weekends."
+  ],
+  [
+   "Identification",
+   "Enforces the rules established by the authorization policy; every time a subject requests access, access controls determine whether to grant or deny it."
+  ],
+  [
+   "What determines how stringent identification controls are?",
+   "The sensitivity of the information and information systems. Cybersecurity policies determine which controls are used."
+  ],
+  [
+   "Authentication methods",
+   "What you know\nWhat you have\nWho you are\nMulti-factor authentication"
+  ],
+  [
+   "What you know",
+   "Passwords, passphrases, or PINs. Passwords are the most popular authentication method."
+  ],
+  [
+   "What you have",
+   "Smart cards and security key fobs."
+  ],
+  [
+   "Who you are (biometrics)",
+   "A unique physical characteristic such as a fingerprint, retina, or voice."
+  ],
+  [
+   "Multi-factor authentication",
+   "Uses at least two methods of verification, e.g., something you know (password) and something you have (security key fob)."
+  ],
+  [
+   "Authorization",
+   "Controls what a user can and cannot do on the network after successful authentication, using a set of attributes describing the user's access."
+  ],
+  [
+   "First step in controlling access",
+   "Defining authorization rules; an authorization policy establishes these rules."
+  ],
+  [
+   "Accountability",
+   "Traces an action back to a person or process making the change to a system, collects this information, and reports the usage data (for auditing or billing)."
+  ],
+  [
+   "What does implementing accountability consist of?",
+   "Technologies, policies, procedures, and education."
+  ],
+  [
+   "Six types of security controls",
+   "Preventative\nDeterrent\nDetective\nCorrective\nRecovery\nCompensative"
+  ],
+  [
+   "Preventative controls",
+   "Stop unwanted or unauthorized activity from happening."
+  ],
+  [
+   "Deterrent controls",
+   "Discourage individuals from doing the wrong thing (opposite of a reward); limit or mitigate an action but do not always stop it."
+  ],
+  [
+   "Detective controls",
+   "Identify different types of unauthorized activity, e.g., a motion detector, security guard, or intrusion detection system."
+  ],
+  [
+   "Corrective controls",
+   "Put in place after a system experiences a threat; restore the system back to a state of confidentiality, integrity, and availability."
+  ],
+  [
+   "Recovery controls",
+   "Restore resources, functions, and capabilities after a security policy violation; can repair damage and stop further damage. More advanced than corrective controls."
+  ],
+  [
+   "Compensative controls",
+   "Provide options to other controls to bolster enforcement of a security policy, or substitute for a control that is not possible under the circumstances."
+  ]
+ ],
+ "M5: Obscuring Data": [
+  [
+   "Data masking",
+   "Secures data by replacing sensitive information with a non-sensitive version that looks and acts like the original."
+  ],
+  [
+   "Benefit of data masking for business processes",
+   "A business process can use non-sensitive data with no need to change the supporting applications or data storage facilities."
+  ],
+  [
+   "Most common use case of masking",
+   "Limiting the propagation of sensitive data within IT systems by distributing surrogate data sets for testing and analysis."
+  ],
+  [
+   "Two data masking techniques",
+   "Substitution\nShuffling"
+  ],
+  [
+   "Substitution (masking)",
+   "Replaces data with authentic looking values to apply anonymity to the data records."
+  ],
+  [
+   "Shuffling",
+   "Derives a substitution set from the same column of data that a user wants to mask; works well for financial information in a test database."
+  ],
+  [
+   "Steganography",
+   "Conceals data (the message) in another file such as a graphic, audio, or other text file."
+  ],
+  [
+   "Advantage of steganography over cryptography",
+   "The secret message does not attract any special attention."
+  ],
+  [
+   "Components involved in hiding data (steganography)",
+   "Embedded data\nCover-text (cover-image / cover-audio)\nStego-text (stego-image / stego-audio)\nStego-key"
+  ],
+  [
+   "Embedded data",
+   "The secret message."
+  ],
+  [
+   "Cover-text / cover-image / cover-audio",
+   "Hides the embedded data, producing the stego-text (or stego-image or stego-audio)."
+  ],
+  [
+   "Stego-key",
+   "Controls the hiding process."
+  ],
+  [
+   "Data obfuscation",
+   "The use and practice of data masking and steganography techniques in the cybersecurity and cyber intelligence profession."
+  ],
+  [
+   "Obfuscation",
+   "The art of making the message confusing, ambiguous, or harder to understand."
+  ],
+  [
+   "Software watermarking",
+   "Protects software from unauthorized access or modification by inserting a secret message (the watermark) into the program as proof of ownership."
+  ],
+  [
+   "What happens if someone removes a software watermark?",
+   "The result is nonfunctional code."
+  ],
+  [
+   "Two techniques used to accomplish data masking (per summary)",
+   "Data obfuscation and steganography"
+  ]
+ ],
+ "M6: Hashing, Salting & HMAC": [
+  [
+   "Module 6 title",
+   "The Art of Ensuring Integrity"
+  ],
+  [
+   "Integrity (as defined in the M6 summary)",
+   "Used to ensure that data remains unchanged by anyone or anything over its entire life cycle."
+  ],
+  [
+   "Three types of data integrity controls introduced in M6",
+   "1. Hashing algorithms\n2. Password salting\n3. Keyed-hash message authentication code (HMAC)"
+  ],
+  [
+   "Hashing",
+   "A tool that ensures data integrity by taking binary data (the message) and producing a fixed-length representation called the hash value or message digest."
+  ],
+  [
+   "Two names for the fixed-length output of hashing",
+   "Hash value or message digest"
+  ],
+  [
+   "Hashing as a function",
+   "A one-way mathematical function that is relatively easy to compute, but significantly harder to reverse."
+  ],
+  [
+   "Analogy used for a one-way function",
+   "Grinding coffee beans: easy to grind, but almost impossible to put all the tiny pieces back together to rebuild the original beans."
+  ],
+  [
+   "Four properties of a cryptographic hash function",
+   "1. The input can be any length.\n2. The output has a fixed length.\n3. The hash function is one way and is not reversible.\n4. Two different input values will always result in different hash values."
+  ],
+  [
+   "Hash function property: input length",
+   "The input can be any length."
+  ],
+  [
+   "Hash function property: output length",
+   "The output has a fixed length."
+  ],
+  [
+   "Hash function property: reversibility",
+   "The hash function is one way and is not reversible."
+  ],
+  [
+   "Hash function property: different inputs",
+   "Two different input values will always result in different hash values."
+  ],
+  [
+   "Two of the most popular modern hashing algorithms",
+   "MD5 and SHA"
+  ],
+  [
+   "MD5",
+   "Message Digest 5 - a hash algorithm developed by Ron Rivest that produces a 128-bit hash value."
+  ],
+  [
+   "Who developed MD5?",
+   "Ron Rivest"
+  ],
+  [
+   "MD5 hash value size",
+   "128-bit"
+  ],
+  [
+   "SHA",
+   "Secure Hash Algorithm - developed by the U.S. National Institute of Standards and Technology (NIST); can be implemented in different strengths."
+  ],
+  [
+   "Who developed SHA?",
+   "The U.S. National Institute of Standards and Technology (NIST)"
+  ],
+  [
+   "Four SHA strengths listed",
+   "SHA-224 (224 bit)\nSHA-256 (256 bit)\nSHA-384 (384 bit)\nSHA-512 (512 bit)"
+  ],
+  [
+   "Salting",
+   "Used to make hashing more secure. A salt (a random string of characters) is an additional input to the password before hashing, so two users with the same password get different hashes."
+  ],
+  [
+   "Salt",
+   "A random string of characters added as an additional input to the password before hashing."
+  ],
+  [
+   "Problem salting solves",
+   "If two users have the same password, they will also have the same password hashes."
+  ],
+  [
+   "What does the database store when salting is used?",
+   "Both the hash and the salt."
+  ],
+  [
+   "HMAC",
+   "Keyed-hash message authentication code - strengthens hashing algorithms by using an additional secret key as input to the hash function."
+  ],
+  [
+   "What does HMAC add beyond integrity assurance?",
+   "Authentication"
+  ],
+  [
+   "How an HMAC works",
+   "Uses a specific algorithm that combines a cryptographic hash function with a secret key."
+  ]
+ ],
+ "M6: Digital Signatures & Certificates": [
+  [
+   "Digital signature (function)",
+   "Provides the same functionality as handwritten signatures for electronic documents."
+  ],
+  [
+   "Digital signature (definition)",
+   "A mathematical method used to check the authenticity and integrity of a message, digital document, or software."
+  ],
+  [
+   "What a digital signature can determine about a document",
+   "Whether someone edits a document after the user signs it."
+  ],
+  [
+   "Legal importance of digital signatures",
+   "In many countries, digital signatures have the same legal importance as a manually signed document."
+  ],
+  [
+   "What else do digital signatures provide (per the slide)?",
+   "Repudiation"
+  ],
+  [
+   "Basis for digital signatures",
+   "Asymmetric cryptography"
+  ],
+  [
+   "Example public key algorithm that generates the key pair",
+   "RSA"
+  ],
+  [
+   "Keys generated by a public key algorithm like RSA",
+   "Two keys: one private and one public. The keys are mathematically related."
+  ],
+  [
+   "Digital certificate is equivalent to...",
+   "An electronic passport"
+  ],
+  [
+   "Digital certificates enable...",
+   "Users, hosts, and organizations to exchange information securely over the Internet."
+  ],
+  [
+   "What a digital certificate authenticates and verifies",
+   "That users sending a message are who they claim to be."
+  ],
+  [
+   "What digital certificates can provide for the receiver",
+   "Confidentiality, with the means to encrypt a reply."
+  ],
+  [
+   "Why must a digital certificate follow a standard structure?",
+   "So that any entity can read and understand it regardless of the issuer."
+  ],
+  [
+   "X.509",
+   "The standard for construction of digital certificates and the public key infrastructure (PKI) used to manage digital certificates."
+  ],
+  [
+   "PKI",
+   "Public key infrastructure - the policies, roles, and procedures required to create, manage, distribute, use, store, and revoke digital certificates."
+  ],
+  [
+   "What PKI is used for with digital certificates (verbs)",
+   "Create, manage, distribute, use, store, and revoke"
+  ]
+ ],
+ "M6: Database Integrity": [
+  [
+   "Databases provide...",
+   "An efficient way to store, retrieve, and analyze data."
+  ],
+  [
+   "Data integrity (database)",
+   "The accuracy, consistency, and reliability of data stored in a database."
+  ],
+  [
+   "Four database integrity rules (constraints)",
+   "1. Entity Integrity\n2. Domain Integrity\n3. Referential Integrity\n4. User-defined Integrity"
+  ],
+  [
+   "Entity Integrity",
+   "All rows must have a unique identifier called a Primary Key. Every table must have a primary key, and the primary key column(s) must be unique and not NULL."
+  ],
+  [
+   "Domain Integrity",
+   "All data stored in a column must follow the same format and definition; all data items in a column fall within a defined set of valid values."
+  ],
+  [
+   "Referential Integrity",
+   "Table relationships must remain consistent, so a user cannot delete a record which is related to another one. It deals with foreign keys and maintains their integrity."
+  ],
+  [
+   "User-defined Integrity",
+   "A set of rules defined by a user which does not belong to one of the other categories."
+  ],
+  [
+   "User-defined integrity example",
+   "A customer places a new order. The user first checks if this is a new customer; if it is, the user adds the new customer to the customers table."
+  ],
+  [
+   "Primary Key",
+   "The unique identifier for rows; it uniquely identifies entities (rows) in the table."
+  ],
+  [
+   "Foreign key",
+   "A key in one table that references a primary key in a second table."
+  ],
+  [
+   "NULL in a database",
+   "Signifies missing or unknown values."
+  ],
+  [
+   "What entity integrity enables",
+   "Proper organization of data for that record."
+  ],
+  [
+   "How domain integrity can be enforced simply",
+   "By choosing the correct data type, length and/or format for a column."
+  ],
+  [
+   "Examples of a column's defined set of values (domain integrity)",
+   "The set of all numbers for credit card numbers, social security numbers, or email addresses."
+  ],
+  [
+   "What makes up a database",
+   "Tables, records, fields, and data within each field."
+  ],
+  [
+   "Validation rule",
+   "Checks that data falls within the parameters defined by the database designer; helps ensure completeness, accuracy and consistency of data."
+  ],
+  [
+   "Five criteria used in a validation rule",
+   "1. Size\n2. Format\n3. Consistency\n4. Range\n5. Check digit"
+  ],
+  [
+   "Validation: Size",
+   "Checks the number of characters in a data item."
+  ],
+  [
+   "Validation: Format",
+   "Checks that the data conforms to a specified format."
+  ],
+  [
+   "Validation: Consistency",
+   "Checks for the consistency of codes in related data items."
+  ],
+  [
+   "Validation: Range",
+   "Checks that data lies within a minimum and maximum value."
+  ],
+  [
+   "Validation: Check digit",
+   "Provides for an extra calculation to generate a check digit for error detection."
+  ],
+  [
+   "Benefit of a well-controlled, well-defined data integrity system",
+   "Increases the stability, performance, and maintainability of a database system."
+  ]
+ ],
+ "M7: Five Nines & High Availability": [
+  [
+   "Five nines",
+   "Systems and services are available 99.999% of the time."
+  ],
+  [
+   "Five nines availability percentage",
+   "99.999%"
+  ],
+  [
+   "Maximum downtime per year under five nines",
+   "Less than 5.26 minutes per year (planned and unplanned)."
+  ],
+  [
+   "Does the five nines downtime limit include planned downtime?",
+   "Yes - both planned and unplanned downtime is less than 5.26 minutes per year."
+  ],
+  [
+   "High availability",
+   "A system or component that is continuously operational for a given length of time."
+  ],
+  [
+   "Three ways to help ensure high availability",
+   "1. Eliminate single points of failure\n2. Design for reliability\n3. Detect failures as they occur"
+  ],
+  [
+   "Four environments that require five nines",
+   "1. Finance\n2. Healthcare\n3. Public safety\n4. Retail"
+  ],
+  [
+   "Why finance needs five nines",
+   "For continuous trading, compliance, and customer trust."
+  ],
+  [
+   "Why healthcare needs five nines",
+   "To provide around-the-clock care for patients."
+  ],
+  [
+   "Public safety industry",
+   "Includes agencies that provide security and services to a community, state, or nation."
+  ],
+  [
+   "Why retail needs five nines",
+   "It depends on efficient supply chains and delivery of products; disruption can be devastating, especially during peak demand times such as holidays."
+  ],
+  [
+   "Why don't all industries pursue five nines?",
+   "The cost of sustaining high availability may be too costly for some industries."
+  ],
+  [
+   "Range of threats to availability",
+   "From failure of a mission-critical application to severe storms such as a hurricane or tornado."
+  ],
+  [
+   "Catastrophic event examples threatening availability",
+   "Terrorist attack, building bombing, or building fires."
+  ],
+  [
+   "Three major principles of designing a high availability system",
+   "1. Elimination or reduction of single points of failure\n2. System resiliency\n3. Fault tolerance"
+  ],
+  [
+   "Goal of the three high availability principles",
+   "Uninterrupted access to data and services."
+  ]
+ ],
+ "M7: Asset Management & Defense in Depth": [
+  [
+   "Why asset management?",
+   "An organization needs to know what hardware and software assets they have in order to protect them."
+  ],
+  [
+   "Asset management includes...",
+   "A complete inventory of hardware and software."
+  ],
+  [
+   "Components subject to security risks an organization must know (asset inventory)",
+   "Every hardware system, every operating system, every hardware network device, every network device OS, every software application, all firmware, all language runtime environments, all individual libraries."
+  ],
+  [
+   "How many organizations track assets",
+   "With an automated solution."
+  ],
+  [
+   "Asset classification",
+   "Assigns all resources of an organization into a group based on common characteristics; applied to documents, data records, data files, and disks."
+  ],
+  [
+   "Asset standardization",
+   "As part of an IT asset management system, an organization specifies the acceptable IT assets that meet its objectives."
+  ],
+  [
+   "Threat identification",
+   "Uses the dictionary of common vulnerabilities and exposures (CVE) sponsored by US-CERT and the U.S. Department of Homeland Security."
+  ],
+  [
+   "CVE",
+   "Common vulnerabilities and exposures - a dictionary whose identification contains a standard identifier number with a brief description, and references to related vulnerability reports and advisories."
+  ],
+  [
+   "Who sponsors the CVE?",
+   "The United States Computer Emergency Readiness Team (US-CERT) and the U.S. Department of Homeland Security."
+  ],
+  [
+   "US-CERT",
+   "United States Computer Emergency Readiness Team"
+  ],
+  [
+   "Risk analysis",
+   "The process of analyzing the dangers posed by natural and human-caused events to the assets of an organization."
+  ],
+  [
+   "What a user performs in risk analysis to determine which assets to protect",
+   "Asset identification"
+  ],
+  [
+   "Mitigation",
+   "Reducing the severity of the loss or the likelihood of the loss from occurring."
+  ],
+  [
+   "Technical controls that mitigate risk (examples)",
+   "Authentication systems, file permissions, and firewalls."
+  ],
+  [
+   "Defense in depth",
+   "Creating different layers of protection; it will not provide an impenetrable cyber shield but helps minimize risk by keeping one step ahead of cyber criminals."
+  ],
+  [
+   "Five defense in depth concepts",
+   "1. Layering\n2. Limiting\n3. Diversity\n4. Obscuring\n5. Simplicity"
+  ],
+  [
+   "Layering",
+   "Creating a barrier of multiple defenses that coordinate together to prevent attacks; provides the most comprehensive protection."
+  ],
+  [
+   "Limiting",
+   "Restricting access so users only have the level of access required to do their job."
+  ],
+  [
+   "Diversity",
+   "Changing the controls and procedures at different layers, e.g. different encryption algorithms or authentication systems for data in different states."
+  ],
+  [
+   "Obscuring",
+   "Not revealing information cyber criminals can use, such as the OS version a server runs or the type of equipment used."
+  ],
+  [
+   "Simplicity",
+   "Complexity does not guarantee security; too complex leads to misconfigurations or failure to comply. Simplicity can improve availability."
+  ]
+ ],
+ "M7: Redundancy & Resilience": [
+  [
+   "Single point of failure",
+   "Can be a specific piece of hardware, a process, a specific piece of data, or even an essential utility; the weak links in the chain that can disrupt operations."
+  ],
+  [
+   "General solution to a single point of failure",
+   "Modify the critical operation so it does not rely on a single element, or build redundant components to take over the process."
+  ],
+  [
+   "N+1 redundancy",
+   "Ensures system availability in the event of a component failure; components (N) need at least one backup component (+1)."
+  ],
+  [
+   "N+1 example",
+   "A car has four tires (N) and a spare tire in the trunk (+1)."
+  ],
+  [
+   "RAID",
+   "Redundant array of independent disks - combines multiple physical hard drives into a single logical unit to provide data redundancy and improve performance."
+  ],
+  [
+   "How RAID protects data",
+   "Spreads data among several drives; if any single disk is lost, data can be recovered from the other disks."
+  ],
+  [
+   "RAID can be...",
+   "Hardware-based or software-based."
+  ],
+  [
+   "Three RAID storage terms",
+   "1. Parity\n2. Striping\n3. Mirroring"
+  ],
+  [
+   "RAID: Parity",
+   "Detects data errors."
+  ],
+  [
+   "RAID: Striping",
+   "Writes data across multiple drives."
+  ],
+  [
+   "RAID: Mirroring",
+   "Stores duplicate data on a second drive."
+  ],
+  [
+   "Spanning Tree Protocol (STP)",
+   "A network protocol that provides redundancy; its basic function is to prevent loops when switches interconnect via multiple paths."
+  ],
+  [
+   "How STP keeps redundant links loop-free",
+   "Ensures only one logical path between all destinations; intentionally blocks redundant paths that could cause a loop."
+  ],
+  [
+   "Default gateway",
+   "Typically the router that provides devices access to the rest of the network or the Internet; a single point of failure if only one router serves it."
+  ],
+  [
+   "First-hop redundancy",
+   "The ability of a network to dynamically recover from the failure of a router acting as a default gateway."
+  ],
+  [
+   "Three router redundancy options",
+   "1. HSRP\n2. VRRP\n3. GLBP"
+  ],
+  [
+   "HSRP",
+   "Hot Standby Router Protocol - provides high network availability by providing first-hop routing redundancy."
+  ],
+  [
+   "VRRP",
+   "Virtual Router Redundancy Protocol - the elected router is the virtual router master; other routers act as backups in case the master fails."
+  ],
+  [
+   "GLBP",
+   "Gateway Load Balancing Protocol - protects traffic from a failed router or circuit, while also allowing load balancing (load sharing) between redundant routers."
+  ],
+  [
+   "Three forms of location redundancy",
+   "1. Synchronous\n2. Asynchronous replication\n3. Point-in-time replication"
+  ],
+  [
+   "Synchronous (location redundancy)",
+   "Synchronizes both locations in real time; requires high bandwidth; locations must be close together to reduce latency."
+  ],
+  [
+   "Asynchronous replication",
+   "Not synchronized in real time but close to it; requires less bandwidth; sites can be further apart."
+  ],
+  [
+   "Point-in-time replication",
+   "Updates the backup location periodically; the most bandwidth-conservative option because it does not require a constant connection."
+  ],
+  [
+   "Resiliency",
+   "The methods and configurations used to make a system or network tolerant of failure."
+  ],
+  [
+   "What provides resiliency (example)",
+   "Routing protocols"
+  ],
+  [
+   "Resilient design vs redundancy",
+   "Resilient design is more than just adding redundancy: understand business needs, then incorporate redundancy."
+  ]
+ ],
+ "M7: Incident Response & Disaster Recovery": [
+  [
+   "Incident response",
+   "The procedures that an organization follows after an event occurs outside the normal range."
+  ],
+  [
+   "CSIRT",
+   "Computer Security Incident Response Team - put together to manage the incident response."
+  ],
+  [
+   "Four incident response phases",
+   "1. Preparation\n2. Detection and Analysis\n3. Containment, Eradication, and Recovery\n4. Post-Incident Follow-Up"
+  ],
+  [
+   "IR Phase 1: Preparation",
+   "Planning for potential incidents."
+  ],
+  [
+   "IR Phase 2: Detection and Analysis",
+   "Discovering the incident."
+  ],
+  [
+   "IR Phase 3: Containment, Eradication, and Recovery",
+   "Efforts to immediately contain or eradicate the threat and begin recovery efforts."
+  ],
+  [
+   "IR Phase 4: Post-Incident Follow-Up",
+   "Investigate the cause of the incident and ask questions to better understand the nature of the threat."
+  ],
+  [
+   "Five incident response technologies",
+   "1. NAC\n2. IDS\n3. IPS\n4. NetFlow and IPFIX\n5. Advanced Threat Intelligence"
+  ],
+  [
+   "NAC",
+   "Network Admission Control - allows network access for authorized users with compliant systems."
+  ],
+  [
+   "Compliant system (NAC)",
+   "A system that meets all of the policy requirements of the organization."
+  ],
+  [
+   "IDS",
+   "Intrusion Detection System - monitors network traffic; IDS systems are passive."
+  ],
+  [
+   "IPS",
+   "Intrusion Prevention System - operates in inline mode; can detect and immediately address a network problem."
+  ],
+  [
+   "NetFlow",
+   "A Cisco IOS technology that provides statistics on packets flowing through a Cisco router or multilayer switch."
+  ],
+  [
+   "IPFIX",
+   "IP Flow Information Export - IETF used Cisco's NetFlow Version 9 as its basis."
+  ],
+  [
+   "Advanced Threat Intelligence",
+   "Helps organizations detect attacks during one of the stages of the cyberattack (sometimes before, with the right information)."
+  ],
+  [
+   "Disaster",
+   "Any natural or human-caused event that damages assets or property and impairs the organization's ability to continue operating."
+  ],
+  [
+   "Four categories of natural disasters",
+   "Geological, meteorological, health, and miscellaneous."
+  ],
+  [
+   "Geological disasters",
+   "Earthquakes, landslides, volcanoes, and tsunamis."
+  ],
+  [
+   "Meteorological disasters",
+   "Hurricanes, tornadoes, snow storms, lightning, and hail."
+  ],
+  [
+   "Health disasters",
+   "Widespread illnesses, quarantines, and pandemics."
+  ],
+  [
+   "Miscellaneous natural disasters",
+   "Fires, floods, solar storms, and avalanches."
+  ],
+  [
+   "Four categories of human-caused disasters",
+   "Labor events, social-political events, materials events, and utilities disruptions."
+  ],
+  [
+   "Labor events",
+   "Strikes, walkouts, and slowdowns."
+  ],
+  [
+   "Social-political events",
+   "Vandalism, blockades, protests, sabotage, terrorism, and war."
+  ],
+  [
+   "Materials events",
+   "Hazardous spills and fires."
+  ],
+  [
+   "Utilities disruptions",
+   "Power failures, communication outages, fuel shortages, and radioactive fallout."
+  ],
+  [
+   "Business continuity",
+   "One of the most important concepts in computer security; plans that ensure the business continues regardless of what may occur, since not every scenario can be predicted."
+  ],
+  [
+   "Five business continuity considerations",
+   "1. Documenting configurations\n2. Establishing alternate communications channels\n3. Providing power\n4. Identifying all dependencies for applications and processes\n5. Understanding how to carry out automated tasks manually"
+  ],
+  [
+   "Eight business continuity best practices",
+   "1. Write a policy (guidance + roles)\n2. Identify and prioritize critical systems/processes\n3. Identify vulnerabilities, threats, calculate risks\n4. Implement controls and countermeasures\n5. Devise methods to bring back critical systems quickly\n6. Write procedures for functioning in a chaotic state\n7. Test the plan\n8. Update the plan regularly"
+  ],
+  [
+   "BC best practice step 1",
+   "Write a policy that provides guidance to develop the business continuity plan and assigns roles to carry out the tasks."
+  ],
+  [
+   "Last two BC best practice steps",
+   "7. Test the plan.\n8. Update the plan regularly."
+  ]
+ ],
+ "M8: Host Hardening & Data Protection": [
+  [
+   "Module 8 sections (4)",
+   "7.1 Defending Systems and Devices\n7.2 Server Hardening\n7.3 Network Hardening\n7.4 Physical Security"
+  ],
+  [
+   "Host hardening items (6)",
+   "Operating System Security\nAntimalware\nPatch Management\nHost-based Firewalls\nHost Intrusion Detection Systems\nSecure Communications (VPNs)"
+  ],
+  [
+   "Operating System Security",
+   "The OS plays a critical role in the operation of a computer system and is the target of many attacks. An administrator hardens it by modifying the default configuration to make it more secure to outside threats."
+  ],
+  [
+   "Two parts of hardening an operating system",
+   "1. Removal of unnecessary programs and services\n2. Application of security patches and updates"
+  ],
+  [
+   "Malware types listed under Antimalware (6)",
+   "Viruses, worms, Trojan horses, keyloggers, spyware, and adware"
+  ],
+  [
+   "What malware does",
+   "Invades privacy, steals information, damages the system, or deletes and corrupts data."
+  ],
+  [
+   "Patches",
+   "Code updates that manufacturers provide to prevent a newly discovered virus or worm from making a successful attack."
+  ],
+  [
+   "Service pack",
+   "A comprehensive update application in which manufacturers combine patches and upgrades."
+  ],
+  [
+   "Host-based (software) firewall",
+   "A program that runs on a computer to allow or deny traffic between the computer and other connected computers. It applies a set of rules to data transmissions through inspection and filtering of data packets."
+  ],
+  [
+   "HIDS",
+   "Host Intrusion Detection System: software that runs on a host computer that monitors suspicious activity."
+  ],
+  [
+   "VPN",
+   "Virtual Private Network: a private network that connects remote sites or users together over a public network, like the Internet. Used to communicate and share resources over a network that is not secure."
+  ],
+  [
+   "Wireless/mobile hardening items (3)",
+   "Wired Equivalent Privacy (WEP)\nWPA/WPA2\nMutual Authentication"
+  ],
+  [
+   "WEP",
+   "Wired Equivalent Privacy: one of the first widely used Wi-Fi security standards. Provides authentication and encryption protections."
+  ],
+  [
+   "WPA",
+   "Wi-Fi Protected Access: the computer industry's response to the weakness of the WEP standard; provided several security improvements. Followed by WPA2."
+  ],
+  [
+   "Mutual authentication",
+   "Also called two-way authentication: a process or technology in which both entities in a communications link authenticate to each other. Developed to prevent rogue access points."
+  ],
+  [
+   "Attack an imposter (rogue access point) can launch",
+   "A man-in-the-middle attack: very difficult to detect; can result in stolen login credentials and transmitted data."
+  ],
+  [
+   "Host data protection items (3)",
+   "File Access Control\nFile Encryption\nSystem and Data Backups"
+  ],
+  [
+   "File access control",
+   "Permissions that limit folder or file access for an individual or for a group of users."
+  ],
+  [
+   "File encryption",
+   "A tool used to protect data stored in files. Encryption transforms data using a complicated algorithm to make it unreadable. Software can encrypt files, folders, and even entire drives."
+  ],
+  [
+   "Data backup",
+   "Stores a copy of the information from a computer to removable backup media. One of the most effective ways of protecting against data loss."
+  ]
+ ],
+ "M8: Content Control & Workstation Protection": [
+  [
+   "Content control software",
+   "Restricts the content that a user can access with a web browser over the Internet. Can block sites with material such as pornography or controversial religious or political content."
+  ],
+  [
+   "Purpose of disk cloning / Deep Freeze-type tools",
+   "Third-party applications that restore a system back to a default state, protecting the operating system and configuration files."
+  ],
+  [
+   "Disk cloning",
+   "Copies the contents of the computer's hard disk to an image file."
+  ],
+  [
+   "Deep Freeze",
+   "\"Freezes\" the hard drive partition. On restart, the system reverts to its frozen configuration; installed applications or saved files are lost."
+  ],
+  [
+   "Methods of physically protecting computer equipment (3)",
+   "Use cable locks\nKeep telecommunication rooms locked\nUse security cages around equipment"
+  ],
+  [
+   "Physical protection and workstation controls (6)",
+   "Security Cables and Locks\nLogout Timers\nIdle Timeout and Screen Lock\nLogin Times\nGPS Tracking\nInventory and RFID Tags"
+  ],
+  [
+   "Logout timers (risk addressed)",
+   "An employee leaves the computer for a break without securing the workstation; any information on it is vulnerable to an unauthorized user."
+  ],
+  [
+   "Idle timeout and screen lock",
+   "Security best practice: configure an idle timer that automatically logs the user out and locks the screen."
+  ],
+  [
+   "Login times",
+   "Restrict logins to specific hours (example: 7 a.m. to 6 p.m.); the system blocks logins outside the allowed hours."
+  ],
+  [
+   "Example login hours given in the module",
+   "7 a.m. to 6 p.m."
+  ],
+  [
+   "GPS tracking",
+   "Uses satellites and computers to determine the location of a device. Standard on smartphones; provides real-time position tracking."
+  ],
+  [
+   "GPS tracking accuracy",
+   "Can pinpoint a location within 100 meters."
+  ],
+  [
+   "RFID",
+   "Radio frequency identification: uses radio waves to identify and track objects. RFID inventory systems use tags attached to all items an organization wants to track."
+  ]
+ ],
+ "M8: Server Hardening": [
+  [
+   "Remote access",
+   "Any combination of hardware and software that enables users to access a local internal network remotely."
+  ],
+  [
+   "SSH",
+   "Secure Shell: a protocol that provides a secure (encrypted) management connection to a remote device. Should replace Telnet for management connections."
+  ],
+  [
+   "Telnet",
+   "An older protocol that uses unsecure plaintext transmission of both the login authentication (username and password) and the data transmitted."
+  ],
+  [
+   "SCP",
+   "Secure copy: securely transfers computer files between two remote systems. Uses SSH for data transfer (including authentication), ensuring authenticity and confidentiality of data in transit."
+  ],
+  [
+   "Protocol that should replace Telnet",
+   "SSH (Secure Shell)"
+  ],
+  [
+   "Administrative measures for servers (4)",
+   "Securing Ports and Services\nPrivileged Accounts\nGroup Policies\nEnable Logs and Alerts"
+  ],
+  [
+   "Securing ports and services",
+   "Most devices run more services than they need. An administrator should look at every service to verify its necessity and evaluate its risk, and remove any unnecessary services."
+  ],
+  [
+   "Privileged accounts",
+   "The most powerful accounts in the organization; have credentials with elevated, unrestricted access. Used to deploy and manage OSs, applications, and network devices. Should be secured or removed."
+  ],
+  [
+   "Group policies",
+   "On Windows networks, an administrator configures Active Directory with Domains on a Windows Server and sets user account policies (password and lockout policies) at a group level."
+  ],
+  [
+   "Log",
+   "Records events as they occur on a system. Log entries make up a log file; a log entry contains all information related to a specific event."
+  ],
+  [
+   "Physical protection of servers (3)",
+   "Power\nHeating, Ventilation, and Air Conditioning (HVAC)\nHardware Monitoring"
+  ],
+  [
+   "Power (server protection)",
+   "A continuous supply of electrical power is critical in today's massive server and data storage facilities."
+  ],
+  [
+   "HVAC",
+   "Heating, Ventilation, and Air Conditioning: critical to safety of people and information systems. Controls the ambient environment."
+  ],
+  [
+   "What HVAC controls (4)",
+   "Temperature, humidity, airflow, and air filtering"
+  ],
+  [
+   "Hardware monitoring",
+   "Often found in large server farms."
+  ],
+  [
+   "Server farm",
+   "A facility that houses hundreds or thousands of servers for companies."
+  ]
+ ],
+ "M8: Network Hardening & Physical Security": [
+  [
+   "NOC",
+   "Network Operation Center: one or more locations with tools that give administrators a detailed status of the organization's network. Ground zero for troubleshooting, performance monitoring, software distribution/updates, communications and device management."
+  ],
+  [
+   "How network devices ship (passwords)",
+   "With either no passwords or default passwords."
+  ],
+  [
+   "Main threats to network switches",
+   "Theft, hacking and remote access, attacks against network protocols like ARP/STP, or attacks against performance and availability."
+  ],
+  [
+   "Heart of the modern data communication network",
+   "Network switches"
+  ],
+  [
+   "VLANs",
+   "Provide a way to group devices within a LAN and on individual switches. Use logical connections instead of physical connections."
+  ],
+  [
+   "Firewalls (network)",
+   "Hardware or software solutions that enforce network security policies; filter unauthorized or potentially dangerous traffic from entering the network."
+  ],
+  [
+   "Routers",
+   "Form the backbone of the Internet and communications between networks; identify the best path to deliver traffic; use routing protocols to make routing decisions."
+  ],
+  [
+   "Vulnerabilities of wireless and mobile devices",
+   "Theft, hacking and unauthorized remote access, sniffing, man-in-the-middle attacks, and attacks against performance and availability."
+  ],
+  [
+   "Network services named in the module",
+   "DHCP, DNS, ICMP, Routing Services, NTP and others"
+  ],
+  [
+   "Voice and video equipment items (4)",
+   "VoIP Equipment\nCameras\nVideoconferencing Equipment\nNetwork and IoT Sensors"
+  ],
+  [
+   "VoIP equipment",
+   "Uses networks such as the Internet to make and receive phone calls. Requires an Internet connection plus a phone."
+  ],
+  [
+   "Internet camera",
+   "Sends and receives data over a LAN and/or the Internet; users can remotely view live video using a web browser."
+  ],
+  [
+   "Videoconferencing equipment",
+   "Allows two or more locations to communicate simultaneously using telecommunication technologies (uses high definition video standards)."
+  ],
+  [
+   "IoT",
+   "Internet of Things: the sector of intelligent devices and sensors, used to automate processes, monitor environmental conditions, and alert the user of adverse conditions."
+  ],
+  [
+   "Physical access control items (3)",
+   "Fencing and Barricades\nBiometrics\nBadges and Access Logs"
+  ],
+  [
+   "Outermost layer of security (most publicly visible)",
+   "Fencing and barricades (physical barriers)"
+  ],
+  [
+   "Perimeter security system components (5)",
+   "Perimeter fence system, security gate system, bollards, vehicle entry barriers, and guard shelters"
+  ],
+  [
+   "Biometrics",
+   "Automated methods of recognizing an individual based on a physiological or behavioral characteristic."
+  ],
+  [
+   "Biometric measurements listed (7)",
+   "Face, fingerprint, hand geometry, iris, retina, signature, and voice"
+  ],
+  [
+   "Badge",
+   "Allows an individual to access an area with automated entry points (door, turnstile, gate). Technologies: magnetic stripe, barcode, or biometrics. The system logs the transaction."
+  ],
+  [
+   "Surveillance items (3)",
+   "Guards and Escorts\nVideo and Electronic Surveillance\nRFID and Wireless Surveillance"
+  ],
+  [
+   "Guards and escorts",
+   "All physical access controls ultimately rely on personnel to intervene and stop the actual attack or intrusion; guards control access to sensitive areas."
+  ],
+  [
+   "Benefits of video and electronic surveillance",
+   "Monitor areas when no guards are present; record and log videos/data for long periods; incorporate motion detection and notification. Can supplement or replace guards."
+  ],
+  [
+   "RFID and wireless surveillance",
+   "Used to manage and locate important information system assets."
+  ]
+ ],
+ "M9: Cybersecurity Domains": [
+  [
+   "Module 9 sections (3)",
+   "8.1 Cybersecurity Domains\n8.2 Understanding the Ethics of Working in Cybersecurity\n8.3 Next Step"
+  ],
+  [
+   "Number of domains the IT infrastructure is categorized into",
+   "Seven"
+  ],
+  [
+   "Domains covered in Module 9",
+   "User, Device, Local Area Network, Private Cloud (WAN), Public Cloud, Physical Facilities, Application"
+  ],
+  [
+   "User Domain",
+   "Includes the users who access the organization's information system: employees, customers, business contractors and other individuals that need access to data."
+  ],
+  [
+   "Weakest link in information security systems",
+   "Users"
+  ],
+  [
+   "Managing user threats (4)",
+   "Conduct security awareness training and user education\nEnable and automate content filtering and antivirus scanning\nDisable internal CD drives and USB ports\nMinimize permissions, restrict access, track and monitor users, enable intrusion detection"
+  ],
+  [
+   "Common threats to devices",
+   "Unattended workstations, user downloads, unpatched software, malware, use of unauthorized media, and violations of the acceptable use policy"
+  ],
+  [
+   "Common threats to the LAN",
+   "Unauthorized LAN access; unauthorized access to systems, applications, wireless networks and data; network OS software vulnerabilities, misconfigurations and failure to update; unauthorized network probing and port scanning"
+  ],
+  [
+   "Private Cloud domain is also called",
+   "WAN"
+  ],
+  [
+   "Common threats to the private cloud (WAN)",
+   "Unauthorized network probing, port scanning and access to resources; router, firewall, or network device OS vulnerability and misconfiguration; remote users accessing the infrastructure and downloading sensitive data"
+  ],
+  [
+   "Common threats to the public cloud",
+   "Data breaches, loss or theft of intellectual property, compromised credentials; federated identity repositories as high-value targets; account hijacking, social engineering, lack of understanding by the organization"
+  ],
+  [
+   "High-value target in the Public Cloud domain",
+   "Federated identity repositories"
+  ],
+  [
+   "Common threats to physical facilities",
+   "Natural threats (weather, geological hazards, power interruptions); unauthorized access, open lobbies, theft, unlocked data center, lack of surveillance; social engineering, breach of electronic perimeter defenses"
+  ],
+  [
+   "Common threats to applications",
+   "Unauthorized access to data centers, computer rooms, wiring closets; server downtime for maintenance, IT systems down for extended periods; network OS software vulnerability; unauthorized access to systems; data loss"
+  ]
+ ],
+ "M9: Ethics & Cyber Laws": [
+  [
+   "Ethics (cybersecurity specialist)",
+   "The little voice in the background guiding a cybersecurity specialist as to what he should or should not do, regardless of whether it is legal."
+  ],
+  [
+   "Computer Ethics Institute (CEI)",
+   "A resource for identifying, assessing, and responding to ethical issues throughout the IT industry; one of the first to recognize ethical and public policy issues from IT's rapid growth."
+  ],
+  [
+   "Three ways a computer may be involved in cybercrime",
+   "Computer-assisted crime, computer-targeted crime, and computer-incidental crime"
+  ],
+  [
+   "Example of computer-incidental crime",
+   "Child pornography: the computer is a storage device, not the actual tool used to commit the crime."
+  ],
+  [
+   "Three primary sources of U.S. laws and regulations",
+   "Statutory law, administrative law, and common law"
+  ],
+  [
+   "Who established federal administrative agencies and a regulatory framework with civil and criminal penalties",
+   "The U.S. Congress"
+  ],
+  [
+   "Industry-specific laws (3) + other",
+   "Gramm-Leach-Bliley Act (GLBA)\nSarbanes-Oxley Act (SOX)\nPayment Card Industry Data Security Standard (PCI DSS)\nAlso: Import/Export Encryption Restrictions"
+  ],
+  [
+   "GLBA",
+   "Gramm-Leach-Bliley Act (industry-specific law)"
+  ],
+  [
+   "SOX",
+   "Sarbanes-Oxley Act (industry-specific law)"
+  ],
+  [
+   "PCI DSS",
+   "Payment Card Industry Data Security Standard"
+  ],
+  [
+   "Security breach notification laws (2)",
+   "Electronic Communications Privacy Act (ECPA)\nComputer Fraud and Abuse Act (1986)"
+  ],
+  [
+   "Protecting privacy laws (9)",
+   "Privacy Act of 1974\nFOIA\nFERPA\nCFAA\nCOPPA\nCIPA\nVPPA\nHealth Insurance Portability & Accountability Act\nCalifornia Senate Bill 1386 (SB 1386)"
+  ],
+  [
+   "FOIA",
+   "Freedom of Information Act"
+  ],
+  [
+   "FERPA",
+   "Family Education Records and Privacy Act"
+  ],
+  [
+   "CFAA",
+   "U.S. Computer Fraud and Abuse Act"
+  ],
+  [
+   "COPPA",
+   "U.S. Children's Online Privacy Protection Act"
+  ],
+  [
+   "CIPA",
+   "U.S. Children's Internet Protection Act"
+  ],
+  [
+   "VPPA",
+   "Video Privacy Protection Act"
+  ],
+  [
+   "ECPA",
+   "Electronic Communications Privacy Act"
+  ],
+  [
+   "International laws/organizations listed (2)",
+   "Convention on Cybercrime\nElectronic Privacy Information Center (EPIC)"
+  ],
+  [
+   "Laws focused on confidentiality",
+   "FISMA, GLBA, and FERPA"
+  ],
+  [
+   "Laws focused on integrity",
+   "FISMA, SOX, and FERPA"
+  ],
+  [
+   "Laws concerned with availability",
+   "FISMA, GLBA, SOX, and CIPA"
+  ]
+ ],
+ "M9: Info Websites, Weapons & Profession": [
+  [
+   "NVD",
+   "National Vulnerability Database: U.S. government repository of standards-based vulnerability management data that uses SCAP."
+  ],
+  [
+   "SCAP",
+   "Security Content Automation Protocol (used by the NVD)"
+  ],
+  [
+   "CERT",
+   "The Software Engineering Institute (SEI) at Carnegie Mellon University; a Federally Funded Research and Development Center sponsored by the U.S. Department of Defense."
+  ],
+  [
+   "Internet Storm Center",
+   "Provides a free analysis and warning service to Internet users and organizations; works with ISPs to combat cyber criminals."
+  ],
+  [
+   "Internet Storm Center sensor coverage",
+   "Millions of log entries daily from IDS, using sensors covering 500,000 IP addresses in over 50 countries."
+  ],
+  [
+   "ACSC",
+   "Advanced Cyber Security Center: non-profit bringing together industry, academia, and government to address advanced cyber threats; shares threat info, does R&D, creates education programs."
+  ],
+  [
+   "Cybersecurity weapons (4)",
+   "Vulnerability Scanners\nPenetration Testing\nPacket Analyzers\nSecurity Tools"
+  ],
+  [
+   "Vulnerability scanners",
+   "Assess computers, systems, networks, or applications for weaknesses; automate security auditing and produce a prioritized list to address weaknesses."
+  ],
+  [
+   "Penetration testing (pen testing)",
+   "Testing areas of weakness using malicious techniques; a specialist hacks a website, network, or server with the organization's permission without knowledge of usernames, passwords, or other normal means."
+  ],
+  [
+   "Pen testing vs. vulnerability testing",
+   "Vulnerability testing just identifies potential problems; pen testing actually tries to gain access (with permission)."
+  ],
+  [
+   "Packet analyzers (packet sniffers)",
+   "Intercept and log network traffic; capture each packet, show field values, analyze content. Work on both wired and wireless networks."
+  ],
+  [
+   "Security tools (best tool)",
+   "No one size fits all; depends on situation, circumstance, and personal preference."
+  ],
+  [
+   "Standard that defines the role of cybersecurity professionals",
+   "ISO standard / ISO 27000 framework"
+  ],
+  [
+   "Roles required by ISO 27000 (5)",
+   "Senior manager responsible for IT and ISM (often the audit sponsor)\nInformation security professionals and security administrators\nSite/physical security manager and facilities contacts\nHR contact (disciplinary action, training)\nSystems and network managers, security architects, other IT professionals"
+  ],
+  [
+   "Who is often the audit sponsor (ISO 27000)",
+   "The senior manager responsible for IT and ISM"
+  ],
+  [
+   "Job search tools listed (3)",
+   "Indeed.com, CareerBuilder.com, USAJobs.gov"
+  ]
+ ]
+};
+
+// [question, [options], correctIndex, why]
+const QUIZ = [["Which hacker breaks into systems to discover weaknesses in order to improve security?",["Black hat","Gray hat","White hat","Script kiddie"],2,""],["Which type of attacker may report a vulnerability only if it coincides with their agenda?",["White hat","Gray hat","Black hat","State sponsored"],1,""],["Teenagers or hobbyists with little or no skill who use existing tools are called:",["Hacktivists","Vulnerability brokers","Cyber criminals","Script kiddies"],3,""],["Grey hat hackers who discover exploits and report them to vendors for prizes are:",["Vulnerability brokers","Hacktivists","Script kiddies","State sponsored hackers"],0,""],["Hacktivists commonly perform which attack?",["APT","TDoS","DDoS","Packet forgery"],2,""],["Which group steals government secrets and sabotages networks of foreign governments?",["Cyber criminals","State sponsored hackers","Vulnerability brokers","Script kiddies"],1,""],["The Honeynet project is an example of which coordinated action?",["Vulnerability database","ISM standards","Share cyber intelligence","Early warning systems"],3,"It provides a HoneyMap of real-time attacks."],["InfraGard is an example of:",["Share cyber intelligence","Early warning systems","New laws","Vulnerability database"],0,""],["Which is an example of an Information Security Management (ISM) standard?",["CVE","ISO 27000","HoneyMap","InfraGard"],1,""],["A weakness that makes a target susceptible to an attack is a:",["Cybersecurity threat","Exploit","Cyber vulnerability","Countermeasure"],2,""],["Interfering with communication by constructing packets that appear part of it is:",["Packet sniffing","Packet forgery","Rogue device","APT"],1,"Also called packet injection."],["SCADA belongs to which threat arena domain?",["Communication","Energy","Transportation","Manufacturing"],3,""],["In the U.S., which agency handles intelligence collection and surveillance?",["NIST","NSA","ISACA","DoD"],1,""],["Why can internal threats cause greater damage than external threats?",["They use social engineering","They are always intentional","Insiders have direct access and knowledge of the network","They exploit IoT devices"],2,""],["Which is NOT one of the three dimensions of big data?",["Volume","Velocity","Variety","Validity"],3,""],["A continuous hack under the radar against a specific object is a(n):",["APT","Algorithm attack","TDoS","DDoS"],0,""],["The most common way to protect federated identity is to:",["Use encryption","Tie login ability to an authorized device","Use CVE","Require BYOD"],1,""],["Next generation 911 centers are vulnerable to TDoS because they use:",["Landlines","Satellite","VoIP","SCADA"],2,""],["Which NIST category covers conceptualizing, designing, and building secure IT systems?",["Operate and Maintain","Protect and Defend","Oversight and Development","Securely Provision"],3,""],["Which NIST category includes denial and deception operations?",["Collect and Operate","Analyze","Investigate","Protect and Defend"],0,""],["Which vendor-neutral certification is approved by the U.S. DoD?",["CEH","CISSP","Security+","GSEC"],1,""],["Which certification is a good entry-level credential from SANS?",["CISM","CEH","GSEC","CCNA Security"],2,""],["The Cybersecurity Cube is also known as the:",["OSI Cube","ISO Cube","CIA Cube","McCumber Cube"],3,""],["Which is NOT a type of cybersecurity safeguard in the cube?",["Technologies","Policies and Practices","People","Data in transit"],3,"Data in transit is a state of data."],["Another term for confidentiality is:",["Privacy","Quality","Accuracy","Redundancy"],0,""],["Another term for integrity is:",["Privacy","Quality","Availability","Authorization"],1,""],["Which AAA service keeps track of what users do?",["Authentication","Authorization","Accounting","Access control"],2,""],["Which AAA service determines which resources a user can access?",["Authorization","Authentication","Accounting","Auditing"],0,""],["Hashing is a method used to ensure:",["Availability","Confidentiality","Privacy","Integrity"],3,""],["Which is a design principle of high availability systems?",["Data encryption","Eliminate single points of failure","Hashing","Sneaker net"],1,""],["A USB flash drive is an example of:",["NAS","SAN","DAS","RAID"],2,""],["Which combines multiple disks so the OS sees them as a single disk?",["RAID","NAS","SAN","DAS"],0,""],["Using removable media to physically move data between computers is:",["Wired network","SAN","VPN","Sneaker net"],3,""],["Data during initial input, modification, computation or output is data:",["At rest","In process","In transit","In storage"],1,""],["Which requires checks like updated antivirus before a device connects?",["VPN","IaaS","NAC","IDS"],2,""],["Which cloud service provides virtualized computing resources over the Internet?",["IaaS","SaaS","NAC","VPN"],0,""],["Suggestions that are flexible and not usually mandatory are:",["Standards","Procedures","Security policies","Guidelines"],3,""],["Which documents contain step-by-step instructions and graphics?",["Guidelines","Procedures","Standards","Policies"],1,""],["ISO/IEC 27000 was published in ___ and revised in ___.",["2008, 2013","2005, 2010","2005, 2013","2001, 2005"],2,""],["Who is responsible for data during transmission in the ISO model?",["Network security group","Programmers","Hardware and server support specialists","Upper management"],0,""],["Which malware binds itself to non-executable files such as image or audio files?",["Trojan horse","Virus","Worm","Logic bomb"],0,"A Trojan differs from a virus because it binds to non-executable files."],["Which malware replicates by independently exploiting network vulnerabilities and can run without a host program?",["Virus","Rootkit","Worm","Adware"],2,""],["A malicious program stays inactive until a user account is deleted. What is it?",["Ransomware","Backdoor","Scareware","Logic bomb"],3,"Logic bombs use a trigger such as dates, times, or account deletion."],["Which malware modifies the operating system to create a backdoor?",["Spyware","Rootkit","Browser hijacker","Worm"],1,""],["Ransomware usually works by:",["Displaying pop-up ads","Redirecting the browser","Encrypting data with a key unknown to the user","Recording keystrokes"],2,""],["Which malware forges popup windows that resemble OS dialogue windows to scare users into acting?",["Scareware","Adware","Grayware","Spyware"],0,""],["A phishing attack aimed at senior executives is called:",["Spear phishing","Vishing","Pharming","Whaling"],3,""],["Phishing using voice communication technology such as VoIP is:",["SMiShing","Vishing","Pharming","Pretexting"],1,""],["Impersonating a legitimate website to deceive users into entering credentials is:",["Pharming","SEO poisoning","Spoofing","Bluesnarfing"],0,""],["Using SEO techniques to make a malicious website appear higher in search results is:",["Browser hijacking","Pharming","SEO poisoning","Cross-site scripting"],2,""],["An attacker offers a gift in exchange for personal information. This is:",["Pretexting","Tailgating","Impersonation","Quid pro quo"],3,""],["A criminal tags along with an authorized person to enter a restricted area. This is:",["Shoulder surfing","Piggybacking","Dumpster diving","Spoofing"],1,"Tailgating is another term for the same practice."],["Which attack exploits vulnerabilities unknown or undisclosed by the software vendor?",["Buffer overflow","DoS attack","Zero-day attack","Man-in-the-middle"],2,""],["Examining all network traffic passing through a NIC, whether addressed to you or not, is:",["Sniffing","Spoofing","Jamming","Keyboard logging"],0,""],["Copying a victim's emails and contact lists from a Bluetooth device is:",["Bluejacking","RF jamming","SMiShing","Bluesnarfing"],3,""],["Why is WEP weak?",["It uses no encryption","It has no provision for key management","It only works on wired LANs","It requires a VPN"],1,"The number of people sharing the key continually grows."],["Which WLAN tool may discover rogue access points?",["NetStumbler","JVM","ActiveX","PGP"],0,""],["Cross-site scripting has which three participants?",["Client, server, router","Sender, receiver, ISP","Criminal, victim, website","User, admin, database"],2,""],["Data going beyond the limits of an application's allocated memory area describes:",["Code injection","Remote code execution","XSS","Buffer overflow"],3,""],["What is the first line of defense against application attacks?",["Install antivirus","Write solid code","Use a DMZ","Disable plugins"],1,"Treat all input from outside a function as hostile."],["Which DoS attack characteristic makes it a major risk?",["Requires advanced skills","Only affects wireless networks","Relatively simple to conduct, even by an unskilled attacker","Always steals data"],2,""],["The science of making and breaking secret codes is:",["Cryptology","Cryptography","Steganography","Obfuscation"],0,""],["Which is NOT one of the listed methods of creating ciphertext?",["Transposition","Substitution","One-time pad","Shuffling"],3,"Shuffling is a data masking technique."],["Symmetric algorithms are also known as:",["Public-key encryption","Private-key encryption","Hashing","Steganography"],1,""],["Which is a drawback of asymmetric algorithms?",["Resource intensive and slower to execute","Need a pre-shared key","Cannot encrypt data","Key management grows endlessly"],0,""],["DES uses what block size and key size?",["128-bit block, 128-bit key","64-bit block, 128-bit key","64-bit block, 56-bit key","128-bit block, 256-bit key"],2,""],["Which symmetric algorithm has a cumulative key size of 112-168 bits?",["AES","IDEA","RSA","3DES"],3,""],["Which algorithm did NIST approve in December 2001?",["IDEA","AES","ECC","ElGamal"],1,""],["Which algorithm does PGP use, having replaced DES?",["3DES","AES","IDEA","RSA"],2,""],["RSA uses:",["The product of two very large prime numbers","Elliptic curves","A pre-shared secret key","64-bit blocks"],0,""],["Which asymmetric algorithm provides an electronic exchange method to share the secret key?",["ElGamal","ECC","RSA","Diffie-Hellman"],3,""],["Which algorithm do most encrypting file systems such as NTFS use?",["DES","AES","3DES","IDEA"],1,""],["Which protocol is a fundamental component of IPsec VPNs?",["IKE","SSH","PGP","SSL"],0,""],["Which access control strategy lets an object's owner pass permissions to another subject?",["MAC","RBAC","DAC","Rule-based"],2,""],["Which access control strategy uses ACLs?",["Role-based","Mandatory","Discretionary","Rule-based"],3,""],["A smart card is an example of which authentication method?",["What you know","What you have","Who you are","Where you are"],1,""],["Which component traces an action back to a person or process and reports usage data?",["Identification","Authentication","Accountability","Authorization"],2,""],["An intrusion detection system is an example of which control type?",["Detective","Preventative","Deterrent","Recovery"],0,""],["Which control type has more advanced capabilities than corrective controls?",["Compensative","Deterrent","Preventative","Recovery"],3,""],["In steganography, what controls the hiding process?",["Embedded data","Stego-key","Cover-text","Stego-text"],1,""],["What happens if someone tries to remove a software watermark?",["The result is nonfunctional code","Program runs faster","The watermark regenerates","Nothing changes"],0,""],["What is the fixed-length output of a hashing algorithm called?",["Salt","Hash value or message digest","Secret key","Check digit"],1,"Hashing produces a fixed-length hash value, also called a message digest."],["Which analogy does the module use for a one-way hash function?",["Locking a padlock","Grinding coffee beans","Sealing an envelope","A car's spare tire"],1,"Easy to grind, almost impossible to rebuild the beans."],["Which is NOT a listed property of a cryptographic hash function?",["The input can be any length","The output has a fixed length","The function is reversible with the key","Two different inputs always produce different hash values"],2,"A hash function is one way and not reversible."],["Who developed the MD5 hash algorithm?",["NIST","Ron Rivest","IETF","US-CERT"],1,""],["What size hash value does MD5 produce?",["128-bit","224-bit","256-bit","512-bit"],0,""],["Which organization developed SHA?",["Cisco","U.S. Department of Homeland Security","U.S. National Institute of Standards and Technology (NIST)","Internet Engineering Task Force (IETF)"],2,""],["Which is NOT one of the SHA strengths listed in the module?",["SHA-224","SHA-256","SHA-384","SHA-128"],3,"Listed: SHA-224, SHA-256, SHA-384, SHA-512."],["Two users have the same password. What makes their stored hashes different?",["HMAC","Salting","Check digit","Mirroring"],1,"A salt is a random string added to the password before hashing."],["When salting is used, what does the database store?",["Only the hash","Only the salt","Both the hash and the salt","The plaintext password and the salt"],2,""],["HMAC strengthens hashing by adding a secret key, which provides integrity plus:",["Availability","Authentication","Redundancy","Load balancing"],1,"HMAC goes a step further than integrity by adding authentication."],["What is the basis for digital signatures?",["Symmetric cryptography","Asymmetric cryptography","Salting","Parity"],1,"A public key algorithm like RSA generates a related private and public key."],["A digital certificate is equivalent to a(n):",["Electronic passport","Handwritten signature","Primary key","Message digest"],0,""],["Which standard is used for constructing digital certificates?",["X.509","IPFIX","SHA-256","NetFlow v9"],0,""],["The policies, roles, and procedures to create, manage, distribute, use, store, and revoke digital certificates are called:",["CVE","PKI","HMAC","CSIRT"],1,""],["Which database integrity rule requires every row to have a unique, non-NULL primary key?",["Domain integrity","Referential integrity","Entity integrity","User-defined integrity"],2,""],["A user cannot delete a record that is related to another record. Which integrity rule is this?",["Entity integrity","Referential integrity","Domain integrity","User-defined integrity"],1,"Referential integrity keeps table relationships consistent and deals with foreign keys."],["Choosing the correct data type, length, or format for a column enforces:",["Domain integrity","Entity integrity","Referential integrity","User-defined integrity"],0,""],["Which validation rule criterion checks that data lies within a minimum and maximum value?",["Size","Format","Range","Consistency"],2,""],["Which validation criterion provides an extra calculation for error detection?",["Check digit","Format","Size","Parity"],0,""],["In a database, NULL signifies:",["A primary key","Missing or unknown values","A foreign key","A validation error"],1,""],["Five nines means systems are available what percentage of the time?",["99.9%","99.99%","99.999%","99.9999%"],2,""],["Under five nines, total planned and unplanned downtime per year is less than:",["52.6 minutes","5.26 minutes","8.76 hours","31.5 seconds"],1,""],["Which is NOT one of the three principles for designing a high availability system?",["Elimination or reduction of single points of failure","System resiliency","Fault tolerance","Asset standardization"],3,""],["Which industry needs five nines for continuous trading, compliance, and customer trust?",["Healthcare","Finance","Retail","Public safety"],1,""],["Assigning all resources of an organization into groups based on common characteristics is:",["Asset standardization","Asset classification","Risk analysis","Mitigation"],1,""],["The CVE dictionary is sponsored by US-CERT and:",["NIST","IETF","The U.S. Department of Homeland Security","Cisco"],2,""],["Reducing the severity of a loss or the likelihood of it occurring is called:",["Mitigation","Risk analysis","Threat identification","Obscuring"],0,""],["Using different encryption algorithms or authentication systems at different layers is which defense in depth concept?",["Layering","Limiting","Diversity","Simplicity"],2,""],["Not revealing which operating system version a server runs is an example of:",["Obscuring","Limiting","Layering","Diversity"],0,""],["A car with four tires and a spare in the trunk illustrates:",["RAID","N+1 redundancy","First-hop redundancy","Point-in-time replication"],1,""],["Which RAID term means storing duplicate data on a second drive?",["Parity","Striping","Mirroring","Spanning"],2,""],["Which RAID term means writing data across multiple drives?",["Mirroring","Parity","Striping","Replication"],2,""],["What is the basic function of Spanning Tree Protocol (STP)?",["Load balance between routers","Prevent loops when switches interconnect via multiple paths","Detect data errors on disks","Export flow statistics"],1,""],["The ability of a network to dynamically recover from the failure of a default gateway router is:",["First-hop redundancy","N+1 redundancy","Asynchronous replication","Resiliency"],0,""],["Which router redundancy protocol also allows load balancing among redundant routers?",["HSRP","VRRP","GLBP","STP"],2,""],["In VRRP, the elected router is called the:",["Active standby router","Virtual router master","Default gateway","Root bridge"],1,""],["Which location redundancy option is the most bandwidth conservative?",["Synchronous","Asynchronous replication","Point-in-time replication","Mirroring"],2,"It updates periodically and needs no constant connection."],["Which location redundancy form requires high bandwidth and locations close together?",["Synchronous","Asynchronous replication","Point-in-time replication","N+1"],0,""],["Which incident response phase involves discovering the incident?",["Preparation","Detection and Analysis","Containment, Eradication, and Recovery","Post-Incident Follow-Up"],1,""],["Which technology is passive and only monitors network traffic?",["IPS","IDS","NAC","GLBP"],1,"An IPS operates inline; an IDS is passive."],["IETF used Cisco's NetFlow Version 9 as the basis for:",["IPFIX","X.509","HSRP","CVE"],0,""],["Strikes, walkouts, and slowdowns are which type of disaster?",["Social-political events","Labor events","Materials events","Utilities disruptions"],1,""],["Pandemics and quarantines fall under which natural disaster category?",["Geological","Meteorological","Health","Miscellaneous"],2,""],["Which is the final step of the business continuity best practices?",["Test the plan","Write a policy","Update the plan regularly","Identify critical systems"],2,""],["Which describes how an administrator hardens an operating system?",["Installing a host-based firewall only","Modifying the default configuration to make it more secure","Encrypting the entire drive","Cloning the disk to an image file"],1,"Includes removing unnecessary programs/services and applying patches."],["What do manufacturers call a comprehensive update combining patches and upgrades?",["Hotfix","Image file","Service pack","Baseline"],2,""],["What is a HIDS?",["Software on a host computer that monitors suspicious activity","A hardware firewall at the network edge","A Wi-Fi security standard","A protocol for encrypted file transfer"],0,""],["Which was one of the first widely used Wi-Fi security standards?",["WPA2","WPA","SSH","WEP"],3,""],["Mutual authentication was developed to prevent which threat?",["Rogue access points","Unpatched software","Power interruptions","Port scanning"],0,"Both entities in a link authenticate to each other."],["Which tool reverts a system to its frozen configuration when the user restarts?",["Disk cloning","Deep Freeze","Content control software","Service pack"],1,""],["GPS tracking can pinpoint a location within about:",["10 meters","50 meters","100 meters","500 meters"],2,""],["Which protocol should replace Telnet for management connections?",["SCP","FTP","SSH","NTP"],2,"Telnet sends login and data in plaintext."],["SCP uses which protocol for data transfer?",["Telnet","SSH","HTTP","DHCP"],1,""],["Why do cyber criminals target privileged accounts?",["They are the most powerful accounts, with elevated, unrestricted access","They never have passwords","They are stored in the NOC","They bypass the HVAC system"],0,""],["On a Windows network, where does an administrator configure group policies such as password and lockout policies?",["Active Directory with Domains on a Windows Server","A host-based firewall","The NOC","A VLAN"],0,""],["HVAC systems control which of the following?",["Badge access and logs","Temperature, humidity, airflow, and air filtering","Routing decisions","Patch distribution"],1,""],["A facility that houses hundreds or thousands of servers is a:",["NOC","Telecommunication room","Server farm","Security cage"],2,""],["What is considered ground zero for network troubleshooting and performance monitoring?",["Server farm","Network Operation Center (NOC)","Internet Storm Center","Data backup site"],1,""],["What do VLANs use to group devices?",["Physical connections","Logical connections","Biometrics","RFID tags"],1,""],["Which is the outermost, most publicly visible layer of physical security?",["Biometrics","Badges and access logs","Video surveillance","Fencing and barricades"],3,""],["Which is NOT listed as a biometric measurement?",["Iris","Hand geometry","Password","Voice"],2,""],["All physical access controls ultimately rely on what to stop the actual intrusion?",["Personnel (guards)","Motion detection","RFID tags","Magnetic stripes"],0,""],["Network switches face attacks against which protocols, per the module?",["SSH/SCP","ARP/STP","WEP/WPA","DNS/NTP"],1,""],["The sector of intelligent devices and sensors used to automate processes is called:",["VoIP","IoT","NOC","SCAP"],1,""],["Who are often the weakest link in information security systems?",["Routers","Users","Firewalls","Cloud providers"],1,""],["Disabling internal CD drives and USB ports manages threats in which domain?",["User Domain","Public Cloud Domain","Application Domain","Private Cloud (WAN) Domain"],0,""],["Violations of the acceptable use policy and unattended workstations are threats to which domain?",["Physical Facilities","Device","Public Cloud","Application"],1,""],["Federated identity repositories are a high-value target in which domain?",["LAN","Private Cloud (WAN)","Public Cloud","User"],2,""],["Remote users accessing the infrastructure and downloading sensitive data is a threat to which domain?",["Private Cloud (WAN)","Device","User","Physical Facilities"],0,""],["Weather problems, geological hazards, and open lobbies are threats to which domain?",["Application","LAN","Physical Facilities","Device"],2,""],["Ethics guides a specialist on what to do:",["Only when it is illegal","Regardless of whether it is legal","Only when management approves","Only in the public cloud"],1,""],["Child pornography stored on a computer is an example of:",["Computer-assisted crime","Computer-targeted crime","Computer-incidental crime","Regulatory crime"],2,"The computer is a storage device, not the tool."],["What are the three primary sources of U.S. laws and regulations?",["Civil, criminal, and regulatory law","Statutory, administrative, and common law","Federal, state, and local law","Privacy, breach, and export law"],1,""],["Which is an industry-specific law?",["Sarbanes-Oxley Act (SOX)","Privacy Act of 1974","COPPA","Convention on Cybercrime"],0,""],["The Electronic Communications Privacy Act is listed under:",["Industry Specific Laws","International Laws","Security Breach Notification Laws","Job Search Tools"],2,""],["Which law focuses on protecting availability according to the summary?",["FERPA","CIPA","COPPA","VPPA"],1,"Availability: FISMA, GLBA, SOX, and CIPA."],["Which group of laws focuses on confidentiality?",["FISMA, GLBA, and FERPA","FISMA, SOX, and CIPA","GLBA, SOX, and CIPA","SOX, FERPA, and COPPA"],0,""],["Which is listed under International Laws?",["FOIA","Convention on Cybercrime","SB 1386","GLBA"],1,""],["The National Vulnerability Database uses which protocol?",["SCP","SSH","SCAP","SNMP"],2,""],["CERT is part of the Software Engineering Institute at which university?",["MIT","Stanford","Carnegie Mellon University","Harvard"],2,""],["The Internet Storm Center uses sensors covering 500,000 IP addresses in over how many countries?",["10","25","50","100"],2,""],["Which organization is a non-profit bringing together industry, academia, and government against advanced cyber threats?",["NVD","ACSC","CEI","EPIC"],1,""],["Which tool only identifies potential problems, unlike pen testing?",["Vulnerability testing","Packet sniffing","Penetration testing","Disk cloning"],0,""],["Which ISO framework defines the roles of cybersecurity professionals?",["ISO 9000","ISO 14000","ISO 27000","ISO 31000"],2,""]];
+
+const QUIZ_SIZE = 30;
+
+// [topic, question, points]
+const ESSAYS = [
+ [
+  "M2 · Types of cyber attackers",
+  "Compare white hat, gray hat, and black hat attackers, and give examples of criminal types that fall under each.",
+  [
+   "White hat: find weaknesses to improve security",
+   "Gray hat: between; report vulnerability if it suits their agenda",
+   "Black hat: unethical, personal gain or malicious",
+   "Vulnerability brokers and hacktivists are grey hat",
+   "Cyber criminals are black hat",
+   "State sponsored hackers can be white or black hat depending on perspective",
+   "Script kiddies: little skill, pranks and vandalism"
+  ]
+ ],
+ [
+  "M2 · Spread of threats",
+  "Explain how internal threats, mobile devices/BYOD, IoT, and big data contribute to the spread of cybersecurity threats.",
+  [
+   "Internal users have direct access and knowledge, so can cause greater damage",
+   "External attackers exploit vulnerabilities or use social engineering",
+   "BYOD: mobile devices cannot be centrally managed and updated",
+   "IoT connects billions of devices, increasing data and networks to protect",
+   "Cloud and virtualization lead to exponential data growth",
+   "Big data: volume, velocity, variety"
+  ]
+ ],
+ [
+  "M3 · Cybersecurity cube",
+  "Describe the three dimensions of the cybersecurity (McCumber) cube and how they work together to protect data.",
+  [
+   "Principles: confidentiality, integrity, availability (CIA)",
+   "States of data: at rest, in transit, in process",
+   "Safeguards: technologies, policies and practices, people",
+   "Principles help prioritize actions",
+   "Each state of data has its own protection challenges"
+  ]
+ ],
+ [
+  "M3 · CIA triad",
+  "Explain each principle of the CIA triad and give methods used to ensure each.",
+  [
+   "Confidentiality: prevents disclosure to unauthorized; encryption, authentication, access control",
+   "AAA: authentication, authorization, accounting",
+   "Integrity: accuracy, consistency, trustworthiness; hashing, validation and consistency checks, access controls",
+   "Availability: systems available at all times; redundancy, backups, resiliency, maintenance, updates, disaster recovery",
+   "High availability: eliminate single points of failure, reliable crossover, detect failures"
+  ]
+ ],
+ [
+  "M4 · Malware",
+  "Compare viruses, worms, and Trojan horses. How does each spread or run, and how do they differ from each other?",
+  [
+   "Virus: malicious code attached to another executable file",
+   "Most viruses require end-user initiation; can activate at a specific time/date",
+   "Worm: replicates by independently exploiting network vulnerabilities",
+   "Worms run by themselves (no host program) and usually slow down networks",
+   "After initial infection worms need no user participation",
+   "Trojan: malicious operations under the guise of a desired operation (e.g., online game)",
+   "Trojan exploits privileges of the user who runs it",
+   "Trojan binds to non-executable files (images, audio, games), unlike a virus"
+  ]
+ ],
+ [
+  "M4 · Wireless & Application Defense",
+  "Describe common wireless/mobile attacks and the steps an organization should take to defend against wireless and application attacks.",
+  [
+   "Rogue access points, RF jamming, bluejacking/bluesnarfing, WEP/WPA attacks",
+   "WEP has no key management; WPA2 passphrase can be attacked offline with a packet sniffer",
+   "Change default WLAN settings; use authentication and encryption",
+   "Place access points outside the firewall or in a DMZ",
+   "Use tools like NetStumbler to find rogue APs; have a guest policy; use remote access VPN for employees",
+   "Application defense: write solid code, treat/validate all input as hostile",
+   "Keep OS and applications up to date; don't ignore update prompts; use manual update if needed"
+  ]
+ ],
+ [
+  "M5 · Encryption",
+  "Compare symmetric and asymmetric encryption, giving examples of algorithms and where each is used.",
+  [
+   "Symmetric: same pre-shared key; also called private-key encryption",
+   "Symmetric examples: 3DES, IDEA, AES",
+   "Symmetric is more efficient and handles more data, but key management is harder",
+   "Asymmetric: public key encrypts, private key decrypts; no pre-shared key needed",
+   "Asymmetric examples: RSA, Diffie-Hellman, ElGamal, ECC",
+   "Asymmetric is complex, resource intensive, slower; better for small data like key exchange",
+   "Uses: 3DES in electronic payments, AES in NTFS; IKE, SSL, SSH, PGP use asymmetric"
+  ]
+ ],
+ [
+  "M5 · Access Control",
+  "Explain how access control protects confidentiality using identification, authentication, authorization, and accountability, and describe the access control strategies.",
+  [
+   "Identification enforces authorization policy rules; grant/deny each request",
+   "Authentication: what you know, what you have, who you are, multi-factor",
+   "Authorization: what a user can do after authentication; based on attributes and authorization policy",
+   "Accountability: traces actions to a person/process; used for auditing or billing; log files",
+   "MAC: authorization rule controls subject access to objects",
+   "DAC: object owner decides and can pass on permissions",
+   "RBAC: permissions through job roles",
+   "Rule-based: ACLs with rules (e.g., no payroll access after hours)"
+  ]
+ ],
+ [
+  "M6 · Hashing, salting, and HMAC",
+  "Explain how hashing ensures data integrity, and describe how salting and HMAC each improve on basic hashing.",
+  [
+   "Hashing takes binary data and produces a fixed-length hash value / message digest",
+   "One-way function: easy to compute, hard to reverse (coffee beans analogy)",
+   "Properties: any-length input, fixed-length output, not reversible, different inputs give different hashes",
+   "Popular algorithms: MD5 (Ron Rivest, 128-bit) and SHA (NIST; SHA-224/256/384/512)",
+   "Salting: random string added to the password before hashing so identical passwords give different hashes; database stores hash and salt",
+   "HMAC: adds a secret key to the hash function, providing authentication on top of integrity"
+  ]
+ ],
+ [
+  "M6 · Database integrity",
+  "Describe the four database integrity rules and the criteria a validation rule uses to keep database data accurate and consistent.",
+  [
+   "Data integrity = accuracy, consistency, and reliability of data in a database",
+   "Entity integrity: every row has a unique, non-NULL primary key",
+   "Domain integrity: column data follows the same format/definition and valid set of values (data type, length, format)",
+   "Referential integrity: relationships stay consistent; foreign keys reference primary keys; cannot delete related records",
+   "User-defined integrity: user rules outside other categories (new customer order example)",
+   "Validation criteria: size, format, consistency, range, check digit"
+  ]
+ ],
+ [
+  "M7 · Five nines and high availability",
+  "Explain the five nines concept and describe how an organization can design for high availability using redundancy and resiliency.",
+  [
+   "Five nines = 99.999% availability, under 5.26 minutes of planned and unplanned downtime per year",
+   "Environments needing it: finance, healthcare, public safety, retail",
+   "Three principles: eliminate/reduce single points of failure, system resiliency, fault tolerance",
+   "Redundancy examples: N+1, RAID (parity, striping, mirroring), STP, router redundancy (HSRP, VRRP, GLBP)",
+   "Location redundancy: synchronous, asynchronous, point-in-time replication",
+   "Resiliency is more than adding redundancy: understand business needs first"
+  ]
+ ],
+ [
+  "M7 · Incident response and business continuity",
+  "Describe the phases of incident response and explain what an organization should include in business continuity planning.",
+  [
+   "Incident response = procedures after an event outside the normal range; managed by a CSIRT",
+   "Four phases: Preparation; Detection and Analysis; Containment, Eradication, and Recovery; Post-Incident Follow-Up",
+   "Technologies: NAC, IDS (passive), IPS (inline), NetFlow/IPFIX, Advanced Threat Intelligence",
+   "Disasters can be natural or human-caused",
+   "BC considerations: document configurations, alternate communications, power, dependencies, doing automated tasks manually",
+   "Best practices include writing a policy, prioritizing critical systems, calculating risk, testing and regularly updating the plan"
+  ]
+ ],
+ [
+  "M8 · Host hardening",
+  "Explain how an organization can harden a host (computer or workstation). Include operating system, software, and data protection measures.",
+  [
+   "Modify the default OS configuration; remove unnecessary programs and services",
+   "Apply security patches and updates / service packs",
+   "Use reputable antimalware (viruses, worms, Trojans, keyloggers, spyware, adware)",
+   "Host-based firewall filters packets using rules; HIDS monitors suspicious activity",
+   "VPN for communicating over insecure public networks",
+   "File access control permissions, file encryption, and data backups",
+   "Workstation controls: idle timeout/screen lock, login times, cable locks"
+  ]
+ ],
+ [
+  "M8 · Server, network & physical security",
+  "Describe measures to protect servers and network infrastructure, including remote access, administrative, and physical controls.",
+  [
+   "Use SSH (and SCP) instead of plaintext Telnet for remote management",
+   "Remove unnecessary ports/services; secure or remove privileged accounts",
+   "Group policies via Active Directory; enable logs and alerts",
+   "Power, HVAC (temperature, humidity, airflow, air filtering), hardware monitoring",
+   "Change no/default passwords on network devices; use VLANs, firewalls, secure routing/network services",
+   "Physical access control: fencing/barricades, biometrics, badges and access logs",
+   "Surveillance: guards and escorts, video/electronic surveillance, RFID"
+  ]
+ ],
+ [
+  "M9 · Cybersecurity domains",
+  "Choose three cybersecurity domains. For each, describe its common threats and, where given, how to manage them.",
+  [
+   "User Domain: users are the weakest link; manage via awareness training, content filtering/antivirus, disabling CD/USB, minimizing permissions and monitoring",
+   "Device: unattended workstations, user downloads, unpatched software, malware, unauthorized media, AUP violations",
+   "LAN: unauthorized access, NOS vulnerabilities and misconfigurations, probing and port scanning",
+   "Private Cloud (WAN): probing, device OS misconfiguration, remote users downloading sensitive data",
+   "Public Cloud: data breaches, IP theft, compromised credentials, federated identity repositories, account hijacking",
+   "Physical Facilities / Application threats"
+  ]
+ ],
+ [
+  "M9 · Ethics, laws & tools",
+  "Discuss the role of ethics and law in a cybersecurity specialist's work and describe tools/resources the specialist can use.",
+  [
+   "Ethics guides what to do regardless of legality; organizations entrust specialists with sensitive data",
+   "Computer Ethics Institute as a resource for ethical issues",
+   "Computer-assisted, computer-targeted, and computer-incidental crime",
+   "Statutory, administrative, common law; examples GLBA, SOX, PCI DSS, FERPA, COPPA, CFAA",
+   "CIA mapping: confidentiality (FISMA, GLBA, FERPA), integrity (FISMA, SOX, FERPA), availability (FISMA, GLBA, SOX, CIPA)",
+   "Information sites: NVD, CERT, Internet Storm Center, ACSC",
+   "Weapons: vulnerability scanners, pen testing (with permission), packet analyzers"
+  ]
+ ]
+];
+
+// tabs
+const TABS = {fc:"Flashcards", qz:"Quiz", es:"Essay practice"};
+const tabsEl = document.getElementById("tabs");
+let tab = "fc";
+function showTab(t){ tab=t; for(const k in TABS){ document.getElementById(k).classList.toggle("hidden",k!==t); } [...tabsEl.children].forEach(b=>b.classList.toggle("on",b.dataset.t===t)); }
+for(const k in TABS){ const b=document.createElement("button"); b.textContent=TABS[k]; b.dataset.t=k; b.onclick=()=>showTab(k); tabsEl.appendChild(b); }
+
+// flashcards
+const decksEl=document.getElementById("decks"), cardEl=document.getElementById("card"), countEl=document.getElementById("count");
+let deckName=Object.keys(DECKS)[0], cards=[], i=0, flipped=false;
+function loadDeck(n){ deckName=n; cards=[...DECKS[n]]; i=0; flipped=false; [...decksEl.children].forEach(b=>b.classList.toggle("on",b.textContent===n)); render(); }
+function render(){ const [f,b]=cards[i]; cardEl.innerHTML = flipped ? `<div class="tag">Answer</div><div class="back"></div>` : `<div class="tag">${deckName}</div><div class="front"></div><div class="hint">Answer first, then tap to flip</div>`; cardEl.querySelector(flipped?".back":".front").textContent = flipped?b:f; countEl.textContent=`${i+1} / ${cards.length}`; }
+Object.keys(DECKS).forEach(n=>{ const b=document.createElement("button"); b.textContent=n; b.onclick=()=>loadDeck(n); decksEl.appendChild(b); });
+cardEl.onclick=()=>{flipped=!flipped; render();};
+function step(d){ i=(i+d+cards.length)%cards.length; flipped=false; render(); }
+document.getElementById("prev").onclick=()=>step(-1);
+document.getElementById("next").onclick=()=>step(1);
+document.getElementById("shuffle").onclick=()=>{ for(let k=cards.length-1;k>0;k--){const j=Math.floor(Math.random()*(k+1));[cards[k],cards[j]]=[cards[j],cards[k]];} i=0; flipped=false; render(); };
+document.addEventListener("keydown",e=>{ if(tab!=="fc") return; if(e.key===" "){e.preventDefault(); cardEl.click();} if(e.key==="ArrowRight") step(1); if(e.key==="ArrowLeft") step(-1); });
+
+// quiz
+const qp=document.getElementById("qpanel");
+let order=[], qi=0, score=0, missed=[];
+function shuffled(a){ a=[...a]; for(let k=a.length-1;k>0;k--){const j=Math.floor(Math.random()*(k+1));[a[k],a[j]]=[a[j],a[k]];} return a; }
+function startQuiz(){ order=shuffled(QUIZ.map((_,k)=>k)).slice(0,QUIZ_SIZE); qi=0; score=0; missed=[]; renderQ(); }
+function renderQ(){
+  if(qi>=order.length){
+    qp.innerHTML=`<div class="q">Score: <b>${score} / ${order.length}</b></div>`;
+    if(missed.length){ const ul=document.createElement("ul"); ul.className="check"; missed.forEach(k=>{const li=document.createElement("li"); li.textContent=`${QUIZ[k][0]} → ${QUIZ[k][1][QUIZ[k][2]]}`; ul.appendChild(li);}); qp.appendChild(Object.assign(document.createElement("div"),{className:"why",textContent:"Missed (say each answer out loud once):"})); qp.appendChild(ul); }
+    const b=document.createElement("button"); b.textContent="Retake"; b.style.marginTop="14px"; b.onclick=startQuiz; qp.appendChild(b); return;
+  }
+  const [q,opts,ans,why]=QUIZ[order[qi]];
+  qp.innerHTML=`<div class="tag">Question ${qi+1} / ${order.length} · Score ${score}</div><div class="q"></div><div class="opts"></div><div class="why"></div><div class="row"><span></span><button class="hidden" id="qn">Next &rarr;</button></div>`;
+  qp.querySelector(".q").textContent=q;
+  const oe=qp.querySelector(".opts");
+  const pos=shuffled(opts.map((_,k)=>k)), ansPos=pos.indexOf(ans);
+  pos.forEach((k,p)=>{ const o=opts[k]; const b=document.createElement("button"); b.textContent=o; b.onclick=()=>{
+    if(oe.dataset.done) return; oe.dataset.done=1;
+    if(k===ans) score++; else { b.classList.add("wrong"); missed.push(order[qi]); }
+    oe.children[ansPos].classList.add("right");
+    qp.querySelector(".why").textContent=why;
+    const n=qp.querySelector("#qn"); n.classList.remove("hidden"); n.onclick=()=>{qi++; renderQ();};
+  }; oe.appendChild(b); });
+}
+startQuiz();
+
+// essays
+let ei=0;
+function renderE(){ const [t,q,pts]=ESSAYS[ei]; document.getElementById("etag").textContent=`${t} · ${ei+1} / ${ESSAYS.length}`; document.getElementById("eq").textContent=q; document.getElementById("ea").value=""; document.getElementById("ekey").classList.add("hidden"); const ul=document.getElementById("elist"); ul.innerHTML=""; pts.forEach(p=>{const li=document.createElement("li"); li.textContent=p; ul.appendChild(li);}); }
+document.getElementById("echeck").onclick=()=>document.getElementById("ekey").classList.remove("hidden");
+document.getElementById("eprev").onclick=()=>{ei=(ei-1+ESSAYS.length)%ESSAYS.length; renderE();};
+document.getElementById("enext").onclick=()=>{ei=(ei+1)%ESSAYS.length; renderE();};
+
+loadDeck(deckName); renderE(); showTab("fc");
+</script>
+</body>
+</html>
