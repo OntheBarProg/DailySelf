@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Daily</title>
+<style>
+  :root{--bg:#f6f4ef;--card:#fff;--ink:#1d1d1f;--mute:#6b6b70;--line:#e3e0d8;--acc:#2d5bd7;--warn:#c2410c;--ok:#15803d}
+  @media (prefers-color-scheme:dark){:root{--bg:#141416;--card:#1d1d20;--ink:#ececee;--mute:#9a9aa2;--line:#2c2c31;--acc:#7aa2ff;--warn:#fb923c;--ok:#4ade80}}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
+  main{max-width:680px;margin:0 auto;padding:20px 16px 80px}
+  h1{font-size:22px;margin:0 0 2px}
+  h2{font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--mute);margin:0 0 10px}
+  .sub{color:var(--mute);font-size:14px;margin-bottom:18px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:14px}
+  .focus{border:2px solid var(--acc)}
+  .big{font-size:20px;font-weight:600;margin:4px 0 6px}
+  .why{color:var(--mute);font-size:14px;white-space:pre-wrap}
+  .slip{color:var(--warn);font-weight:600;font-size:14px;margin-top:8px}
+  button{font:inherit;font-size:14px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:8px;padding:8px 12px;cursor:pointer;margin:6px 6px 0 0}
+  button.p{background:var(--acc);border-color:var(--acc);color:#fff}
+  button.s{font-size:12px;padding:4px 8px}
+  input,textarea,select{font:inherit;width:100%;background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:8px;margin-top:6px}
+  textarea{min-height:70px;resize:vertical}
+  .row{display:flex;gap:8px;align-items:center}
+  .row>*{flex:1}
+  ul{list-style:none;padding:0;margin:0}
+  li{padding:8px 0;border-top:1px solid var(--line);display:flex;gap:8px;align-items:flex-start}
+  li:first-child{border-top:0}
+  li .t{flex:1}
+  .tag{font-size:12px;color:var(--mute)}
+  .done{color:var(--ok)} .no{color:var(--warn)}
+  .timer{font-size:32px;font-variant-numeric:tabular-nums;font-weight:600}
+  details summary{cursor:pointer;color:var(--mute);font-size:14px}
+  .rules li{display:block;font-size:14px}
+  .hide{display:none}
+</style>
+</head>
+<body>
+<main>
+  <h1 id="today"></h1>
+  <div class="sub" id="streak"></div>
+
+  <!-- 1. Yesterday must be reported first -->
+  <section class="card hide" id="reportCard">
+    <h2>Report first: <span id="reportDate"></span></h2>
+    <div class="why">These were open at the end of your last day. Mark each one truthfully. "Not done" is a fine answer.</div>
+    <ul id="reportList"></ul>
+    <button class="p" id="reportSave">Save report</button>
+  </section>
+
+  <!-- 2. ONE task -->
+  <section class="card focus" id="focusCard">
+    <h2>Your one task right now</h2>
+    <div id="focusBody"></div>
+  </section>
+
+  <!-- 3. Timer -->
+  <section class="card">
+    <h2>Focus block (your ceiling is ~1 hr)</h2>
+    <div class="row"><div class="timer" id="timer">60:00</div>
+      <div><button class="p" id="tStart">Start</button><button id="tReset">Reset</button></div></div>
+    <div class="why">When it rings: stop, write one line in the log, then decide. Don't push past it.</div>
+  </section>
+
+  <!-- 4. Blocked -->
+  <section class="card">
+    <h2>Blocked?</h2>
+    <textarea id="blocker" placeholder="Exactly what is blocking you, and exactly which step does it block? If you can't name the step, it's not a blocker. Start the task."></textarea>
+    <button id="blockSave">Log blocker</button>
+  </section>
+
+  <!-- Draft checker -->
+  <section class="card">
+    <h2>Draft checker (emails, messages)</h2>
+    <textarea id="draft" spellcheck="true" lang="en" style="min-height:160px" placeholder="Paste or write your draft here. Red underlines are your browser's spellcheck."></textarea>
+    <button id="chkMine">Check my usual mistakes (offline)</button>
+    <button class="p" id="chkLT">Full grammar check</button>
+    <button id="copyDraft">Copy</button>
+    <div class="tag">The full check sends this text to LanguageTool (languagetool.org), a free grammar service. Don't paste anything private there. The offline check stays on this computer.</div>
+    <ul id="chkOut" style="margin-top:10px"></ul>
+  </section>
+
+  <!-- 5. Queue -->
+  <section class="card">
+    <details id="queueDetails">
+      <summary>Full queue (<span id="qCount"></span>). Open it only to add or reorder, not to browse.</summary>
+      <ul id="queue" style="margin-top:10px"></ul>
+      <input id="newTitle" placeholder="New task (one concrete action, e.g. 'Send email to X')">
+      <textarea id="newWhy" placeholder="Why / details (optional)"></textarea>
+      <button id="addTask">Add to bottom</button>
+    </details>
+  </section>
+
+  <!-- 6. Deadlines -->
+  <section class="card">
+    <h2>Deadlines</h2>
+    <ul id="deadlines"></ul>
+    <div class="row"><input id="dlName" placeholder="What"><input id="dlDate" type="date"></div>
+    <button id="addDl">Add deadline</button>
+  </section>
+
+  <!-- 7. End of day -->
+  <section class="card">
+    <h2>End of day log</h2>
+    <textarea id="dayLog" placeholder="What actually happened today. Include what didn't happen and why. Write the true version."></textarea>
+    <button class="p" id="logSave">Save log</button>
+  </section>
+
+  <!-- 8. Vent -->
+  <section class="card">
+    <h2>Vent</h2>
+    <textarea id="vent" placeholder="Nothing written here becomes a task."></textarea>
+    <button id="ventSave">Save</button>
+  </section>
+
+  <section class="card">
+    <details><summary>History</summary><ul id="history" style="margin-top:10px"></ul></details>
+  </section>
+
+  <section class="card rules">
+    <details><summary>The rules (from the check-ins)</summary>
+    <ul style="margin-top:10px">
+      <li>One task at a time. The full list is how you get overwhelmed.</li>
+      <li>Report bad days too. Going quiet is the real failure.</li>
+      <li>"Not done" is safe to write. Lying here only cheats you.</li>
+      <li>If something slips 3+ times, do it first or delete it honestly.</li>
+      <li>A blocker has to name the step it blocks. Otherwise it's an excuse, so call it one.</li>
+      <li>Hold the standard rather than piling on tasks. Rest when rest is right, because that protects the streak.</li>
+      <li>Hard thing with a fixed date &gt; easy thing with no date.</li>
+      <li>Venting is not a task.</li>
+    </ul></details>
+  </section>
+
+  <section class="card">
+    <h2>Backup</h2>
+    <div class="why">Data lives only in this browser. Export weekly, and before clearing browser data or switching devices.</div>
+    <button id="exp">Export</button><button id="imp">Import</button>
+    <input type="file" id="impFile" accept=".json" class="hide">
+  </section>
+</main>
+
+<script>
+const KEY = 'daily-v1';
+const iso = d => { const z = new Date(d.getTime() - d.getTimezoneOffset()*60000); return z.toISOString().slice(0,10); };
+const TODAY = iso(new Date());
+const uid = () => Math.random().toString(36).slice(2,9);
+
+const SEED = {
+  lastOpened: null,
+  tasks: [
+    {id:uid(), title:'Email Christine (Vertiv)', why:'Short personal note: thank her; the roles she referred are full-time, you need an internship Dec 7–Mar 31 (540 hrs); ask her to re-refer you to Early Talent Program Trainee, Job ID 20255916; ask if the HR email you found is the right contact.', slips:0, status:'open'},
+    {id:uid(), title:'Vertiv HR email (school template)', why:'Early Talent Program Trainee 20255916. Mention Christine\'s referral. CC sc_ialap@ only.', slips:1, status:'open'},
+    {id:uid(), title:'Send Infor PSSC, Arch Global, Taxumo emails', why:'One template, swap company details. Add one line: 3rd place, Most Innovative Thesis, out of 97 groups.\nInfor: Development Intern, Manila.TalentAcquisition@infor.com\nArch Global: IT / Data Analytics (SmartRecruiters)\nTaxumo: careers@taxumo.com', slips:4, status:'open'},
+    {id:uid(), title:'Follow-ups: Amadeus, PayMongo, ByteDance', why:'Short polite check-in emails / portal checks. Window was Nov 11–13 (overdue). Check spam + Workday/Darwinbox portals first.', slips:1, status:'open'},
+    {id:uid(), title:'Write down finals dates (Ethics, InfoSec)', why:'Then add them as deadlines below.', slips:0, status:'open'},
+  ],
+  deadlines: [
+    {id:uid(), name:'Thesis CD + bookbinding', date:'2026-11-30'},
+    {id:uid(), name:'OJT starts (540 hrs)', date:'2026-12-07'},
+  ],
+  days: {} // date -> {log, vent:[], blockers:[], done:[], notDone:[], reported:bool}
+};
+
+let S = JSON.parse(localStorage.getItem(KEY) || 'null') || SEED;
+const save = () => localStorage.setItem(KEY, JSON.stringify(S));
+const day = d => (S.days[d] ||= {log:'', vent:[], blockers:[], done:[], notDone:[]});
+const $ = id => document.getElementById(id);
+const esc = s => s.replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+// ---------- report on last opened day ----------
+const needReport = S.lastOpened && S.lastOpened < TODAY && !day(S.lastOpened).reported && S.tasks.some(t=>t.status==='open');
+function renderReport(){
+  if(!needReport){ $('reportCard').classList.add('hide'); return; }
+  $('reportCard').classList.remove('hide');
+  $('reportDate').textContent = S.lastOpened;
+  $('reportList').innerHTML = S.tasks.filter(t=>t.status==='open').map(t=>`
+    <li><div class="t">${esc(t.title)}
+      <select data-id="${t.id}"><option value="">choose</option><option value="done">Done</option><option value="no">Not done</option><option value="drop">Dropping it on purpose</option></select></div></li>`).join('');
+}
+$('reportSave').onclick = () => {
+  const sels = [...$('reportList').querySelectorAll('select')];
+  if(sels.some(s=>!s.value)){ alert('Mark every task. "Not done" counts as an answer.'); return; }
+  const d = day(S.lastOpened);
+  sels.forEach(s=>{
+    const t = S.tasks.find(x=>x.id===s.dataset.id);
+    if(s.value==='done'){ t.status='done'; d.done.push(t.title); }
+    else if(s.value==='drop'){ t.status='dropped'; d.notDone.push(t.title+' (dropped)'); }
+    else { t.slips++; d.notDone.push(t.title); }
+  });
+  d.reported = true;
+  S.lastOpened = TODAY; save(); location.reload();
+};
+
+// ---------- focus ----------
+function renderFocus(){
+  const open = S.tasks.filter(t=>t.status==='open');
+  if(needReport){ $('focusBody').innerHTML = '<div class="why">Report yesterday first.</div>'; return; }
+  if(!open.length){ $('focusBody').innerHTML = '<div class="big">Nothing queued.</div><div class="why">Add the next concrete action, or rest if rest is right.</div>'; return; }
+  const t = open[0];
+  $('focusBody').innerHTML = `
+    <div class="big">${esc(t.title)}</div>
+    <div class="why">${esc(t.why||'')}</div>
+    ${t.slips>=3?`<div class="slip">Slipped ${t.slips} times. Do it first, or delete it honestly.</div>`:t.slips?`<div class="tag">Carried over ${t.slips}×</div>`:''}
+    <button class="p" id="fDone">Done</button><button id="fNot">Not today</button>`;
+  $('fDone').onclick = () => { t.status='done'; day(TODAY).done.push(t.title); save(); renderAll(); };
+  $('fNot').onclick = () => {
+    const r = prompt('Why not today? Be specific. If it\'s a blocker, name the step it blocks.');
+    if(!r) return;
+    t.slips++; day(TODAY).notDone.push(t.title+': '+r);
+    S.tasks.splice(S.tasks.indexOf(t),1); S.tasks.push(t); save(); renderAll();
+  };
+}
+
+// ---------- queue ----------
+function renderQueue(){
+  const open = S.tasks.filter(t=>t.status==='open');
+  $('qCount').textContent = open.length;
+  $('queue').innerHTML = open.map((t,i)=>`<li><div class="t">${esc(t.title)}${t.slips?` <span class="tag">(${t.slips}× slipped)</span>`:''}</div>
+    <button class="s" data-up="${t.id}" ${i?'':'disabled'}>↑</button><button class="s" data-del="${t.id}">✕</button></li>`).join('');
+  $('queue').querySelectorAll('[data-up]').forEach(b=>b.onclick=()=>{
+    const i=S.tasks.findIndex(t=>t.id===b.dataset.up);
+    let j=i-1; while(j>=0 && S.tasks[j].status!=='open') j--;
+    if(j>=0){ [S.tasks[i],S.tasks[j]]=[S.tasks[j],S.tasks[i]]; save(); renderAll(); }
+  });
+  $('queue').querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{
+    const t=S.tasks.find(x=>x.id===b.dataset.del);
+    if(confirm('Drop "'+t.title+'"? It will be logged as dropped.')){ t.status='dropped'; day(TODAY).notDone.push(t.title+' (dropped)'); save(); renderAll(); }
+  });
+}
+$('addTask').onclick = () => {
+  const title=$('newTitle').value.trim(); if(!title) return;
+  S.tasks.push({id:uid(), title, why:$('newWhy').value.trim(), slips:0, status:'open'});
+  $('newTitle').value=$('newWhy').value=''; save(); renderAll();
+};
+
+// ---------- deadlines ----------
+function renderDeadlines(){
+  const t0 = new Date(TODAY);
+  S.deadlines.sort((a,b)=>a.date.localeCompare(b.date));
+  $('deadlines').innerHTML = S.deadlines.map(d=>{
+    const n = Math.round((new Date(d.date)-t0)/864e5);
+    return `<li><div class="t">${esc(d.name)} <span class="tag">${d.date}</span></div>
+      <span class="${n<=7?'no':''}">${n<0?Math.abs(n)+'d ago':n===0?'TODAY':n+'d'}</span><button class="s" data-dl="${d.id}">✕</button></li>`;
+  }).join('') || '<li class="tag">None</li>';
+  $('deadlines').querySelectorAll('[data-dl]').forEach(b=>b.onclick=()=>{ S.deadlines=S.deadlines.filter(d=>d.id!==b.dataset.dl); save(); renderAll(); });
+}
+$('addDl').onclick = () => { if(!$('dlName').value||!$('dlDate').value) return;
+  S.deadlines.push({id:uid(), name:$('dlName').value, date:$('dlDate').value}); $('dlName').value=''; save(); renderAll(); };
+
+// ---------- log / vent / blocker ----------
+$('dayLog').value = day(TODAY).log;
+$('logSave').onclick = () => { day(TODAY).log = $('dayLog').value; save(); renderAll(); flash('logSave'); };
+$('ventSave').onclick = () => { if(!$('vent').value.trim()) return; day(TODAY).vent.push($('vent').value); $('vent').value=''; save(); flash('ventSave'); };
+$('blockSave').onclick = () => { if(!$('blocker').value.trim()) return; day(TODAY).blockers.push($('blocker').value); $('blocker').value=''; save(); flash('blockSave'); };
+function flash(id){ const b=$(id), t=b.textContent; b.textContent='Saved ✓'; setTimeout(()=>b.textContent=t,1200); }
+
+// ---------- history + streak ----------
+function renderHistory(){
+  const ds = Object.keys(S.days).sort().reverse();
+  $('history').innerHTML = ds.map(d=>{const x=S.days[d]; return `<li><div class="t"><b>${d}</b>
+    ${x.done.length?`<div class="done">✓ ${x.done.map(esc).join('<br>✓ ')}</div>`:''}
+    ${x.notDone.length?`<div class="no">✗ ${x.notDone.map(esc).join('<br>✗ ')}</div>`:''}
+    ${x.blockers.length?`<div class="tag">Blocked: ${x.blockers.map(esc).join(' | ')}</div>`:''}
+    ${x.log?`<div class="why">${esc(x.log)}</div>`:''}</div></li>`}).join('') || '<li class="tag">Nothing yet</li>';
+  // streak = consecutive days (ending today/yesterday) with a log or any reported item
+  let n=0, c=new Date(TODAY);
+  const has = d => { const x=S.days[d]; return x && (x.log || x.done.length || x.notDone.length); };
+  if(!has(TODAY)) c.setDate(c.getDate()-1);
+  while(has(iso(c))){ n++; c.setDate(c.getDate()-1); }
+  $('streak').textContent = `Reporting streak: ${n} day${n===1?'':'s'}. Bad days count, silence doesn't.`;
+}
+
+// ---------- timer ----------
+let left=3600, tick=null;
+const fmt = s => String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');
+$('tStart').onclick = () => {
+  if(tick){ clearInterval(tick); tick=null; $('tStart').textContent='Start'; return; }
+  const end = Date.now()+left*1000; $('tStart').textContent='Pause';
+  tick = setInterval(()=>{ left=Math.max(0,Math.round((end-Date.now())/1000)); $('timer').textContent=fmt(left);
+    if(!left){ clearInterval(tick); tick=null; $('tStart').textContent='Start'; alert('Hour\'s up. Stop, log one line, then decide.'); } },500);
+};
+$('tReset').onclick = () => { clearInterval(tick); tick=null; left=3600; $('timer').textContent=fmt(left); $('tStart').textContent='Start'; };
+
+// ---------- draft checker ----------
+$('draft').value = S.draft || '';
+$('draft').oninput = () => { S.draft = $('draft').value; save(); };
+const MONTHS = 'january|february|march|april|may|june|july|august|september|october|november|december';
+// Your own recurring mistakes. Add a line here whenever you catch a new one.
+const MY_RULES = [
+  [/\bI'am\b/gi, () => 'I am', '"I\'am" is not a word: use "I am" or "I\'m".'],
+  [/\breferall\b/gi, () => 'referral', 'Spelling: "referral" (one l at the end, two r\'s).'],
+  [/\bi\b/g, () => 'I', '"I" is always a capital letter.'],
+  [new RegExp('\\b(' + MONTHS + ')\\b', 'g'), m => m[0].toUpperCase() + m.slice(1), 'Months take a capital letter.'],
+  [/\bfeu ?tech\b/gi, () => 'FEU Tech', 'School name: "FEU Tech".'],
+  [/\bcs expo\b/gi, () => 'CS Expo', 'Event name: "CS Expo".'],
+  [/\bi would be (\w+ing)\b/gi, m => m.replace(/would/i, 'will'), 'If it\'s your plan, write "will be", not "would be".'],
+  [/\bhad given me\b/gi, () => 'gave me', 'It happened once, recently, so use "gave me".'],
+  [/  +/g, () => ' ', 'Double space.'],
+];
+function showFixes(list){
+  $('chkOut').innerHTML = list.length ? '' : '<li class="done">Nothing found.</li>';
+  list.sort((a,b)=>a.offset-b.offset).forEach(f=>{
+    const li = document.createElement('li');
+    const bad = $('draft').value.substr(f.offset, f.length);
+    li.innerHTML = `<div class="t"><b>${esc(bad)}</b>${f.fix!=null?` → <b class="done">${esc(f.fix)}</b>`:''}<div class="tag">${esc(f.msg)}</div></div>`;
+    if(f.fix!=null){ const b=document.createElement('button'); b.className='s'; b.textContent='Apply';
+      b.onclick=()=>{ const v=$('draft').value;
+        if(v.substr(f.offset,f.length)!==bad){ alert('The text changed. Run the check again.'); return; }
+        $('draft').value=v.slice(0,f.offset)+f.fix+v.slice(f.offset+f.length);
+        const d=f.fix.length-f.length; list.forEach(o=>{ if(o.offset>f.offset) o.offset+=d; });
+        S.draft=$('draft').value; save(); li.remove(); };
+      li.appendChild(b); }
+    $('chkOut').appendChild(li);
+  });
+}
+$('chkMine').onclick = () => {
+  const v = $('draft').value, out = [];
+  MY_RULES.forEach(([re, fix, msg]) => { for(const m of v.matchAll(re)){ const r=fix(m[0]); if(r!==m[0]) out.push({offset:m.index,length:m[0].length,fix:r,msg}); } });
+  // long lines with no ending punctuation
+  let pos=0; v.split('\n').forEach(line=>{ const t=line.trimEnd();
+    if(t.length>40 && !/[.!?:,]$/.test(t)) out.push({offset:pos+t.length-1,length:1,fix:null,msg:'This line ends without a period.'});
+    pos+=line.length+1; });
+  showFixes(out);
+};
+$('chkLT').onclick = async () => {
+  const v = $('draft').value.trim(); if(!v) return;
+  $('chkOut').innerHTML = '<li class="tag">Checking…</li>';
+  try{
+    const r = await fetch('https://api.languagetool.org/v2/check',{method:'POST',
+      headers:{'Content-Type':'application/x-www-form-urlencoded'},
+      body:new URLSearchParams({text:$('draft').value, language:'en-US'})});
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    const j = await r.json();
+    showFixes(j.matches.map(m=>({offset:m.offset,length:m.length,fix:m.replacements[0]?.value ?? null,msg:m.message})));
+  }catch(e){ $('chkOut').innerHTML = `<li class="no">Couldn't reach LanguageTool (${esc(String(e.message||e))}). Are you online? The offline check still works.</li>`; }
+};
+$('copyDraft').onclick = () => { navigator.clipboard.writeText($('draft').value); flash('copyDraft'); };
+
+// ---------- backup ----------
+$('exp').onclick = () => { const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([JSON.stringify(S,null,2)],{type:'application/json'})); a.download=`daily-backup-${TODAY}.json`; a.click(); };
+$('imp').onclick = () => $('impFile').click();
+$('impFile').onchange = e => { const f=e.target.files[0]; if(!f) return; f.text().then(t=>{ try{ S=JSON.parse(t); save(); location.reload(); }catch{ alert('Not a valid backup file.'); } }); };
+
+// ---------- boot ----------
+function renderAll(){ renderReport(); renderFocus(); renderQueue(); renderDeadlines(); renderHistory(); }
+$('today').textContent = new Date().toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric'});
+if(!needReport){ S.lastOpened = TODAY; save(); }
+renderAll();
+</script>
+</body>
+</html>
